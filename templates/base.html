@@ -1,0 +1,478 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% block title %}
+  <title>华大数极数据库管理系统主页</title>
+  {% endblock %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="{% static 'stylesheets/Google_Front.Source_Sans_Pro.css' %}">
+  <!-- Font Awesome -->
+<!--  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">-->
+  <link rel="stylesheet" href="{% static 'font-awesome/css/all.css' %}">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="{% static 'AdminLTE/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'AdminLTE/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'AdminLTE/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static 'AdminLTE/dist/css/adminlte.min.css' %}">
+  <!-- 引入自定义的css样式-->
+  <style type="text/css">
+    .fa-sign-out-alt:before {
+          content: "\f093";
+          font-weight: 900;
+      }
+  </style>
+  {% block page_css %}
+  {% endblock %}
+
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="/Home/" class="nav-link">主页 <i class="fa fa-home"></i></a>
+      </li>
+    </ul>
+
+    <!-- SEARCH FORM -->
+    <!-- 暂时省略
+    <form class="form-inline ml-3">
+      <div class="input-group input-group-sm">
+        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
+        <div class="input-group-append">
+          <button class="btn btn-navbar" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </form>
+    -->
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/USER/users/logout/" role="button">
+          退出登录 <i class="fa fa-sign-out-alt"></i>
+        </a>
+      </li>
+    </ul>
+
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-teal elevation-4">
+    <!-- Brand Logo -->
+    <a href="#" class="brand-link">
+      <img src="{% static 'image/华大数极logo.jpg' %}" alt="Logo" class="brand-image-xl img-circle elevation-3" style="opacity: .8">
+      <span class="brand-text text-teal "> 华大数极</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar user (optional) -->
+      <!-- 暂时省略 -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+          <img src="{{user.avatar.url}}" class="img-circle elevation-2" alt="User Image">
+        </div>
+        <div class="info">
+          <a href="/USER/UserInfo/" class="d-block text-teal">{{user.nick_name}}</a>
+        </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false"
+            id="sidebar_menu">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+          <li class="nav-item">
+            <a href="/Home/" class="nav-link">
+              <i class="nav-icon fas fa-chart-line"></i>
+              <p>
+                网站概览
+              </p>
+            </a>
+          </li>
+          {% if perms.EMR.view_clinicalinfo %}
+          <li class="nav-item has-treeview" id="sidebar_EMR">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-hospital"></i>
+              <p>
+                病历信息管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="/EMR/ClinicalInfo/" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>临床信息概述</p>
+                </a>
+              </li>
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>病理报告信息</p>
+                  <i class="right fas fa-angle-left"></i>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="/EMR/LiverPathologicalInfo/" class="nav-link">
+                      <i class="far fa-circle nav-icon text-info"></i>
+                      <p>肝癌</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon text-info"></i>
+                      <p>肠癌</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>医院检查项目信息</p>
+                  <i class="right fas fa-angle-left"></i>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="/EMR/LiverTMDInfo/" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>肝癌肿瘤标志物检测</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/EMR/LiverBiochemInfo/" class="nav-link">
+                      <i class="far fa-circle nav-icon text-info"></i>
+                      <p>肝癌生化检测</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a href="/EMR/FollowupInfo/" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>随访信息</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          {% endif %}
+          {% if perms.BIS.view_sampleinventoryinfo %}
+          <li class="nav-item has-treeview" id="sidebar_BIS">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-dna"></i>
+              <p>
+                样本库信息管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="/BIS/SampleInventoryInfo/" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>样本库存信息</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/BIS/SampleInfo/" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>样本信息</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/BIS/ExtractInfo/" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>核酸提取信息</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/BIS/DNAUsageRecordInfo/" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>样本核酸使用记录信息</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          {% endif %}
+          {% if perms.LIMS.view_methylibraryinfo %}
+          <li class="nav-item has-treeview" id="sidebar_LIMS">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-biohazard"></i>
+              <p>
+                实验项目信息管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>甲基化检测</p>
+                  <i class="right fas fa-angle-left"></i>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="/LIMS/MethyLibraryInfo/" class="nav-link">
+                      <i class="far fa-circle nav-icon text-info"></i>
+                      <p>甲基化建库信息</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/LIMS/MethyCaptureInfo/" class="nav-link">
+                      <i class="far fa-circle nav-icon text-info"></i>
+                      <p>捕获文库信息</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/LIMS/MethyPoolingInfo/" class="nav-link">
+                      <i class="far fa-circle nav-icon text-info"></i>
+                      <p>pooling映射信息</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          {% endif %}
+          {% if perms.SEQ.view_sequencinginfo %}
+          <li class="nav-item has-treeview" id="sidebar_SEQ">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-calculator"></i>
+              <p>
+                分析结果管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="/SEQ/SequencingInfo/" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>测序上机信息</p>
+                </a>
+              </li>
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>QC信息</p>
+                  <i class="right fas fa-angle-left"></i>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="/SEQ/MethyQCInfo/" class="nav-link">
+                      <i class="far fa-circle nav-icon text-info"></i>
+                      <p>甲基化检测</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          {% endif %}
+          <li class="nav-item has-treeview" id="sidebar_PROJ">
+            <a href="/Home/" class="nav-link">
+              <i class="nav-icon fas fa-project-diagram"></i>
+              <p>
+                项目信息管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>项目样本管理</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li class="nav-item has-treeview" id="sidebar_USER">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-user"></i>
+              <p>
+                用户信息管理
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="/USER/UserInfo/" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>用户信息</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          {% if perms.ADVANCE.access_Advance %}
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-wrench"></i>
+              <p>
+                高级功能
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>高级搜索</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-circle nav-icon text-info"></i>
+                  <p>订制上传</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          {% endif %}
+
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+      <section class="content-header">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              {% block header_title %}
+              <h1>网站概览</h1>
+              {% endblock %}
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-right">
+                  {% block header_ol %}
+                  <li class="breadcrumb-item active">Home</li>
+                  {% endblock %}
+              </ol>
+            </div>
+          </div>
+        </div><!-- /.container-fluid -->
+      </section>
+
+      <!-- Main content -->
+      <section class="content">
+          <div class="container-fluid">
+              <div class="row">
+                  <div class="col-12">
+                      <div class="card">
+                          <div class="card-header">
+                            {% block card-title %}
+                            <h3 class="card-title fas fa-list-ul"> 病历信息管理</h3><br>
+                            <a class="col-6">  临床信息概述 总条目数:</a>
+                            <a class="col-6">  临床信息概述 总条目数:</a><br>
+                            <h3 class="card-title fas fa-list-ul mt-1"> 样本库信息管理</h3><br>
+                            <a class="col-6">  样本库存信息概述 总条目数:</a>
+                            <a class="col-6">  核酸提取信息概述 总条目数:</a><br>
+                            <h3 class="card-title fas fa-list-ul mt-1"> 实验项目信息管理</h3><br>
+                            <a class="col-6">  甲基化检测-甲基化建库信息概述 总条目数:</a>
+                            <a class="col-6">  甲基化检测-捕获建库信息信息概述 总条目数:</a><br>
+                            <h3 class="card-title fas fa-list-ul mt-1"> 分析结果信息管理</h3><br>
+                            <a class="col-6">  测序上机信息概述 总条目数:</a>
+                            <a class="col-6">  QC信息-甲基化检测概述 总条目数:</a><br>
+                            <h3 class="card-title fas fa-list-ul mt-1"> 项目信息管理</h3><br>
+                            <a>  总条目数:</a><br>
+                            <h3 class="card-title fas fa-list-ul mt-1"> 用户管理信息</h3><br>
+                            <a>  总条目数:</a>
+                            {% endblock %}
+                          </div>
+                          <!-- /.card-header -->
+                          <div class="card-body">
+                            {% block card-body %}
+
+                            {% endblock %}
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+  </div>
+
+  <!-- Modal content -->
+  {% block modal_html %}
+
+  {% endblock %}
+
+  <!-- /.content-wrapper -->
+  <footer class="main-footer">
+    <div class="float-right d-none d-sm-block">
+      <b>Version</b> 1.0.1
+    </div>
+    <strong>Copyright &copy; 2014-2020 <a href="#">华大数极</a>.</strong> All rights reserved.
+  </footer>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+
+<!-- jQuery -->
+<script src="{% static 'AdminLTE/plugins/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/jquery-ui/jquery-ui.js' %}"></script>
+<!--<script src="{% static 'AdminLTE/plugins/popper/popper.min.js' %}"></script>-->
+<!-- Bootstrap 4 -->
+<script src="{% static 'AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- DataTables -->
+<script src="{% static 'AdminLTE/plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/datatables-select/js/dataTables.select.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/datatables-rowReorder/js/dataTables.rowReorder.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/datatables-colReorder/js/dataTables.colReorder.min.js' %}"></script>
+<script src="{% static 'AdminLTE/plugins/datatables-fixedColumns/js/dataTables.fixedColumns.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'AdminLTE/dist/js/adminlte.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'AdminLTE/dist/js/demo.js' %}"></script>
+<!-- custom javascript -->
+<script src="{% static 'javascript/custom.js' %}"></script>
+<!-- Modal javascript content -->
+{% block modal_js %}
+
+{% endblock %}
+<!-- page script -->
+{% block page-script %}
+<script>
+  $(document).ready(function () {
+    $("#sidebar_menu li:eq(0) a").addClass("active");
+  });
+</script>
+{% endblock %}
+</body>
+</html>

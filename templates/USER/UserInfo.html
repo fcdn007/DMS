@@ -1,0 +1,196 @@
+{% extends "../single_page.html" %}
+
+{% block title %}
+<title>用户信息管理 用户信息</title>
+{% endblock %}
+
+{% block header_title %}
+<h1>用户信息</h1>
+{% endblock %}
+
+{% block header_ol %}
+	<li class="breadcrumb-item"><a href="/Home/">Home</a></li>
+	<li class="breadcrumb-item">USER</li>
+	<li class="breadcrumb-item active">UserInfo</li>
+{% endblock %}
+
+{% block card-body %}
+<ul class="list-group mb-2 login-form">
+    <li class="list-group-item text-center" style="border:0px">
+        <img class="avatar" src = "{{user.avatar.url}}" alt="{{user.username}}" style="width:100px"></img>
+    </li>
+    <li class="list-group-item text-center" style="border:0px">
+        <h4><span>用户名：</span><span>{{user.username}}</span> </h4>
+    </li>
+    <li class="list-group-item text-center" style="border:0px">
+        <h4><span>昵&emsp;称：</span>{{user.nick_name}}</h4>
+    </li>
+    <li class="list-group-item text-center" style="border:0px">
+        <h4><span>邮&emsp;箱：</span><span>{{user.email}}</span> </h4>
+    </li>
+    <li class="list-group-item text-center" style="border:0px">
+        <h4><span>备&emsp;注：</span><span>
+            {% if user.memo %} {{user.memo}}
+            {% else %} 无
+            {% endif %}
+        </span> </h4>
+    </li>
+</ul>
+<div class="text-center">
+    <button class="btn btn-primary" style="margin-right: 20px" id="update">修改资料</button>
+    <a href="/USER/users/password_change/">
+        <button class="btn btn-primary" style="margin-right: 20px" type="submit">修改密码</button>
+    </a>
+</div>
+{% endblock %}
+
+{% block modal_html %}
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modal_title">修改资料</h4>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'USER:UserInfo' %}" method="post" class="mb-2 login-form"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for error in form.non_field_errors %}
+                          <p{% if forloop.last %} class="mb-0"{% endif %}>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" placeholder="请输入用户名" name="username" autofocus
+                             required id="id_username">
+                      <div class="input-group-append">
+                        <div class="input-group-text">
+                          <span class="fas fa-user"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" placeholder="请输入昵称" name="nick_name"
+                             required id="id_nick_name">
+                      <div class="input-group-append">
+                        <div class="input-group-text">
+                          <span class="far fa-grin-squint"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="input-group mb-3">
+                      <input type="email" class="form-control" placeholder="请输入邮箱" name="email"
+                             required id="id_email">
+                      <div class="input-group-append">
+                        <div class="input-group-text">
+                          <span class="fas fa-envelope"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="input-group mb-3">
+                      <input type="file" class="form-control" name="avatar"
+                             id="id_avatar" accept="image/*">
+                      <div class="input-group-append">
+                        <div class="input-group-text">
+                          请上传头像&emsp;<span class="fas fa-image"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="input-group mb-3">
+                      <textarea class="form-control" placeholder="请输入备注" name="memo"
+                             required id="id_memo"></textarea>
+                      <div class="input-group-append">
+                        <div class="input-group-text">
+                          <span class="far fa-edit"></span>
+                        </div>
+                      </div>
+                    </div>
+
+
+<!--                    {% for field in form %}-->
+<!--          <div class="form-group">-->
+<!--            {{ field.label_tag }}-->
+<!--            {{ field }}-->
+<!--            {{ field.errors }}-->
+<!--            {% if field.help_text %}-->
+<!--                <div class="alert alert-info">-->
+<!--                    <p class="help text-small text-muted">{{ field.help_text|safe }}</p>-->
+<!--                </div>-->
+<!--            {% endif %}-->
+<!--          </div>-->
+<!--          {% endfor %}-->
+
+                    <button type="submit" id="upload_submit" class="btn btn-primary btn-block">确认修改</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <p class="col-4 mb-1 text-center" id="post_result">{{ post_result }}</p>
+                <button type="col-4 button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page-script %}
+<script>
+	$(document).ready(function () {
+	    $("#sidebar_USER>ul>li:eq(0)>a").addClass("active");
+		$("#sidebar_USER>a").addClass("active");
+		$("#sidebar_USER").addClass("menu-open");
+
+	    let url0 = '/api/USER/UserInfo/';
+
+	    $('#update').on('click', function (e) {
+	        e.preventDefault();
+	        $('#id_username').val("{{ user.username }}");
+	        $('#id_nick_name').val("{{ user.nick_name }}");
+	        $('#id_email').val("{{ user.email }}");
+	        $('#id_memo').val("{{ user.memo }}");
+	        $("#myModal").modal();
+	    });
+
+	    $("#myModal").on('hide', function () {
+            window.location.reload(true);
+        });
+
+	    // $("#upload_submit").on('click', function (e) {
+	    //     e.preventDefault();
+	    //     let url_ajax = '/USER/UserInfo/';
+	    //     // 构建FormData对象
+        //     let form_data = new FormData();
+        //     form_data.append('avatar', $('#id_avatar')[0].files[0]);
+        //     form_data.append('username', $('#id_username').val());
+        //     form_data.append('nick_name', $('#id_nick_name').val());
+        //     form_data.append('email', $('#id_email').val());
+        //     form_data.append('memo', $('#id_memo').val());
+        //
+        //     $.ajax({
+        //         async: true, url: url_ajax, processData: false,
+        //         method: 'POST', data: form_data, dataType: 'json',
+        //         contentType: false,
+        //         success: function (data) {
+        //             console.info(data);
+        //             let post_result = $('#post_result');
+        //             if (data['error_msg']) {
+        //                 post_result.text(data['error_msg']);
+        //                 post_result.addClass('text-danger');
+        //             }else{
+        //                 post_result.text(data['success_msg']);
+        //                 post_result.addClass('text-success');
+        //                 setTimeout(
+        //                         function () {
+        //                             window.location.reload(true);
+        //                         }, 3000
+        //                     );
+        //             }
+        //         }
+        //     });
+	    // });
+    });
+</script>
+{% endblock %}

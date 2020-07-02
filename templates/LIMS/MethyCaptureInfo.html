@@ -1,0 +1,431 @@
+{% extends "../single_page.html" %}
+
+{% block title %}
+<title>实验项目信息管理 甲基化检测 捕获文库信息</title>
+{% endblock %}
+
+{% block header_title %}
+<h1>甲基化检测 捕获文库信息</h1>
+{% endblock %}
+
+{% block header_ol %}
+	<li class="breadcrumb-item"><a href="/Home/">Home</a></li>
+	<li class="breadcrumb-item">LIMS</li>
+	<li class="breadcrumb-item active">MethyCaptureInfo</li>
+{% endblock %}
+
+{% block card-body %}
+<table id="table" class="table table-bordered table-hover dt-responsive">
+<thead>
+<tr>
+	<th>索引</th>
+	<th>捕获文库名</th>
+	<th>杂交日期</th>
+	<th>杂交探针</th>
+	<th>杂交时间(min)</th>
+	<th>PostPCR循环数</th>
+	<th>PostPCR浓度(ng/ul)</th>
+	<th>洗脱体积(ul)</th>
+	<th>操作人</th>
+	<th>备注</th>
+	<th>上次修改时间</th>
+	<th>创建时间</th>
+	<th>操作</th>
+</tr>
+</thead>
+</table>
+{% endblock %}
+
+{% block ModalForm %}
+	<div class="form-group InventoryForm">
+		<span><a class="text-danger front-weight-bold">* </a>
+				<label for="poolingLB_id"> 捕获文库名</label></span>
+		<input type="text" class="form-control" id="poolingLB_id" name="poolingLB_id"
+			   placeholder="请输入捕获文库名，必填" required="true">
+	</div>
+    <div class="form-group">
+		<label for="hybrid_date"> 杂交日期</label>
+		<input type="date" class="form-control" id="hybrid_date" name="hybrid_date"
+			   placeholder="请输入杂交日期，默认：2000-01-01" value="2000-01-01">
+	</div>
+    <div class="form-group">
+		<label for="probes"> 杂交探针</label>
+		<input type="text" class="form-control" id="probes" name="probes"
+			   placeholder="请输入杂交探针，默认：无" value="无">
+	</div>
+    <div class="form-group">
+		<label for="hybrid_min"> 杂交时间(min)</label>
+		<input type="number" step="0.01" class="form-control" id="hybrid_min" name="hybrid_min"
+			   placeholder="请输入杂交时间/min，默认：0" value="0">
+	</div>
+    <div class="form-group">
+		<label for="postpcr_cycles"> PostPCR循环数</label>
+		<input type="number" step="0.01" class="form-control" id="postpcr_cycles" name="postpcr_cycles"
+			   placeholder="请输入PostPCR循环数，默认：0" value="0">
+	</div>
+	<div class="form-group">
+		<label for="postpcr_con"> PostPCR浓度(ng/ul)</label>
+		<input type="number" class="form-control" id="postpcr_con" name="postpcr_con"
+			   placeholder="请输入PostPCR浓度(ng/ul)，默认：0" value="0">
+	</div>
+    <div class="form-group">
+		<label for="elution_vol"> 洗脱体积(ul)</label>
+		<input type="number" class="form-control" id="elution_vol" name="elution_vol"
+			   placeholder="请输入洗脱体积(ul)，默认：0" value="0">
+	</div>
+    <div class="form-group">
+		<label for="operator"> 操作人</label>
+		<input type="text" class="form-control" id="operator" name="operator"
+			   placeholder="请输入操作人，默认：无" value="无">
+	</div>
+	<div class="form-group">
+		<label for="memo"> 备注</label>
+		<input type="text" class="form-control" id="memo" name="memo"
+			   placeholder="请输入备注，默认：无" value="无">
+	</div>
+{% endblock %}
+
+{% block page-script %}
+<script>
+    $(document).ready(function () {
+        $("#sidebar_LIMS>ul>li:eq(0)>ul>li:eq(1)>a").addClass("active");
+		$("#sidebar_LIMS>ul>li:eq(0)>a").addClass("active");
+		$("#sidebar_LIMS>ul>li:eq(0)").addClass("menu-open");
+		$("#sidebar_LIMS>a").addClass("active");
+		$("#sidebar_LIMS").addClass("menu-open");
+
+		let model0 = 'MethyCaptureInfo';
+		let url0 = '/api/LIMS/Methy/' + model0 + '/';
+		let id0 = 0;
+		let dataModelForm; //更新弹窗默认值，重置按钮需要
+
+        let data0 = $.ajax({
+			url: url0, dataType: 'json', contentType: "application/json",
+			type: "get", async: false, data: {fields: "index"}
+		}).responseJSON;
+		$("#card-title1").text("甲基化检测 捕获文库信息 总条目数：" + data0.length);
+
+		function MyModelInit(title_name, data) {
+			dataModelForm = data;
+			if (title_name === '更新') {
+				$('#poolingLB_id').val(data['poolingLB_id']);
+				$('#hybrid_date').val(data['hybrid_date']);
+				$('#probes').val(data['probes']);
+				$('#hybrid_min').val(data['hybrid_min']);
+				$('#postpcr_cycles').val(data['postpcr_cycles']);
+				$('#postpcr_con').val(data['postpcr_con']);
+				$('#elution_vol').val(data['elution_vol']);
+				$('#operator').val(data['operator']);
+				$('#memo').val(data['memo']);
+				$('#type').val('edit');
+				$('#modal_title').text('更新');
+			} else {
+				$('#poolingLB_id').val("");
+				$('#type').val('new');
+				$('#modal_title').text('新增');
+			}
+		}
+
+		let table = $('#table').DataTable({
+		  "paging": true,
+		  "ordering": true,
+		  "info": true,
+		  "autoWidth": false,
+		  "responsive": true,
+		  "language": {
+					"lengthMenu": "选择每页 _MENU_ 展示 ",
+					"zeroRecords": "未找到匹配结果--抱歉",
+					"info": "当前显示第 _PAGE_ 页结果，共 _PAGES_ 页",
+					"infoEmpty": "没有数据",
+					"search": "搜索",
+					"infoFiltered": "(获取 _MAX_ 项结果)",
+					"paginate": {
+						"first": "首页",
+						"previous": "上一页",
+						"next": "下一页",
+						"last": "末页"
+					}
+				},
+		  "scrollY": "500px",
+		  "scrollCollapse": true,
+		  "scrollX": true,
+		  "pagingType": "full_numbers",
+		  //"fixedColumns": true,
+		  "rowReorder": true,
+		  "colReorder": true,
+		  "searching": true,
+		  "select": true,
+		  "fixedHeader": true,
+		  "lengthChange": true,
+		  "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]],
+		  "serverSide": true,
+		  "processing": true,
+		  "deferRender": true,
+		  "dom": 'rilB<"clear">ftp',
+		  "buttons": [
+			  /*
+			  {
+				extend: 'pageLength',
+				text: '显示行数'
+			  },
+			  */
+			  {
+				  extend: 'colvisGroup',
+				  text: '显示前5列',
+				  className: 'btn btn-info fas fa-low-vision my-1',
+				  show: [0, 1, 2, 3, 4, 5, 12],
+				  hide: [6, 7, 8, 9, 10, 11]
+			  },
+			  {
+				  extend: 'colvisGroup',
+				  text: '显示全部列',
+				  className: 'btn btn-info far fa-eye my-1',
+				  show: ':hidden',
+			  },
+			  {
+				  extend: 'selectAll',
+				  className: 'btn btn-primary fab fa-autoprefixer my-1',
+				  text: '全选'
+			  },
+			  {
+				  extend: 'selectRows',
+				  className: 'btn btn-primary far fa-check-circle my-1',
+				  text: '选择多行'
+			  },
+			  {
+				  extend: 'selectNone',
+				  className: 'btn btn-primary fas fa-ban my-1',
+				  text: '取消当前选择'
+			  },
+			  {
+				  extend: 'copy',
+				  text: '复制到剪切板',
+				  className: 'btn btn-success fas fa-copy my-1',
+				  exportOptions: {
+					  columns: range(12)
+				  }
+			  },
+			  {
+				  extend: 'csv',
+				  text: '输出到csv',
+				  className: 'btn btn-success fas fa-file-csv my-1',
+				  exportOptions: {
+					  columns: range(12)
+				  }
+			  },
+			  {
+				  text: '添加单行',
+				  className: 'btn btn-warning fas fa-edit my-1',
+				  action: function ( e, dt, node, config ) {
+
+				  },
+				  attr: {
+					  id: 'new'
+				  }
+			  },
+			{% if perms.LIMS.bulk_update_MethyCaptureInfo %}
+			  {
+				  text: '批量添加模板下载',
+				  className: 'btn btn-success fas fa-download my-1',
+				  action: function ( e, dt, node, config ) {
+
+				  },
+				  attr: {
+					  id: 'downloadExcel'
+				  }
+			  },
+			  {
+				  text: '批量添加',
+				  className: 'btn btn-warning fas fa-upload my-1',
+				  action: function ( e, dt, node, config ) {
+
+				  },
+				  attr: {
+					  id: 'upload'
+				  }
+			  },
+			{% endif %}
+            {% if perms.LIMS.bulk_delete_MethyCaptureInfo %}
+			  {
+				  text: '批量删除',
+				  className: 'btn btn-danger fas fa-trash-alt my-1',
+				  action: function ( e, dt, node, config ) {
+
+				  },
+				  attr: {
+					  id: 'bulkDel'
+				  }
+			  },
+			{% endif %}
+		  ],
+		  "ajax": url0 + "?format=datatables",
+		  "columns": [
+			  {
+				  data: 'index',
+				  width: "1%",
+				  // 若想前端显示的不一样，则需要"render"函数
+				  'render': function (data, type, full, meta) {
+					  return meta.row + 1 + meta.settings._iDisplayStart;
+				  }
+			  },
+			  {"data": "poolingLB_id"},
+			  {"data": "hybrid_date"},
+			  {"data": "probes"},
+              {"data": "hybrid_min"},
+              {"data": "postpcr_cycles"},
+			  {"data": "postpcr_con"},
+			  {"data": "elution_vol"},
+			  {"data": "operator"},
+			  {"data": "memo"},
+			  {"data": "last_modify_time"},
+			  {"data": "create_time"},
+			  {
+				  "data": null,
+				  "defaultContent": '<button type="button" class="btn btn-info">更新</button>' + '&nbsp;&nbsp' +
+					'<button type="button" class="btn btn-danger">删除</button>'
+			  }
+		  ]
+	    });
+		table.button(0).trigger();
+
+		$('#table tbody').on('click', 'button', function () {
+          let data = table.row($(this).parents('tr')).data();
+          let class_name = $(this).attr('class');
+          id0 = data['index'];
+          console.info("click button, id:", id0)
+          //alert(id);
+          if (class_name === 'btn btn-info') {
+              // EDIT button
+              MyModelInit('更新', data);
+              $("#myModal").modal();
+          } else {
+              // DELETE button
+              // alert('delete '+id);
+              // $('#modal_title').text('DELETE');
+              $("#confirm").modal();
+          }
+      	});
+
+		$('#modelForm').on('submit', function (e) {
+		    e.preventDefault();
+		    // 递交前检查，一般是检测model的外键是否存在
+
+            let type = $('#type').val();
+            let method = '';
+            let url_ajax0 = url0;
+            let send_data0 = $(this).serialize();
+            if (type === 'new') {
+                // new
+                method = 'POST';
+              // POST前检查，一般是检测model的关键字段值是否存在
+                data0 = $.ajax({
+                    url: url0, dataType: 'json', contentType: "application/json",
+                    type: "get", async: false, data: {poolingLB_id: $('#poolingLB_id').val()}
+                }).responseJSON[0];
+                if (data0 !== undefined) {
+                    $('#myModalError').text('错误！！！捕获文库名已存在，无法添加。如需更新该条目，请在对应行进行更新操作。');
+                    return
+                }
+            } else {
+                // edit
+                url_ajax0 = url0 + id0 + '/';
+                method = 'PUT';
+            }
+
+            $.ajax({
+                url: url_ajax0,
+                method: method,
+                data: send_data0,
+                headers: {'X-HTTP-Method-Override': 'PATCH'},
+                success: function () {
+                    let v_tmp = $('#poolingLB_id').val();
+                    if (type === 'new') {
+                      databaseRecordAjaxPut(model0, "单项添加", "捕获文库名：" + v_tmp);
+                      $('#myModalError').text('添加成功！！！捕获文库名：' + v_tmp);
+                  } else {
+                      databaseRecordAjaxPut(model0, "单项更新", "捕获文库名：" + v_tmp);
+                      $('#myModalError').text('更新成功！！！捕获文库名：' + v_tmp);
+                  }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    $('#myModalError').text('出现错误！！！请联系管理员');
+                    console.info(url_ajax0, method, send_data0);
+                    console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
+                }
+            });
+        });
+
+		$('#confirm').on('click', '#delete', function (e) {
+		    let res = delete_by_id_simple(url0, id0);
+		    if (res[0] === "success") {
+		        databaseRecordAjaxPut(model0, "单项删除", "index：" + res[1]);
+		        window.location.reload(true);
+		    } else {
+		        console.log(res[1]);
+		    }
+		});
+
+		$('#new').on('click', function (e) {
+		    MyModelInit('新增', {});
+		    $("#myModal").modal();
+		});
+
+		$('#upload').on('click', function (e) {
+		    $('#uploadOperator').val("");
+		    $('#uploadFile').val("");
+		    $('#uploadError').val("");
+		    $('#uploadUrl').val(model0);
+		    $("#uploadModal").modal();
+		});
+
+		$('#bulkDel').on('click', function (e) {
+		    $('#bulkDelUrl').val(model0);
+		    $("#bulkDelModal").modal();
+		});
+
+		$('#bulkDelModal').on('click', '#bulkDelete', function (e) {
+		    let arrayLen = table.rows(".selected").data().length;
+		    if (arrayLen > 0) {
+		        let delete_index_list = [];
+		        for (let i = 0; i < arrayLen; i++) {
+		            let delete_index = table.rows(".selected").data()[i]['index'];
+		            let res = delete_by_id_simple(url0, delete_index);
+		            if (res[0] === "success") {
+		                delete_index_list.push(res[1]);
+		            }
+		        }
+		        databaseRecordAjaxPut(model0, "批量删除", "index_list：[" + delete_index_list + "]");
+		        window.location.reload(true);
+		    } else {
+		        $('#bulkDelError').text('没有行被选中，请先选中目标行。');
+		    }
+		});
+
+		$('.downloadExcel').on('click', function (e) {
+		    e.preventDefault();
+		    window.location.href = '/ADVANCE/download_excel/LIMS_' + model0 + '/'
+		});
+
+		$('#myModalReset').on('click', function (e) {
+		    e.preventDefault();
+		    if ($('#modal_title').text() === '更新') {
+		        MyModelInit('更新', dataModelForm);
+		    } else {
+		        MyModelInit('新增', {});
+		    }
+		});
+
+		$("#modelForm input[type='text']").focus(function () {
+		    let key2 = $(this).attr('id');
+		    let values = $.ajax({
+                url: "{% url 'ADVANCE:unique' %}", data: {model: model0, filed: key2},
+                dataType: 'json', contentType: "application/json",
+                method: "GET", async: false
+		    }).responseJSON.values;
+		    console.info("values:", values, "; key2:", key2);
+		    input_autocomplete(values, '#' + key2);
+		});
+
+    });
+</script>
+{% endblock %}
