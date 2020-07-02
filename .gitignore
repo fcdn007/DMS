@@ -1,0 +1,26 @@
+# Created by .ignore support plugin (hsz.mobi)
+将删除 .gitignore
+将删除 ADVANCE/__pycache__/
+将删除 ADVANCE/migrations/__pycache__/
+将删除 BIS/__pycache__/
+将删除 BIS/migrations/__pycache__/
+将删除 EMR/__pycache__/
+将删除 EMR/migrations/__pycache__/
+将删除 LIMS/__pycache__/
+将删除 LIMS/migrations/__pycache__/
+将删除 PROJECT/__pycache__/
+将删除 SEQ/__pycache__/
+将删除 SEQ/migrations/__pycache__/
+将删除 USER/__pycache__/
+将删除 USER/migrations/__pycache__/
+将删除 databaseDemo/__pycache__/
+将删除 db_pool/__pycache__/
+将删除 db_pool/mysql/__pycache__/
+将删除 media/files/
+将删除 media/json/
+将删除 mysql_backup/
+将删除 staticfiles/font-awesome
+将删除 staticfiles/velocity
+将删除 templates/ADVANCE/
+将删除 templates/PROJECT/
+将删除 util/__pycache__/

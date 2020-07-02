@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" uploadOnCheckin="02dee887-eb39-4ebe-a186-a7945c2fc65d">
+    <serverData>
+      <paths name="wsl">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/mnt/f/wsl/project/databaseDemo2" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myUploadOnCheckinName" value="wsl" />
+  </component>
+</project>
