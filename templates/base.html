@@ -8,10 +8,13 @@
   <title>华大数极数据库管理系统主页</title>
   {% endblock %}
 
+
+  <!-- 解决 Not Found: /favicon.ico -->
+  <link href="{% static 'image/favicon.ico' %}" rel="shortcut icon" type="image/x-icon">
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="{% static 'stylesheets/Google_Front.Source_Sans_Pro.css' %}">
   <!-- Font Awesome -->
-<!--  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">-->
+  <!--  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css">-->
   <link rel="stylesheet" href="{% static 'font-awesome/css/all.css' %}">
   <!-- DataTables -->
   <link rel="stylesheet" href="{% static 'AdminLTE/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
@@ -22,9 +25,14 @@
   <!-- 引入自定义的css样式-->
   <style type="text/css">
     .fa-sign-out-alt:before {
-          content: "\f093";
-          font-weight: 900;
-      }
+      content: "\f2f5";
+      font-weight: 900;
+    }
+
+    .fa-list-ul:before {
+      content: "\f0ca";
+      font-weight: 900;
+    }
   </style>
   {% block page_css %}
   {% endblock %}
@@ -203,7 +211,7 @@
               <li class="nav-item">
                 <a href="/BIS/DNAUsageRecordInfo/" class="nav-link">
                   <i class="fas fa-circle nav-icon text-info"></i>
-                  <p>样本核酸使用记录信息</p>
+                  <p>核酸使用记录信息</p>
                 </a>
               </li>
             </ul>
@@ -380,26 +388,28 @@
               <div class="row">
                   <div class="col-12">
                       <div class="card">
-                          <div class="card-header">
-                            {% block card-title %}
-                            <h3 class="card-title fas fa-list-ul"> 病历信息管理</h3><br>
-                            <a class="col-6">  临床信息概述 总条目数:</a>
-                            <a class="col-6">  临床信息概述 总条目数:</a><br>
-                            <h3 class="card-title fas fa-list-ul mt-1"> 样本库信息管理</h3><br>
-                            <a class="col-6">  样本库存信息概述 总条目数:</a>
-                            <a class="col-6">  核酸提取信息概述 总条目数:</a><br>
-                            <h3 class="card-title fas fa-list-ul mt-1"> 实验项目信息管理</h3><br>
-                            <a class="col-6">  甲基化检测-甲基化建库信息概述 总条目数:</a>
-                            <a class="col-6">  甲基化检测-捕获建库信息信息概述 总条目数:</a><br>
-                            <h3 class="card-title fas fa-list-ul mt-1"> 分析结果信息管理</h3><br>
-                            <a class="col-6">  测序上机信息概述 总条目数:</a>
-                            <a class="col-6">  QC信息-甲基化检测概述 总条目数:</a><br>
-                            <h3 class="card-title fas fa-list-ul mt-1"> 项目信息管理</h3><br>
-                            <a>  总条目数:</a><br>
-                            <h3 class="card-title fas fa-list-ul mt-1"> 用户管理信息</h3><br>
-                            <a>  总条目数:</a>
-                            {% endblock %}
-                          </div>
+                        <div class="card-header">
+                          {% block card-title %}
+                          <h3 class="card-title fas fa-check-circle"> 病历信息管理</h3><br>
+                          <a class="col-6 pl-4"><i class="fas fa-dot-circle"></i> 临床信息 总条目数: <a id="sum0"></a></a>
+                          <a class="col-6"><i class="fas fa-dot-circle pl-4 pb-4"></i> 随访信息 总条目数: <a
+                                  id="sum1"></a></a><br>
+                          <h3 class="card-title fas fa-check-circle"> 样本库信息管理</h3><br>
+                          <a class="col-6 pl-4"><i class="fas fa-dot-circle"></i> 样本库存信息 总条目数: <a id="sum2"></a></a>
+                          <a class="col-6"><i class="fas fa-dot-circle pl-4 pb-4"></i> 核酸提取信息 总条目数: <a
+                                  id="sum3"></a></a><br>
+                          <h3 class="card-title fas fa-check-circle"> 实验项目信息管理</h3><br>
+                          <a class="col-6 pl-4"><i class="fas fa-dot-circle"></i> 甲基化检测-甲基化建库信息 总条目数: <a id="sum4"></a></a>
+                          <a class="col-6"><i class="fas fa-dot-circle pl-4 pb-4"></i> 甲基化检测-捕获建库信息信息 总条目数: <a
+                                  id="sum5"></a></a><br>
+                          <h3 class="card-title fas fa-check-circle"> 分析结果信息管理</h3><br>
+                          <a class="col-6 pl-4"><i class="fas fa-dot-circle"></i> 测序上机信息 总条目数: <a id="sum6"></a></a>
+                          <a class="col-6"><i class="fas fa-dot-circle pl-4 pb-4"></i> QC信息-甲基化检测 总条目数: <a
+                                  id="sum7"></a></a><br>
+                          <h3 class="card-title fas fa-check-circle"> 项目信息管理 总条目数: 0</h3><br>
+                          <h3 class="card-title fas fa-check-circle pt-4 pb-4"> 用户管理信息 总条目数: <a id="sum8"></a></h3><br>
+                          {% endblock %}
+                        </div>
                           <!-- /.card-header -->
                           <div class="card-body">
                             {% block card-body %}
@@ -471,6 +481,27 @@
 <script>
   $(document).ready(function () {
     $("#sidebar_menu li:eq(0) a").addClass("active");
+
+    let url_list = [
+      "/api/EMR/ClinicalInfo/", "/api/EMR/FollowupInfo/",
+      "/api/BIS/SampleInventoryInfo/", "/api/BIS/ExtractInfo/",
+      "/api/LIMS/Methy/MethyLibraryInfo/", "/api/LIMS/Methy/MethyCaptureInfo/",
+      "/api/SEQ/SequencingInfo/", "/api/SEQ/QC/MethyQCInfo/",
+      "/api/USER/UserInfo/"
+    ];
+
+    $.each(url_list, function (i, v) {
+      let data = $.ajax({
+        url: v, dataType: 'json', contentType: "application/json",
+        type: "get", async: false, data: {fields: "index"}
+      }).responseJSON;
+      let sum = 0;
+      if (data !== undefined) {
+        sum = data.length;
+      }
+      $('#sum' + i).text(sum);
+    });
+
   });
 </script>
 {% endblock %}

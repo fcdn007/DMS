@@ -234,7 +234,7 @@
 			  },
 			  {
 				  extend: 'copy',
-				  text: '复制到剪切板',
+				  text: '所选复制到剪切板',
 				  className: 'btn btn-success fas fa-copy my-1',
 				  exportOptions: {
 					  columns: range(16)
@@ -242,55 +242,86 @@
 			  },
 			  {
 				  extend: 'csv',
-				  text: '输出到csv',
+				  text: '所选输出到csv',
 				  className: 'btn btn-success fas fa-file-csv my-1',
 				  exportOptions: {
 					  columns: range(16)
 				  }
 			  },
 			  {
+				  extend: 'csv',
+				  text: '全部输出到csv',
+				  className: 'btn btn-success fas fa-file-excel my-1',
+				  exportOptions: {
+					  columns: range(16),
+					  selected: null
+				  }
+			  },
+			  {
 				  text: '添加单行',
 				  className: 'btn btn-warning fas fa-edit my-1',
-				  action: function ( e, dt, node, config ) {
+				  action: function (e, dt, node, config) {
 
 				  },
 				  attr: {
 					  id: 'new'
 				  }
 			  },
-			{% if perms.EMR.bulk_update_ClinicalInfo %}
-			  {
-				  text: '批量添加模板下载',
-				  className: 'btn btn-success fas fa-download my-1',
-				  action: function ( e, dt, node, config ) {
+			  { % if perms.EMR.bulk_update_ClinicalInfo %}
+		{
+			'批量添加模板下载',
+					className
+		:
+			'btn btn-success fas fa-download my-1',
+					action
+		:
 
-				  },
-				  attr: {
-					  id: 'downloadExcel'
-				  }
-			  },
-			  {
-				  text: '批量添加',
-				  className: 'btn btn-warning fas fa-upload my-1',
-				  action: function ( e, dt, node, config ) {
+			function (e, dt, node, config) {
 
-				  },
-				  attr: {
-					  id: 'upload'
-				  }
-			  },
+			}
+
+		,
+			{
+				'downloadExcel'
+			}
+		},
+		{
+			'批量添加',
+					className
+		:
+			'btn btn-warning fas fa-upload my-1',
+					action
+		:
+
+			function (e, dt, node, config) {
+
+			}
+
+		,
+			{
+				'upload'
+			}
+		},
 			{% endif %}
-			{% if perms.EMR.bulk_delete_ClinicalInfo %}
-			  {
-				  text: '批量删除',
-				  className: 'btn btn-danger fas fa-trash-alt my-1',
-				  action: function ( e, dt, node, config ) {
+		{%
+			if perms.EMR.bulk_delete_ClinicalInfo %}
+		{
+			'批量删除',
+					className
+		:
+			'btn btn-danger fas fa-trash-alt my-1',
+					action
+		:
 
-				  },
-				  attr: {
-					  id: 'bulkDel'
-				  }
-			  },
+			function (e, dt, node, config) {
+
+			}
+
+		,
+			{
+				'bulkDel'
+			}
+		},
 			{% endif %}
 		  ],
 		  "ajax": url0 + "?format=datatables",
@@ -314,27 +345,27 @@
 			  {"data": "record_date"},
 			  {"data": "category"},
 			  {"data": "stage"},
-			  {"data": "tumor1_diam"},
-			  {"data": "memo"},
-			  {"data": "last_modify_time"},
-			  {"data": "create_time"},
-			  {
-				  "data": null,
-				  "defaultContent": '<button type="button" class="btn btn-info">更新</button>' + '&nbsp;&nbsp' +
-					'<button type="button" class="btn btn-danger">删除</button>'
-			  }
-		  ]
-	  });
+			{"data": "tumor1_diam"},
+			{"data": "memo"},
+			{"data": "last_modify_time"},
+			{"data": "create_time"},
+			{
+				"data": null,
+				"defaultContent": '<button type="button" class="btn btn-info">更新</button>' + '&nbsp;&nbsp' +
+						'<button type="button" class="btn btn-danger">删除</button>'
+			}
+		]
+	})
 		table.button(0).trigger();
 
 		$('#table tbody').on('click', 'button', function () {
-          let data = table.row($(this).parents('tr')).data();
-          let class_name = $(this).attr('class');
-          id0 = data['index'];
-          console.info("click button, id:", id0)
-          //alert(id);
-          if (class_name === 'btn btn-info') {
-              // EDIT button
+			let data = table.row($(this).parents('tr')).data();
+			let class_name = $(this).attr('class');
+			id0 = data['index'];
+			console.info("click button, id:", id0)
+			//alert(id);
+			if (class_name === 'btn btn-info') {
+				// EDIT button
               MyModelInit('更新', data);
               $("#myModal").modal();
           } else {
