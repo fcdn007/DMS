@@ -259,7 +259,8 @@
 					  id: 'new'
 				  }
 			  },
-			  { % if perms.EMR.bulk_update_FollowupInfo %}
+			  { % if perms.EMR.bulk_update_FollowupInfo %
+		}
 		{
 			'批量添加模板下载',
 					className
@@ -276,7 +277,8 @@
 			{
 				'downloadExcel'
 			}
-		},
+		}
+	,
 		{
 			'批量添加',
 					className
@@ -293,8 +295,11 @@
 			{
 				'upload'
 			}
-		},
-			{% endif %}
+		}
+	,
+		{%
+			endif %
+		}
 		{%
 			if perms.EMR.bulk_delete_FollowupInfo %}
 		{
@@ -313,30 +318,37 @@
 			{
 				'bulkDel'
 			}
-		},
-			{% endif %}
-		  ],
-		  "ajax": url0 + "?format=datatables",
-		  "columns": [
-			  {
-				  data: 'index',
-				  width: "1%",
-				  // 若想前端显示的不一样，则需要"render"函数
-				  'render': function (data, type, full, meta) {
-					  return meta.row + 1 + meta.settings._iDisplayStart;
+		}
+	,
+		{%
+			endif %
+		}
+	],
+		"ajax"
+	:
+		url0 + "?format=datatables",
+				"columns"
+	:
+		[
+			{
+				data: 'index',
+				width: "1%",
+				// 若想前端显示的不一样，则需要"render"函数
+				'render': function (data, type, full, meta) {
+					return meta.row + 1 + meta.settings._iDisplayStart;
 				  }
 			  },
 			  {"data": "followup_id"},
-			  {"data": "clinical_id"},
-			  {"data": "sampler_id"},
-              {"data": "survival_status"},
-			  {"data": "death_date"},
-			  {"data": "death_bool"},
-			  {"data": "recur_bool"},
-			  {"data": "recur_date"},
-			  {"data": "record_date"},
-			  {"data": "recur_status"},
-			  {"data": "followup_date"},
+			{"data": "clinical_id"},
+			{"data": "sampler_id"},
+			{"data": "survival_status"},
+			{"data": "death_date"},
+			{"data": "death_bool"},
+			{"data": "recur_bool"},
+			{"data": "recur_date"},
+			{"data": "record_date"},
+			{"data": "recur_status"},
+			{"data": "followup_date"},
 			{"data": "followup_status"},
 			{"data": "memo"},
 			{"data": "last_modify_time"},
@@ -358,15 +370,15 @@
 			//alert(id);
 			if (class_name === 'btn btn-info') {
 				// EDIT button
-              MyModelInit('更新', data);
-              $("#myModal").modal();
-          } else {
-              // DELETE button
-              // alert('delete '+id);
-              // $('#modal_title').text('DELETE');
-              $("#confirm").modal();
-          }
-      	});
+				MyModelInit('更新', data);
+				$("#myModal").modal();
+			} else {
+				// DELETE button
+				// alert('delete '+id);
+				// $('#modal_title').text('DELETE');
+				$("#confirm").modal();
+			}
+		});
 
 		$('#modelForm').on('submit', function (e) {
           e.preventDefault();

@@ -252,7 +252,8 @@
 					  id: 'new'
 				  }
 			  },
-			{% if perms.SEQ.bulk_update_SequencingInfo %}
+			  { % if perms.SEQ.bulk_update_SequencingInfo %
+		}
 		{
 			'批量添加模板下载',
 					className
@@ -269,7 +270,8 @@
 			{
 				'downloadExcel'
 			}
-		},
+		}
+	,
 		{
 			'批量添加',
 					className
@@ -286,8 +288,11 @@
 			{
 				'upload'
 			}
-		},
-			{% endif %}
+		}
+	,
+		{%
+			endif %
+		}
 		{%
 			if perms.SEQ.bulk_delete_SequencingInfo %}
 		{
@@ -306,28 +311,35 @@
 			{
 				'bulkDel'
 			}
-		},
-			{% endif %}
-		  ],
-		  "ajax": url0 + "?format=datatables",
-		  "columns": [
-			  {
-				  data: 'index',
-				  width: "1%",
-				  // 若想前端显示的不一样，则需要"render"函数
-				  'render': function (data, type, full, meta) {
-					  return meta.row + 1 + meta.settings._iDisplayStart;
+		}
+	,
+		{%
+			endif %
+		}
+	],
+		"ajax"
+	:
+		url0 + "?format=datatables",
+				"columns"
+	:
+		[
+			{
+				data: 'index',
+				width: "1%",
+				// 若想前端显示的不一样，则需要"render"函数
+				'render': function (data, type, full, meta) {
+					return meta.row + 1 + meta.settings._iDisplayStart;
 				  }
-			  },
-			  {"data": "sequencing_id"},
-			  {
-			  	"data": "poolingLBName",
+			},
+			{"data": "sequencing_id"},
+			{
+				"data": "poolingLBName",
 				"name": "poolingLB_id__poolingLB_id"
-			  },
-			  {"data": "send_date"},
-              {"data": "start_time"},
-              {"data": "end_time"},
-			  {"data": "machine_id"},
+			},
+			{"data": "send_date"},
+			{"data": "start_time"},
+			{"data": "end_time"},
+			{"data": "machine_id"},
 			{"data": "chip_id"},
 			{"data": "memo"},
 			{"data": "last_modify_time"},
@@ -349,15 +361,15 @@
 			//alert(id);
 			if (class_name === 'btn btn-info') {
 				// EDIT button
-              MyModelInit('更新', data);
-              $("#myModal").modal();
-          } else {
-              // DELETE button
-              // alert('delete '+id);
-              // $('#modal_title').text('DELETE');
-              $("#confirm").modal();
-          }
-      	});
+				MyModelInit('更新', data);
+				$("#myModal").modal();
+			} else {
+				// DELETE button
+				// alert('delete '+id);
+				// $('#modal_title').text('DELETE');
+				$("#confirm").modal();
+			}
+		});
 
 		$('#modelForm').on('submit', function (e) {
 		    e.preventDefault();

@@ -461,6 +461,14 @@
               {
                   extend: 'csv',
                   text: '所选输出到csv',
+                  className: 'btn btn-success fas fa-file-csv my-1',
+                  exportOptions: {
+                      columns: range(48)
+                  }
+              },
+              {
+                  extend: 'csv',
+                  text: '全部输出到csv',
                   className: 'btn btn-success fas fa-file-excel my-1',
                   exportOptions: {
                       columns: range(48),
@@ -468,24 +476,17 @@
                   }
               },
               {
-                  extend: 'csv',
-                  text: '全部输出到csv',
-                  className: 'btn btn-success fas fa-file-csv my-1',
-                  exportOptions: {
-                      columns: range(48)
-                  }
-              },
-              {
                   text: '添加单行',
                   className: 'btn btn-warning fas fa-edit my-1',
                   action: function (e, dt, node, config) {
 
-				  },
-				  attr: {
-					  id: 'new'
-				  }
-			  },
-            {% if perms.SEQ.bulk_update_MethyQCInfo %}
+                  },
+                  attr: {
+                      id: 'new'
+                  }
+              },
+              { % if perms.SEQ.bulk_update_MethyQCInfo %
+        }
         {
             '批量添加模板下载',
                 className
@@ -502,7 +503,8 @@
             {
                 'downloadExcel'
             }
-        },
+        }
+    ,
         {
             '批量添加',
                 className
@@ -519,8 +521,11 @@
             {
                 'upload'
             }
-        },
-            {% endif %}
+        }
+    ,
+        {%
+            endif %
+        }
         {%
             if perms.SEQ.bulk_delete_MethyQCInfo %}
         {
@@ -539,17 +544,24 @@
             {
                 'bulkDel'
             }
-        },
-            {% endif %}
-		  ],
-		  "ajax": url0 + "?format=datatables",
-		  "columns": [
-			  {
-				  data: 'index',
-				  width: "1%",
-				  // 若想前端显示的不一样，则需要"render"函数
-				  'render': function (data, type, full, meta) {
-					  return meta.row + 1 + meta.settings._iDisplayStart;
+        }
+    ,
+        {%
+            endif %
+        }
+    ],
+        "ajax"
+    :
+        url0 + "?format=datatables",
+            "columns"
+    :
+        [
+            {
+                data: 'index',
+                width: "1%",
+                // 若想前端显示的不一样，则需要"render"函数
+                'render': function (data, type, full, meta) {
+                    return meta.row + 1 + meta.settings._iDisplayStart;
 				  }
 			  },
 			  {"data": "QC_id"},
@@ -589,7 +601,7 @@
             {"data": "strand_balance_f_field"},
             {"data": "strand_balance_r_field"},
             {"data": "gc_bin_depth_ratio"},
-              {"data": "sampler_id", "name": "sampler_id__sampler_id"},
+            {"data": "sampler_id", "name": "sampler_id__sampler_id"},
             {"data": "sample_id", "name": "sample_id__sample_id"},
             {"data": "dna_id", "name": "dna_id__dna_id"},
             {"data": "singleLB_id", "name": "singleLB_id__singleLB_id"},
@@ -616,15 +628,15 @@
             //alert(id);
             if (class_name === 'btn btn-info') {
                 // EDIT button
-              MyModelInit('更新', data);
-              $("#myModal").modal();
-          } else {
-              // DELETE button
-              // alert('delete '+id);
-              // $('#modal_title').text('DELETE');
-              $("#confirm").modal();
-          }
-      	});
+                MyModelInit('更新', data);
+                $("#myModal").modal();
+            } else {
+                // DELETE button
+                // alert('delete '+id);
+                // $('#modal_title').text('DELETE');
+                $("#confirm").modal();
+            }
+        });
 
 		$('#modelForm').on('submit', function (e) {
 		    e.preventDefault();
