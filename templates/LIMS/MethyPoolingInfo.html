@@ -225,130 +225,96 @@
 			  {
 				  text: '添加单行',
 				  className: 'btn btn-warning fas fa-edit my-1',
-				  action: function (e, dt, node, config) {
+				  action: function ( e, dt, node, config ) {
 
 				  },
 				  attr: {
 					  id: 'new'
 				  }
 			  },
-			  { % if perms.LIMS.bulk_update_MethyPoolingInfo %
-		}
-		{
-			'批量添加模板下载',
-					className
-		:
-			'btn btn-success fas fa-download my-1',
-					action
-		:
+			{% if perms.LIMS.bulk_update_MethyPoolingInfo %}
+			  {
+				  '批量添加模板下载',
+				  className: 'btn btn-success fas fa-download my-1',
+				  action: function ( e, dt, node, config ) {
 
-			function (e, dt, node, config) {
+				  },
+				  {
+					  'downloadExcel'
+				  }
+			  },
+			  {
+				  '批量添加',
+				  className: 'btn btn-warning fas fa-upload my-1',
+				  action: function ( e, dt, node, config ) {
 
-			}
+				  },
+				  {
+					  'upload'
+				  }
+			  },
+			{% endif %}
+            {% if perms.LIMS.bulk_delete_MethyPoolingInfo %}
+			  {
+				  '批量删除',
+				  className: 'btn btn-danger fas fa-trash-alt my-1',
+				  action: function ( e, dt, node, config ) {
 
-		,
-			{
-				'downloadExcel'
-			}
-		}
-	,
-		{
-			'批量添加',
-					className
-		:
-			'btn btn-warning fas fa-upload my-1',
-					action
-		:
-
-			function (e, dt, node, config) {
-
-			}
-
-		,
-			{
-				'upload'
-			}
-		}
-	,
-		{%
-			endif %
-		}
-		{%
-			if perms.LIMS.bulk_delete_MethyPoolingInfo %}
-		{
-			'批量删除',
-					className
-		:
-			'btn btn-danger fas fa-trash-alt my-1',
-					action
-		:
-
-			function (e, dt, node, config) {
-
-			}
-
-		,
-			{
-				'bulkDel'
-			}
-		}
-	,
-		{%
-			endif %
-		}
-	],
-		"ajax"
-	:
-		url0 + "?format=datatables",
-				"columns"
-	:
-		[
-			{
-				data: 'index',
-				width: "1%",
-				// 若想前端显示的不一样，则需要"render"函数
-				'render': function (data, type, full, meta) {
-					return meta.row + 1 + meta.settings._iDisplayStart;
-				}
-			},
-			{"data": "sampler_id"},
-			{"data": "sample_id"},
-			{"data": "dna_id"},
-			{"data": "singleLB_id"},
-			{"data": "poolingLB_id"},
-			{"data": "singleLB_Pooling_id"},
-			{"data": "pooling_ratio"},
-			{"data": "mass"},
-			{"data": "volume"},
-			{"data": "memo"},
-			{"data": "last_modify_time"},
-			{"data": "create_time"},
-			{
-				"data": null,
-				"defaultContent": '<button type="button" class="btn btn-info">更新</button>' + '&nbsp;&nbsp' +
-						'<button type="button" class="btn btn-danger">删除</button>'
-			}
-		]
-	})
+				  },
+				  {
+					  'bulkDel'
+				  }
+			  },
+			{% endif %}
+		  ],
+		  "ajax": url0 + "?format=datatables",
+		  "columns": [
+			  {
+				  data: 'index',
+				  width: "1%",
+				  // 若想前端显示的不一样，则需要"render"函数
+				  'render': function (data, type, full, meta) {
+					  return meta.row + 1 + meta.settings._iDisplayStart;
+				  }
+			  },
+			  {"data": "sampler_id"},
+			  {"data": "sample_id"},
+              {"data": "dna_id"},
+              {"data": "singleLB_id"},
+			  {"data": "poolingLB_id"},
+			  {"data": "singleLB_Pooling_id"},
+			  {"data": "pooling_ratio"},
+			  {"data": "mass"},
+			  {"data": "volume"},
+			  {"data": "memo"},
+			  {"data": "last_modify_time"},
+			  {"data": "create_time"},
+			  {
+				  "data": null,
+				  "defaultContent": '<button type="button" class="btn btn-info">更新</button>' + '&nbsp;&nbsp' +
+					'<button type="button" class="btn btn-danger">删除</button>'
+			  }
+		  ]
+	    })
 		table.button(0).trigger();
 
 		$('#table tbody').on('click', 'button', function () {
-			let data = table.row($(this).parents('tr')).data();
-			let class_name = $(this).attr('class');
-			id0 = data['index'];
-			console.info("click button, id:", id0)
-			//alert(id);
-			if (class_name === 'btn btn-info') {
-				// EDIT button
-				MyModelInit('更新', data);
-				$("#myModal").modal();
-			} else {
-				// DELETE button
-				// alert('delete '+id);
-				// $('#modal_title').text('DELETE');
-				$("#confirm").modal();
-			}
-		});
+          let data = table.row($(this).parents('tr')).data();
+          let class_name = $(this).attr('class');
+          id0 = data['index'];
+          console.info("click button, id:", id0)
+          //alert(id);
+          if (class_name === 'btn btn-info') {
+              // EDIT button
+              MyModelInit('更新', data);
+              $("#myModal").modal();
+          } else {
+              // DELETE button
+              // alert('delete '+id);
+              // $('#modal_title').text('DELETE');
+              $("#confirm").modal();
+          }
+      	});
 
 		$('#modelForm').on('submit', function (e) {
 		    e.preventDefault();

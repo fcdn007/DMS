@@ -222,102 +222,68 @@
                       id: 'new'
                   }
               },
-              { % if perms.BIS.bulk_update_SampleInventoryInfo %
-      }
-      {
-          '批量添加模板下载',
-              className
-      :
-          'btn btn-success fas fa-download my-1',
-              action
-      :
+            {% if perms.BIS.bulk_update_SampleInventoryInfo %}
+              {
+                  '批量添加模板下载',
+                  className: 'btn btn-success fas fa-download my-1',
+                  action: function ( e, dt, node, config ) {
 
-          function (e, dt, node, config) {
+                  },
+                  {
+                      'downloadExcel'
+                  }
+              },
+              {
+                  '批量添加',
+                  className: 'btn btn-warning fas fa-upload my-1',
+                  action: function ( e, dt, node, config ) {
 
-          }
+                  },
+                  {
+                      'upload'
+                  }
+              },
+            {% endif %}
+            {% if perms.BIS.bulk_delete_SampleInventoryInfo %}
+              {
+                  '批量删除',
+                  className: 'btn btn-danger fas fa-trash-alt my-1',
+                  action: function ( e, dt, node, config ) {
 
-      ,
-          {
-              'downloadExcel'
-          }
-      }
-  ,
-      {
-          '批量添加',
-              className
-      :
-          'btn btn-warning fas fa-upload my-1',
-              action
-      :
+                  },
+                  {
+                      'bulkDel'
+                  }
+              },
+            {% endif %}
+          ],
+          "ajax": url0 + "?format=datatables",
+          "columns": [
 
-          function (e, dt, node, config) {
-
-          }
-
-      ,
-          {
-              'upload'
-          }
-      }
-  ,
-      {%
-          endif %
-      }
-      {%
-          if perms.BIS.bulk_delete_SampleInventoryInfo %}
-      {
-          '批量删除',
-              className
-      :
-          'btn btn-danger fas fa-trash-alt my-1',
-              action
-      :
-
-          function (e, dt, node, config) {
-
-          }
-
-      ,
-          {
-              'bulkDel'
-          }
-      }
-  ,
-      {%
-          endif %
-      }
-  ],
-      "ajax"
-  :
-      url0 + "?format=datatables",
-          "columns"
-  :
-      [
-
-          {
-              data: 'index',
-              width: "1%",
-              // 若想前端显示的不一样，则需要"render"函数
-              'render': function (data, type, full, meta) {
-                  return meta.row + 1 + meta.settings._iDisplayStart;
+              {
+                  data: 'index',
+                  width: "1%",
+                  // 若想前端显示的不一样，则需要"render"函数
+                  'render': function (data, type, full, meta) {
+                      return meta.row + 1 + meta.settings._iDisplayStart;
+                  }
+              },
+              {"data": "sampler_id"},
+              {"data": "plasma_num"},
+              {"data": "cancer_tissue_num"},
+              {"data": "adjacent_mucosa_num"},
+              {"data": "WBC_num"},
+              {"data": "stool_num"},
+              {"data": "memo"},
+              {"data": "last_modify_time"},
+              {"data": "create_time"},
+              {
+                  "data": null,
+                  "defaultContent": '<button type="button" class="btn btn-info">更新</button>' + '&nbsp;&nbsp' +
+                    '<button type="button" class="btn btn-danger">删除</button>'
               }
-          },
-          {"data": "sampler_id"},
-          {"data": "plasma_num"},
-          {"data": "cancer_tissue_num"},
-          {"data": "adjacent_mucosa_num"},
-          {"data": "WBC_num"},
-          {"data": "stool_num"},
-          {"data": "memo"},
-          {"data": "last_modify_time"},
-          {"data": "create_time"},
-          {
-              "data": null,
-              "defaultContent": '<button type="button" class="btn btn-info">更新</button>' + '&nbsp;&nbsp' +
-                  '<button type="button" class="btn btn-danger">删除</button>'
-          }
-      ]
-  })
+          ]
+      })
       table.button(0).trigger();
 
       $('#table tbody').on('click', 'button', function () {
