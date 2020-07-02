@@ -487,35 +487,35 @@
 			  },
             {% if perms.SEQ.bulk_update_MethyQCInfo %}
 			  {
-				  '批量添加模板下载',
+				  text: '批量添加模板下载',
 				  className: 'btn btn-success fas fa-download my-1',
 				  action: function ( e, dt, node, config ) {
 
 				  },
-				  {
-					  'downloadExcel'
+				  attr: {
+					  id: 'downloadExcel'
 				  }
 			  },
 			  {
-				  '批量添加',
+				  text: '批量添加',
 				  className: 'btn btn-warning fas fa-upload my-1',
 				  action: function ( e, dt, node, config ) {
 
 				  },
-				  {
-					  'upload'
+				  attr: {
+					  id: 'upload'
 				  }
 			  },
             {% endif %}
             {% if perms.SEQ.bulk_delete_MethyQCInfo %}
 			  {
-				  '批量删除',
+				  text: '批量删除',
 				  className: 'btn btn-danger fas fa-trash-alt my-1',
 				  action: function ( e, dt, node, config ) {
 
 				  },
-				  {
-					  'bulkDel'
+				  attr: {
+					  id: 'bulkDel'
 				  }
 			  },
             {% endif %}
@@ -583,7 +583,7 @@
                     '<button type="button" class="btn btn-danger">删除</button>'
             }
 		  ]
-	    })
+	    });
 		table.button(0).trigger();
 
 		$('#table tbody').on('click', 'button', function () {
