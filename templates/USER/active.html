@@ -9,7 +9,7 @@
       <p>
           你的账号已成功激活。现在你可以进行登录。
       </p>
-      <a href="{% url 'USER:login' %}">返回登录页面</a>
+      <a href="{% url 'login' %}">返回登录页面</a>
       {% elif error_msg %}
       <p>
           你的激活链接已过期。请重新注册。
@@ -30,7 +30,7 @@
             {% if success_msg %}
                 setTimeout(
                     function () {
-                        window.location.href = "{% url 'USER:login' %}"
+                        window.location.href = "{% url 'login' %}"
                     }, 3000
                 );
             {% elif error_msg %}

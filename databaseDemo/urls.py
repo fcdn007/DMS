@@ -13,11 +13,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from BIS.views import SampleInventoryInfoViewSet, SampleInfoViewSet, ExtractInfoViewSet, DNAUsageRecordInfoViewSet
@@ -48,7 +48,8 @@ router.register(r'USER/DatabaseRecord', DatabaseRecordViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', auth_views.LoginView.as_view()),
+    path('', auth_views.LoginView.as_view(), name='login'),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('Home/', HomeV, name='Home'),
     path('BIS/', include('BIS.urls', namespace='BIS')),
     path('EMR/', include('EMR.urls', namespace='EMR')),

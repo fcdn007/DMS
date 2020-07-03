@@ -9,7 +9,7 @@
   {% endblock %}
 
 
-  <!-- 解决 Not Found: /favicon.ico -->
+  <!-- 解决 Not Found: /favicon2.ico -->
   <link href="{% static 'image/favicon.ico' %}" rel="shortcut icon" type="image/x-icon">
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="{% static 'stylesheets/Google_Front.Source_Sans_Pro.css' %}">
@@ -69,7 +69,7 @@
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
-        <a class="nav-link" href="/USER/users/logout/" role="button">
+        <a class="nav-link" href="{% url 'logout' %}" role="button">
           退出登录 <i class="fa fa-sign-out-alt"></i>
         </a>
       </li>
@@ -159,7 +159,7 @@
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
                     <a href="/EMR/LiverTMDInfo/" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
+                      <i class="far fa-circle nav-icon text-info"></i>
                       <p>肝癌肿瘤标志物检测</p>
                     </a>
                   </li>

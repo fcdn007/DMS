@@ -1,7 +1,10 @@
-import numpy as np
-import pandas as pd
 import datetime
 import re
+
+import numpy as np
+import pandas as pd
+from django.conf import settings
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer_its
 
 
 def get_queryset_base(model_, query_params_):
@@ -90,3 +93,12 @@ def condition_filter(df, f, vp, v, not_):
     # print(">>>>>>>>>>>>> filter >>>>>>>>>>>")
     # pprint(filter_)
     return pd.Series(data=filter_)
+
+
+def custom_token_generator(num):
+    # 加密用户的身份信息，生成激活token
+    serializer = Serializer_its(settings.SECRET_KEY, 3600)
+    info = {'confirm': num}
+    token = serializer.dumps(info)  # bytes
+    token = token.decode('utf8')  # 解码, str
+    return token

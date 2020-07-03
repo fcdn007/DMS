@@ -1,4 +1,4 @@
-{% extends "registration_base.html" %}
+{% extends "../registration_base.html" %}
 
 
 {% block content %}
@@ -7,7 +7,7 @@
   <!-- /.login-card-body -->
   <div class="card-body login-card-body">
       <p class="login-box-msg">登录</p>
-      <form action="{% url 'USER:login' %}" method="post" class="mb-2 login-form">
+      <form action="{% url 'login' %}" method="post" class="mb-2 login-form">
         {% csrf_token %}
         {% if form.non_field_errors %}
         <div class="alert alert-danger" role="alert">
@@ -40,7 +40,7 @@
       <input type="hidden" name="next" value="{{ next }}"/>
     </form>
     <p class="mb-1">
-      <a href="{% url 'USER:password_reset' %}">忘记密码？</a>
+      <a href="{% url 'password_reset' %}">忘记密码？</a>
     </p>
     <p class="mb-1">
       <a href="{% url 'USER:register' %}">立即注册</a>

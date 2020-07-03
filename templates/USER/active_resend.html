@@ -11,10 +11,11 @@
               <option value="username" selected="selected">用户名</option>
               <option value="nick_name">昵称</option>
               <option value="email">邮箱地址</option>
-          </select>
+          </select><br>
           <input type="text" id="value" placeholder="请输入" required="true" class="form-control" >
 
       </form>
+      <br>
       <button type="submit" id="resendSubmit" class="btn btn-primary btn-block">提交</button>
       <button type="submit" id="returnBase" class="btn btn-primary btn-block">返回登录页面</button>
       <p id="resendError"></p>
@@ -47,7 +48,7 @@
                             $('#resendError').text(data['success_msg']);
                             setTimeout(
                                 function () {
-                                    window.location.href = "{% url 'USER:login' %}"
+                                    window.location.href = "{% url 'login' %}"
                                 }, 3000
                             );
                         }
@@ -59,7 +60,7 @@
 
             $('#returnBase').click(function (e) {
                 e.preventDefault();
-                window.location.href = "{% url 'USER:login' %}";
+                window.location.href = "{% url 'login' %}";
             });
         })
 

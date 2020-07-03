@@ -1,18 +1,19 @@
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
-from django.contrib.auth.decorators import login_required
-from django.conf import settings
-from django.contrib.auth.models import Group
 from itsdangerous import SignatureExpired
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer_its
 from rest_framework import viewsets
 
-from .models import UserInfo, DatabaseRecord
-from .forms import RegisterForm, UpdateForm
-from .serializers import UserInfoSerializer, DatabaseRecordSerializer
 from databaseDemo.tasks import send_register_active_email
-from util.utils import get_queryset_base
+from util.utils import get_queryset_base, custom_token_generator
+from .forms import RegisterForm, UpdateForm
+from .models import UserInfo, DatabaseRecord
+from .serializers import UserInfoSerializer, DatabaseRecordSerializer
+
 
 # Create your views here.
 class UserInfoViewSet(viewsets.ModelViewSet):
@@ -112,10 +113,7 @@ def RegisterV(request):
             # 激活链接格式: /user/active/用户身份加密后的信息 /user/active/token
 
             # 加密用户的身份信息，生成激活token
-            serializer = Serializer_its(settings.SECRET_KEY, 3600)
-            info = {'confirm': user.index}
-            token = serializer.dumps(info)  # bytes
-            token = token.decode('utf8')  # 解码, str
+            token = custom_token_generator(user.index)
             # 发送邮件 celery:异步执行任务
             # print(">>>>>>>>>>>>>> user.email: %s >>>>>>>>>>>" % user.email)
             # print(">>>>>>>>>>>>>> user.username: %s >>>>>>>>>>>" % user.username)
@@ -172,11 +170,7 @@ def Active_resendV(request):
             if user.is_active:
                 return JsonResponse({'error_msg': '用户已激活，请返回登录页面进行登录。'})
             else:
-                # 加密用户的身份信息，生成激活token
-                serializer = Serializer_its(settings.SECRET_KEY, 3600)
-                info = {'confirm': user.index}
-                token = serializer.dumps(info)  # bytes
-                token = token.decode('utf8')  # 解码, str
+                token = custom_token_generator(user.index)
                 # 找其他人帮助我们发送邮件 celery:异步执行任务
                 # print(">>>>>>>>>>>>>> user.email: %s >>>>>>>>>>>" % user.email)
                 # print(">>>>>>>>>>>>>> user.username: %s >>>>>>>>>>>" % user.username)
