@@ -139,11 +139,12 @@
 {% block page-script %}
 <script>
 	$(document).ready(function () {
-		$("#sidebar_LIMS>ul>li:eq(0)>ul>li:eq(0)>a").addClass("active");
-		$("#sidebar_LIMS>ul>li:eq(0)>a").addClass("active");
-		$("#sidebar_LIMS>ul>li:eq(0)").addClass("menu-open");
 		$("#sidebar_LIMS>a").addClass("active");
 		$("#sidebar_LIMS").addClass("menu-open");
+		$("#sidebar_LIMS>ul>li:eq(0)>a").addClass("active");
+		$("#sidebar_LIMS>ul>li:eq(0)").addClass("menu-open");
+		$("#sidebar_LIMS>ul>li:eq(0)>ul>li:eq(0)>a").addClass("active");
+		$(".sidebar").removeAttr("hidden");
 
 		let model0 = 'MethyLibraryInfo';
 		let url0 = '/api/LIMS/Methy/' + model0 + '/';

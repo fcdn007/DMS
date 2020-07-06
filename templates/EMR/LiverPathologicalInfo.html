@@ -111,11 +111,12 @@
 {% block page-script %}
 <script>
 	$(document).ready(function () {
-		$("#sidebar_EMR>ul>li:eq(1)>ul>li:eq(0)>a").addClass("active");
-		$("#sidebar_EMR>ul>li:eq(1)>a").addClass("active");
-		$("#sidebar_EMR>ul>li:eq(1)").addClass("menu-open");
 		$("#sidebar_EMR>a").addClass("active");
 		$("#sidebar_EMR").addClass("menu-open");
+		$("#sidebar_EMR>ul>li:eq(1)>a").addClass("active");
+		$("#sidebar_EMR>ul>li:eq(1)").addClass("menu-open");
+		$("#sidebar_EMR>ul>li:eq(1)>ul>li:eq(0)>a").addClass("active");
+		$(".sidebar").removeAttr("hidden");
 
 		let model0 = "LiverPathologicalInfo";
 		let url0 = '/api/EMR/Pathology/' + model0 + '/';

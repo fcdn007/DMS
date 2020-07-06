@@ -76,9 +76,10 @@
 {% block page-script %}
 <script>
   $(document).ready(function () {
-      $("#sidebar_BIS>ul>li:eq(0)>a").addClass("active");
       $("#sidebar_BIS>a").addClass("active");
       $("#sidebar_BIS").addClass("menu-open");
+      $("#sidebar_BIS>ul>li:eq(0)>a").addClass("active");
+      $(".sidebar").removeAttr("hidden");
 
       let model0 = "SampleInventoryInfo";
       let url0 = '/api/BIS/' + model0 + '/';

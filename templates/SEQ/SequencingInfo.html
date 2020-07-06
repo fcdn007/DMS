@@ -92,9 +92,10 @@
 
 <script>
     $(document).ready(function () {
-        $("#sidebar_SEQ>ul>li:eq(0)>a").addClass("active");
 		$("#sidebar_SEQ>a").addClass("active");
 		$("#sidebar_SEQ").addClass("menu-open");
+		$("#sidebar_SEQ>ul>li:eq(0)>a").addClass("active");
+		$(".sidebar").removeAttr("hidden");
 
 		let model0 = "SequencingInfo";
 		let url0 = '/api/SEQ/' + model0 + '/';

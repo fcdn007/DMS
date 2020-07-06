@@ -301,11 +301,12 @@
 {% block page-script %}
 <script>
     $(document).ready(function () {
-        $("#sidebar_SEQ>ul>li:eq(1)>ul>li:eq(0)>a").addClass("active");
-        $("#sidebar_SEQ>ul>li:eq(1)>a").addClass("active");
-        $("#sidebar_SEQ>ul>li:eq(1)").addClass("menu-open");
 		$("#sidebar_SEQ>a").addClass("active");
 		$("#sidebar_SEQ").addClass("menu-open");
+		$("#sidebar_SEQ>ul>li:eq(1)>a").addClass("active");
+        $("#sidebar_SEQ>ul>li:eq(1)").addClass("menu-open");
+        $("#sidebar_SEQ>ul>li:eq(1)>ul>li:eq(0)>a").addClass("active");
+        $(".sidebar").removeAttr("hidden");
 
 		let model0 = "MethyQCInfo";
 		let url0 = '/api/SEQ/QC/' + model0 + '/';

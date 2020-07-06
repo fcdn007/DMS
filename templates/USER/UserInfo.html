@@ -109,21 +109,6 @@
                         </div>
                       </div>
                     </div>
-
-
-<!--                    {% for field in form %}-->
-<!--          <div class="form-group">-->
-<!--            {{ field.label_tag }}-->
-<!--            {{ field }}-->
-<!--            {{ field.errors }}-->
-<!--            {% if field.help_text %}-->
-<!--                <div class="alert alert-info">-->
-<!--                    <p class="help text-small text-muted">{{ field.help_text|safe }}</p>-->
-<!--                </div>-->
-<!--            {% endif %}-->
-<!--          </div>-->
-<!--          {% endfor %}-->
-
                     <button type="submit" id="upload_submit" class="btn btn-primary btn-block">确认修改</button>
                 </form>
             </div>
@@ -139,9 +124,10 @@
 {% block page-script %}
 <script>
 	$(document).ready(function () {
-	    $("#sidebar_USER>ul>li:eq(0)>a").addClass("active");
 		$("#sidebar_USER>a").addClass("active");
 		$("#sidebar_USER").addClass("menu-open");
+		$("#sidebar_USER>ul>li:eq(0)>a").addClass("active");
+		$(".sidebar").removeAttr("hidden");
 
 	    let url0 = '/api/USER/UserInfo/';
 
@@ -158,39 +144,6 @@
             window.location.reload(true);
         });
 
-	    // $("#upload_submit").on('click', function (e) {
-	    //     e.preventDefault();
-	    //     let url_ajax = '/USER/UserInfo/';
-	    //     // 构建FormData对象
-        //     let form_data = new FormData();
-        //     form_data.append('avatar', $('#id_avatar')[0].files[0]);
-        //     form_data.append('username', $('#id_username').val());
-        //     form_data.append('nick_name', $('#id_nick_name').val());
-        //     form_data.append('email', $('#id_email').val());
-        //     form_data.append('memo', $('#id_memo').val());
-        //
-        //     $.ajax({
-        //         async: true, url: url_ajax, processData: false,
-        //         method: 'POST', data: form_data, dataType: 'json',
-        //         contentType: false,
-        //         success: function (data) {
-        //             console.info(data);
-        //             let post_result = $('#post_result');
-        //             if (data['error_msg']) {
-        //                 post_result.text(data['error_msg']);
-        //                 post_result.addClass('text-danger');
-        //             }else{
-        //                 post_result.text(data['success_msg']);
-        //                 post_result.addClass('text-success');
-        //                 setTimeout(
-        //                         function () {
-        //                             window.location.reload(true);
-        //                         }, 3000
-        //                     );
-        //             }
-        //         }
-        //     });
-	    // });
     });
 </script>
 {% endblock %}

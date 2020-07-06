@@ -27,7 +27,7 @@ django-appconf==1.0.3
 django-autoslug==1.9.4
 django-bootstrap4==1.0.1
 django-celery==3.3.1
-django-compressor==2.2
+django-compressor==2.4
 django-debug-toolbar==1.11
 django-filter==2.2.0
 django-guardian==2.3.0
@@ -119,7 +119,7 @@ raven==6.10.0
 rcssmin==1.0.6
 redis==2.10.6
 requests==2.21.0
-rjsmin==1.0.12
+rjsmin==1.1.0
 selenium==3.141.0
 Send2Trash==1.5.0
 six==1.12.0

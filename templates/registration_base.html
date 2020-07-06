@@ -1,4 +1,5 @@
 {% load static %}
+{% load compress %}
 <!DOCTYPE html>
 <html lang="zh-cn">
 
@@ -9,6 +10,7 @@
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    {% compress css %}
     <!-- 解决 Not Found: /favicon2.ico -->
     <link href="{% static 'image/favicon.ico' %}" rel="shortcut icon" type="image/x-icon">
     <!-- Font Awesome -->
@@ -21,13 +23,13 @@
     <link rel="stylesheet" href="{% static 'adminlte/dist/css/adminlte.min.css' %}">
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="{% static 'stylesheets/Google_Front.Source_Sans_Pro.css' %}">
-
-  <style>
-	/* 页面加载完后再显示，更好的显示特效 */
-	body {
-		display : none;
-	}
-  </style>
+    <style>
+        /* 页面加载完后再显示，更好的显示特效 */
+        body {
+            display : none;
+        }
+    </style>
+    {% endcompress %}
 
 </head>
 <body class="hold-transition login-page content-list">
@@ -41,6 +43,7 @@
 </div>
 <!-- /.login-box -->
 
+{% compress js %}
 <!-- jQuery -->
 <script src="{% static 'adminlte/plugins/jquery/jquery.min.js' %}"></script>
 <!-- Bootstrap 4 -->
@@ -82,6 +85,7 @@
 
   });
 </script>
+{% endcompress %}
 {% block extra_js %}
 {% endblock %}
 </body>

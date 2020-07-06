@@ -64,7 +64,7 @@ def UserInfoV(request):
             # user.role = 4
             user.save()
             context2 = {
-                'nick_name': user, 'model_changed': "UserInfo",
+                'user_index': user, 'model_changed': "UserInfo",
                 'operation': "修改资料成功", 'memo': "create_time: {}; role: {}".format(
                     user.create_time, user.role)
             }
@@ -102,7 +102,7 @@ def RegisterV(request):
             user.role = 4
             user.save()
             context2 = {
-                'nick_name': user, 'model_changed': "UserInfo",
+                'user_index': user, 'model_changed': "UserInfo",
                 'operation': "注册", 'memo': "create_time: {}; role: {}".format(user.create_time, user.role)
             }
             record_obj = DatabaseRecord(**context2)
@@ -146,7 +146,7 @@ def ActiveV(request, token):
         user.is_active = 1
         user.save()
         context2 = {
-            'nick_name': user, 'model_changed': "User",
+            'user_index': user, 'model_changed': "User",
             'operation': "激活成功", 'memo': "无"
         }
         record_obj = DatabaseRecord(**context2)

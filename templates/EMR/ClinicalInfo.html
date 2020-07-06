@@ -117,9 +117,10 @@
 {% block page-script %}
 <script>
 	$(document).ready(function () {
-		$("#sidebar_EMR>ul>li:eq(0)>a").addClass("active");
 		$("#sidebar_EMR>a").addClass("active");
 		$("#sidebar_EMR").addClass("menu-open");
+		$("#sidebar_EMR>ul>li:eq(0)>a").addClass("active");
+		$(".sidebar").removeAttr("hidden");
 
 		let model0 = "ClinicalInfo";
 		let url0 = '/api/EMR/' + model0 + '/';

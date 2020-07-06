@@ -139,11 +139,12 @@
 {% block page-script %}
 <script>
 	$(document).ready(function () {
-		$("#sidebar_EMR>ul>li:eq(2)>ul>li:eq(0)>a").addClass("active");
-		$("#sidebar_EMR>ul>li:eq(2)>a").addClass("active");
-		$("#sidebar_EMR>ul>li:eq(2)").addClass("menu-open");
 		$("#sidebar_EMR>a").addClass("active");
 		$("#sidebar_EMR").addClass("menu-open");
+		$("#sidebar_EMR>ul>li:eq(2)>a").addClass("active");
+		$("#sidebar_EMR>ul>li:eq(2)").addClass("menu-open");
+		$("#sidebar_EMR>ul>li:eq(2)>ul>li:eq(0)>a").addClass("active");
+		$(".sidebar").removeAttr("hidden");
 
 		let model0 = "LiverTMDInfo";
 		let url0 = '/api/EMR/Test/' + model0 + '/';

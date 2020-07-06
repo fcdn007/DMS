@@ -1,35 +1,41 @@
+import datetime
 import os
 import re
 import time
-import datetime
-import pandas as pd
 
-from django.shortcuts import render
+import pandas as pd
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import FieldError
 from django.http import JsonResponse, StreamingHttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
 from django.views.decorators.cache import never_cache
-from databaseDemo.settings import BASE_DIR, MEDIA_ROOT
+from django.views.decorators.csrf import csrf_exempt
 
 from USER.models import UserInfo, DatabaseRecord
+from databaseDemo.settings import BASE_DIR, MEDIA_ROOT
 from databaseDemo.tasks import make_new_merge_df_by_celery
-from .forms import FileUploadModelForm
-from util.merge_df import save_records, check_new_merge_df_all, FOREIGNKEY_TO_MODEL, KEY1_TO_MODEL, special_fields
 from util.merge_df import model_links, models_set2
+from util.merge_df import save_records, check_new_merge_df_all, FOREIGNKEY_TO_MODEL, KEY1_TO_MODEL, special_fields
 from util.utils import read_file_by_stream, condition_filter
+from .forms import FileUploadModelForm
 
 
 # Create your views here.
 def uniqueV(request):
     foreign_keys = {
-        'ExtractInfo': ['sample_id'],
-        'DNAUsageRecordInfo': ['sample_id', 'dna_id'],
-        'DNAInventoryInfo': ['sample_id', 'dna_id'],
-        'LibraryInfo': ['sample_id', 'dna_id'],
-        'PoolingInfo': ['sample_id', 'dna_id', 'singleLB_id', 'poolingLB_id'],
+        'SampleInfo': ['sampler_id'],
+        'ExtractInfo': ['sampler_id', 'sample_id'],
+        'DNAUsageRecordInfo': ['sampler_id', 'sample_id', 'dna_id'],
+        'MethyLibraryInfo': ['sampler_id', 'sample_id', 'dna_id'],
+        'MethyPoolingInfo': ['sampler_id', 'sample_id', 'dna_id', 'singleLB_id', 'poolingLB_id'],
         'SequencingInfo': ['poolingLB_id'],
-        'QCInfo': ['sample_id', 'dna_id', 'singleLB_id', 'poolingLB_id', 'singleLB_Pooling_id', 'sequencing_id']
+        'MethyQCInfo': ['sampler_id', 'sample_id', 'dna_id', 'singleLB_id', 'poolingLB_id', 'singleLB_Pooling_id',
+                        'sequencing_id'],
+        'ClinicalInfo': ['sampler_id'],
+        'FollowupInfo': ['sampler_id', 'Clinical_id'],
+        'LiverPathologicalInfo': ['sampler_id', 'Clinical_id'],
+        'LiverTMDInfo': ['sampler_id', 'Clinical_id'],
+        'LiverBiochemInfo': ['sampler_id', 'Clinical_id']
     }
     query_fields = {
         'SampleInfo': ["sample_id", "name", "gender", "patientId", "category", "stage", "diagnose", "diagnose_others",
@@ -80,9 +86,9 @@ def uploadV(request):
             total, valid, add, warning, error_msg, fatal_error = save_records(upload_file)
             if fatal_error:
                 context2 = {
-                    'nick_name': user, 'model_changed': request.POST.get('uploadUrl'),
+                    'user_index': user, 'model_changed': request.POST.get('uploadUrl'),
                     'operation': "批量上传失败",
-                    'others': "file_path: {};fatal_error: {}".format(upload_file.uploadFile.path, fatal_error)
+                    'memo': "file_path: {};fatal_error: {}".format(upload_file.uploadFile.path, fatal_error)
                 }
                 record_obj = DatabaseRecord(**context2)
                 record_obj.save()
@@ -91,9 +97,9 @@ def uploadV(request):
                 })
             else:
                 context2 = {
-                    'nick_name': user, 'model_changed': request.POST.get('uploadUrl'),
+                    'user_index': user, 'model_changed': request.POST.get('uploadUrl'),
                     'operation': "批量上传成功",
-                    'others': "file_path: {};all_records: {};valid_records: {};error_msg_tolerant: {}".format(
+                    'memo': "file_path: {};all_records: {};valid_records: {};error_msg_tolerant: {}".format(
                         upload_file.uploadFile.path, total, valid, error_msg)
                 }
                 record_obj = DatabaseRecord(**context2)
@@ -106,7 +112,7 @@ def uploadV(request):
             # print("form.is_valid(): FALSE")
             data = {'error_msg_fatal': "严重错误！！！文件上传和批量添加失败。只允许上传以下格式文件：txt, csv and xlsx。"}
             context2 = {
-                'nick_name': user, 'model_changed': request.POST.get('uploadUrl'),
+                'user_index': user, 'model_changed': request.POST.get('uploadUrl'),
                 'operation': "批量上传文件格式错误",
                 'memo': "无"
             }
@@ -267,50 +273,85 @@ def Download_excel(request, model):
         response['Content-Type'] = 'application/octet-steam'
         response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
         return response
-    elif model == 'DNAUsageRecordInfo':
-        file_name = "DNAUsageRecordInfo.template.xlsx"
+    elif model == 'BIS_DNAUsageRecordInfo':
+        file_name = "BIS_DNAUsageRecordInfo.template.xlsx"
         file_path = os.path.join(BASE_DIR, "excelData", file_name)
         response = StreamingHttpResponse(read_file_by_stream(file_path))
         response['Content-Type'] = 'application/octet-steam'
         response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
         return response
-    elif model == 'LibraryInfo':
-        file_name = "LibraryInfo.template.xlsx"
+    elif model == 'LIMS_MethyLibraryInfo':
+        file_name = "LIMS_MethyLibraryInfo.template.xlsx"
         file_path = os.path.join(BASE_DIR, "excelData", file_name)
         response = StreamingHttpResponse(read_file_by_stream(file_path))
         response['Content-Type'] = 'application/octet-steam'
         response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
         return response
-    elif model == 'CaptureInfo':
-        file_name = "CaptureInfo.template.xlsx"
+    elif model == 'LIMS_MethyCaptureInfo':
+        file_name = "LIMS_MethyCaptureInfo.template.xlsx"
         file_path = os.path.join(BASE_DIR, "excelData", file_name)
         response = StreamingHttpResponse(read_file_by_stream(file_path))
         response['Content-Type'] = 'application/octet-steam'
         response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
         return response
-    elif model == 'PoolingInfo':
-        file_name = "PoolingInfo.template.xlsx"
+    elif model == 'LIMS_MethyPoolingInfo':
+        file_name = "LIMS_MethyPoolingInfo.template.xlsx"
         file_path = os.path.join(BASE_DIR, "excelData", file_name)
         response = StreamingHttpResponse(read_file_by_stream(file_path))
         response['Content-Type'] = 'application/octet-steam'
         response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
         return response
-    elif model == 'SequencingInfo':
-        file_name = "SequencingInfo.template.xlsx"
+    elif model == 'SEQ_SequencingInfo':
+        file_name = "SEQ_SequencingInfo.template.xlsx"
         file_path = os.path.join(BASE_DIR, "excelData", file_name)
         response = StreamingHttpResponse(read_file_by_stream(file_path))
         response['Content-Type'] = 'application/octet-steam'
         response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
         return response
-    elif model == 'QCInfo':
-        file_name = "QCInfo.template.xlsx"
+    elif model == 'SEQ_MethyQCInfo':
+        file_name = "SEQ_MethyQCInfo.template.xlsx"
         file_path = os.path.join(BASE_DIR, "excelData", file_name)
         response = StreamingHttpResponse(read_file_by_stream(file_path))
         response['Content-Type'] = 'application/octet-steam'
         response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
         return response
-    elif model == 'CaptureInfoPlus':
-        file_name = "CaptureInfoPlus.template.xlsx"
+    elif model == 'LIMS_MethyCaptureInfoPlus':
+        file_name = "LIMS_MethyCaptureInfoPlus.template.xlsx"
+        file_path = os.path.join(BASE_DIR, "excelData", file_name)
+        response = StreamingHttpResponse(read_file_by_stream(file_path))
+        response['Content-Type'] = 'application/octet-steam'
+        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
+        return response
+    elif model == 'EMR_ClinicalInfo':
+        file_name = "EMR_ClinicalInfo.template.xlsx"
+        file_path = os.path.join(BASE_DIR, "excelData", file_name)
+        response = StreamingHttpResponse(read_file_by_stream(file_path))
+        response['Content-Type'] = 'application/octet-steam'
+        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
+        return response
+    elif model == 'EMR_FollowupInfo':
+        file_name = "EMR_FollowupInfo.template.xlsx"
+        file_path = os.path.join(BASE_DIR, "excelData", file_name)
+        response = StreamingHttpResponse(read_file_by_stream(file_path))
+        response['Content-Type'] = 'application/octet-steam'
+        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
+        return response
+    elif model == 'EMR_LiverPathologicalInfo':
+        file_name = "EMR_LiverPathologicalInfo.template.xlsx"
+        file_path = os.path.join(BASE_DIR, "excelData", file_name)
+        response = StreamingHttpResponse(read_file_by_stream(file_path))
+        response['Content-Type'] = 'application/octet-steam'
+        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
+        return response
+    elif model == 'EMR_LiverTMDInfo':
+        file_name = "EMR_LiverTMDInfo.template.xlsx"
+        file_path = os.path.join(BASE_DIR, "excelData", file_name)
+        response = StreamingHttpResponse(read_file_by_stream(file_path))
+        response['Content-Type'] = 'application/octet-steam'
+        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
+        return response
+    elif model == 'EMR_LiverBiochemInfo':
+        file_name = "EMR_LiverBiochemInfo.template.xlsx"
         file_path = os.path.join(BASE_DIR, "excelData", file_name)
         response = StreamingHttpResponse(read_file_by_stream(file_path))
         response['Content-Type'] = 'application/octet-steam'

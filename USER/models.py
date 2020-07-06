@@ -1,8 +1,8 @@
 import os
 import uuid
 
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFill
 
@@ -42,12 +42,12 @@ class UserInfo(AbstractUser):
 
 # 数据库增删改记录表
 class DatabaseRecord(models.Model):
-    nick_name = models.ForeignKey(
+    user_index = models.ForeignKey(
         "UserInfo",
         on_delete=models.CASCADE,
         related_name='DatabaseRecord_UserInfo',
-        to_field="nick_name",
-        db_column='用户昵称',
+        to_field="index",
+        db_column='用户index',
         blank=True,
         null=True)
     model_changed = models.CharField(

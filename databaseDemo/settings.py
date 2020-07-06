@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+
 import djcelery
 from celery import platforms
 from celery.schedules import crontab
@@ -30,6 +31,9 @@ DEBUG = True
 # DEBUG = False
 TEMPLATE_DEBUG = True
 # TEMPLATE_DEBUG = False
+COMPRESS_ENABLED = True
+# COMPRESS_ENABLED = False
+COMPRESS_OFFLINE = True
 ALLOWED_HOSTS = ['*']
 SERVER_HOST = '127.0.0.1'
 
@@ -49,6 +53,7 @@ INSTALLED_APPS = [
     'gunicorn',
     'imagekit',
     'guardian',
+    "compressor",
     'databaseDemo',
     'EMR',
     'BIS',
@@ -155,6 +160,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "staticfiles"),
+)
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'compressor.finders.CompressorFinder',
 )
 
 # 模板文件目录
