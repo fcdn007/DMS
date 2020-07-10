@@ -1,32 +1,21 @@
 from django.db import models
-from BIS.models import SampleInventoryInfo, SampleInfo, ExtractInfo
 
 
 # Create your models here.
 class MethyLibraryInfo(models.Model):
     singleLB_id = models.CharField(
         db_column='建库编号', unique=True, max_length=35, blank=True, null=True)
-    sampler_id = models.ForeignKey(
+    sampleinventoryinfo = models.ForeignKey(
         "BIS.SampleInventoryInfo",
         on_delete=models.CASCADE,
         related_name='MethyLibraryInfo_BIS2SampleInventoryInfo',
-        to_field="sampler_id",
-        db_column='患者编号',
+        db_column='样本库存信息',
         blank=True,
         null=True)
-    sample_id = models.ForeignKey(
-        "BIS.SampleInfo",
-        on_delete=models.CASCADE,
-        related_name='MethyLibraryInfo_BIS2SampleInfo',
-        to_field="sample_id",
-        db_column='样本编号',
-        blank=True,
-        null=True)
-    dna_id = models.ForeignKey(
+    extractinfo = models.ForeignKey(
         "BIS.ExtractInfo",
         on_delete=models.CASCADE,
         related_name='MethyLibraryInfo_BIS2ExtractInfo',
-        to_field="dna_id",
         db_column='核酸提取编号',
         blank=True,
         null=True)
@@ -53,7 +42,6 @@ class MethyLibraryInfo(models.Model):
         db_column='操作人', max_length=35, blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
@@ -61,12 +49,12 @@ class MethyLibraryInfo(models.Model):
         return self.singleLB_id
 
     class Meta:
-        db_table = '甲基化建库表'
-        verbose_name = '甲基化建库表'
-        ordering = ['-index']
+        db_table = '甲基化建库信息表'
+        verbose_name = '甲基化建库信息表'
+        ordering = ['-id']
         permissions = [
-            ("bulk_delete_MethyLibraryInfo", "Can bulk delete 甲基化建库表"),
-            ("bulk_update_MethyLibraryInfo", "Can bulk update 甲基化建库表"),
+            ("bulk_delete_MethyLibraryInfo", "Can bulk delete 甲基化建库信息表"),
+            ("bulk_update_MethyLibraryInfo", "Can bulk update 甲基化建库信息表"),
         ]
 
 
@@ -91,7 +79,6 @@ class MethyCaptureInfo(models.Model):
         db_column='操作人', max_length=35, blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
@@ -101,7 +88,7 @@ class MethyCaptureInfo(models.Model):
     class Meta:
         db_table = '甲基化捕获文库信息表'
         verbose_name = '甲基化捕获文库信息表'
-        ordering = ['-index']
+        ordering = ['-id']
         permissions = [
             ("bulk_delete_MethyCaptureInfo", "Can bulk delete 甲基化捕获文库信息表"),
             ("bulk_update_MethyCaptureInfo", "Can bulk update 甲基化捕获文库信息表"),
@@ -110,54 +97,34 @@ class MethyCaptureInfo(models.Model):
 
 # 表6 pooling表
 class MethyPoolingInfo(models.Model):
-    sampler_id = models.ForeignKey(
-        "BIS.SampleInventoryInfo",
-        on_delete=models.CASCADE,
-        related_name='MethyPoolingInfo_BIS2SampleInventoryInfo',
-        to_field="sampler_id",
-        db_column='患者编号',
-        blank=True,
-        null=True)
-    sample_id = models.ForeignKey(
-        "BIS.SampleInfo",
-        on_delete=models.CASCADE,
-        related_name='MethyPoolingInfo_BIS2SampleInfo',
-        to_field="sample_id",
-        db_column='样本编号',
-        blank=True,
-        null=True)
-    dna_id = models.ForeignKey(
-        "BIS.ExtractInfo",
-        on_delete=models.CASCADE,
-        related_name='MethyPoolingInfo_BIS2ExtractInfo',
-        to_field="dna_id",
-        db_column='核酸提取编号',
-        blank=True,
-        null=True)
-    singleLB_id = models.ForeignKey(
+    methylibraryinfo = models.ForeignKey(
         "MethyLibraryInfo",
         on_delete=models.CASCADE,
         related_name='MethyPoolingInfo_MethyLibraryInfo',
-        to_field="singleLB_id",
-        db_column='建库编号',
+        db_column='甲基化建库信息',
         blank=True,
         null=True)
-    poolingLB_id = models.ForeignKey(
+    methycaptureInfo = models.ForeignKey(
         "MethyCaptureInfo",
         on_delete=models.CASCADE,
         related_name='MethyPoolingInfo_MethyCaptureInfo',
-        to_field="poolingLB_id",
-        db_column='捕获文库名',
+        db_column='甲基化捕获文库信息',
         blank=True,
         null=True)
     singleLB_Pooling_id = models.CharField(
         db_column='测序文库编号', unique=True, max_length=35, blank=True, null=True)
+    sampleinventoryinfo = models.ForeignKey(
+        "BIS.SampleInventoryInfo",
+        on_delete=models.CASCADE,
+        related_name='SampleInfo_BIS2SampleInventoryInfo',
+        db_column='样本库存信息',
+        blank=True,
+        null=True)
     pooling_ratio = models.FloatField(db_column='pooling比例', blank=True, null=True)
     mass = models.FloatField(db_column='取样', blank=True, null=True)
     volume = models.FloatField(db_column='体积', blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
@@ -165,10 +132,10 @@ class MethyPoolingInfo(models.Model):
         return self.singleLB_Pooling_id
 
     class Meta:
-        db_table = '甲基化pooling表'
-        verbose_name = '甲基化pooling表'
-        ordering = ['-index']
+        db_table = '甲基化pooling信息表'
+        verbose_name = '甲基化pooling信息表'
+        ordering = ['-id']
         permissions = [
-            ("bulk_delete_MethyPoolingInfo", "Can bulk delete 甲基化pooling表"),
-            ("bulk_update_MethyPoolingInfo", "Can bulk update 甲基化pooling表"),
+            ("bulk_delete_MethyPoolingInfo", "Can bulk delete 甲基化pooling信息表"),
+            ("bulk_update_MethyPoolingInfo", "Can bulk update 甲基化pooling信息表"),
         ]

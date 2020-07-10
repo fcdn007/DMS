@@ -1,0 +1,149 @@
+{% extends "./test_base.html" %}
+
+{% block title %}
+<title>病历信息管理 病理报告信息 肝癌</title>
+{% endblock %}
+
+{% block header_title %}
+<h1>病理报告信息 肝癌</h1>
+{% endblock %}
+
+{% block header_ol %}
+	<li class="breadcrumb-item"><a href="/Home/">Home</a></li>
+	<li class="breadcrumb-item">EMR</li>
+	<li class="breadcrumb-item active">LiverPathologicalInfo</li>
+{% endblock %}
+
+{% block card-body %}
+<table id="table" class="table table-bordered table-hover dt-responsive">
+<thead>
+<tr id="table_header">
+
+</tr>
+</thead>
+</table>
+{% endblock %}
+
+{% block page-script %}
+<script>
+  $(document).ready(function () {
+      $("#sidebar_EMR>a").addClass("active");
+	  $("#sidebar_EMR").addClass("menu-open");
+	  $("#sidebar_EMR>ul>li:eq(1)>a").addClass("active");
+	  $("#sidebar_EMR>ul>li:eq(1)").addClass("menu-open");
+	  $("#sidebar_EMR>ul>li:eq(1)>ul>li:eq(0)>a").addClass("active");
+	  $(".sidebar").removeAttr("hidden");
+
+	  let model0 = "LiverPathologicalInfo";
+	  let url0 = '/api/EMR/Pathology/' + model0 + '/';
+	  let url1 = '/api/EMR/ClinicalInfo/';
+	  let id0 = 0;
+      let bulk_update_bool = {% if perms.BIS.bulk_update_LiverPathologicalInfo %} true {% else %} false {% endif %};
+      let bulk_delete_bool = {% if perms.BIS.bulk_delete_LiverPathologicalInfo %} true {% else %} false {% endif %};
+
+      function update_func(e){
+          e.preventDefault();
+          // 递交前检查，一般是检测model的外键是否存在
+          let data1 = $.ajax({
+              url: url1, dataType: 'json', contentType: "application/json",
+              type: "get", async: false, data: { clinical_id: $('#clinical_id').val(), fields: "id,sampleinventoryinfo" }
+          }).responseJSON[0];
+          if (data1 === undefined) {
+              $('#myModalError').text('错误！！！病历编号不存在，请填写正确的病历编号。');
+              return
+          }
+
+          let type = $('#type').val();
+          let method = '';
+          let url_ajax0 = url0; // MethyLibraryInfo
+          let send_data0 = $("#modelForm").find(":not(#clinical_id)").serialize() + '&' +
+              $.param({ clinicalinfo: data1.id, sampleinventoryinfo: data1.sampleinventoryinfo  });
+          if (type === 'new') {
+              // new
+              method = 'POST';
+              // POST前检查，一般是检测model的关键字段值是否存在
+              data0 = $.ajax({
+                  url: url0, dataType: 'json', contentType: "application/json",
+                  type: "get", async: false, data: {pathological_id: $('#pathological_id').val(), fields: "id"}
+              }).responseJSON[0];
+              if (data0 !== undefined) {
+                  $('#myModalError').text('错误！！！病理报告编号已存在，无法添加。如需更新该条目，请在对应行进行更新操作。');
+                  return
+              }
+          } else {
+              // edit
+              url_ajax0 = url0 + id0 + '/';
+              method = 'PUT';
+          }
+
+          $.ajax({
+              url: url_ajax0,
+              method: method,
+              data: send_data0,
+              headers: {'X-HTTP-Method-Override': 'PATCH'},
+              success: function () {
+                  let v_tmp = $('#pathological_id').val();
+                  if (type === 'new') {
+                      databaseRecordAjaxPut(model0, "单项添加", "病理报告编号：" + v_tmp);
+                      $('#myModalError').text('添加成功！！！病理报告编号：' + v_tmp);
+                  } else {
+                      databaseRecordAjaxPut(model0, "单项更新", "病理报告编号：" + v_tmp);
+                      $('#myModalError').text('更新成功！！！病理报告编号：' + v_tmp);
+                  }
+
+                  setTimeout(
+                      function () {
+                          window.location.reload(true);
+                      }, 3000
+                  );
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                  $('#myModalError').text('出现错误！！！请联系管理员');
+                  console.info(url_ajax0, method, send_data0);
+                  console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
+              }
+          });
+      }
+
+      let input_params = {
+          "title1_text": "病理报告信息 肝癌 总条目数： ",
+          "fields": [
+              // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
+              // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
+              ["pathological_id", "病理报告编号", 1, 1, 1, "text"],
+			  ["clinical_id", "病历编号", 1, 0, 1, "text"],
+              ["sampler_id", "华大编号", 0],
+              ["check_date", "检查日期", 1, 2, 1, "date"],
+              ["check_stage", "检查阶段", 1, 3, 0, "text", "无"],
+              ["category", "肿瘤类型", 1, 4, 0, "text", "无"],
+              ["stage", "分化程度", 1, 5, 0, "text", "无"],
+              ["tumor_count", "肿瘤数目", 1, 6, 0, "number_1", 0],
+              ["tumor1_diam", "肿瘤1直径", 1, 7, 0, "number_0.001", 0],
+			  ["tumor2_diam", "肿瘤2直径", 1, 8, 0, "number_0.001", 0],
+			  ["tumor3_diam", "肿瘤3直径", 1, 9, 0, "number_0.001", 0],
+			  ["capsule", "肝包膜侵犯（肝被膜）", 1, 10, 0, "text", "无"],
+              ["lmr", "淋巴结转移", 1, 11, 0, "text", "无"],
+              ["lmr_category", "淋巴结转移类型", 1, 12, 0, "text", "无"],
+              ["vi_bool", "肉眼癌栓(脉管侵犯)", 1, 13, 0, "select", [["否", "否"], ["是", "是"]]],
+              ["bv_bool", "微血管浸润", 1, 14, 0, "select", [["否", "否"], ["是", "是"]]],
+			  ["mvi_category", "MVI类型", 1, 15, 0, "text", "无"],
+			  ["section", "切面距癌距离(切除面)", 1, 16, 0, "text", "无"],
+              ["G_score", "G评分", 1, 17, 0, "text", "无"],
+              ["S_score", "S评分", 1, 18, 0, "text", "无"],
+              ["memo", "备注", 1, 19, 0, "text", "无"],
+              ["last_modify_time", "上次修改时间", 0],
+              ["create_time", "创建时间", 0]
+          ],
+          "update_func": update_func,
+          "delete_func": simple_delete_func,
+          "bulkDelete_func": simple_bulkDelete_func,
+          "download_excel": '/ADVANCE/download_excel/EMR_' + model0 + '/'
+      };
+      single_page_generator(model0, url0, id0, bulk_update_bool, bulk_delete_bool, input_params);
+
+      $("#hospital").blur(function () {
+          $("#clinical_id").val($("#hospital").val()+'_'+$("#patientId").val());
+      });
+  });
+</script>
+{% endblock %}

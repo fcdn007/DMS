@@ -1,0 +1,15 @@
+{% extends "../registration_base.html" %}
+
+
+{% block content %}
+<!-- /.login-logo -->
+<div class="card">
+  <!-- /.login-card-body -->
+  <div class="card-body login-card-body">
+      <p class="login-box-msg">你已经退出登录</p>
+      <p class="mb-1"><a href="{% url 'login' %}">重新登录</a></p>
+  </div>
+  <!-- /.login-card-body -->
+</div>
+{% endblock %}
+

@@ -5,7 +5,7 @@ from django.db import models
 # 表1 样本库存信息表
 class SampleInventoryInfo(models.Model):
     sampler_id = models.CharField(
-        db_column='患者编号', unique=True, max_length=35, blank=True, null=True)
+        db_column='华大编号', unique=True, max_length=35, blank=True, null=True)
     plasma_num = models.PositiveIntegerField(db_column='血浆管数', default=0)
     adjacent_mucosa_num = models.PositiveIntegerField(
         db_column='癌旁组织', default=0)
@@ -14,7 +14,6 @@ class SampleInventoryInfo(models.Model):
     stool_num = models.PositiveIntegerField(db_column='粪便', default=0)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
@@ -24,7 +23,7 @@ class SampleInventoryInfo(models.Model):
     class Meta:
         db_table = '样本库存信息表'
         verbose_name = '样本库存信息表'
-        ordering = ['-index']
+        ordering = ['-id']
         permissions = [
             ("bulk_delete_SampleInventoryInfo", "Can bulk delete 样本库存信息表"),
             ("bulk_update_SampleInventoryInfo", "Can bulk update 样本库存信息表"),
@@ -34,13 +33,12 @@ class SampleInventoryInfo(models.Model):
 # 表2 样本信息表
 class SampleInfo(models.Model):
     sample_id = models.CharField(
-        db_column='样本编号', unique=True, max_length=35, blank=True, null=True)
-    sampler_id = models.ForeignKey(
+        db_column='生物样本编号', unique=True, max_length=35, blank=True, null=True)
+    sampleinventoryinfo = models.ForeignKey(
         "SampleInventoryInfo",
         on_delete=models.CASCADE,
         related_name='SampleInfo_SampleInventoryInfo',
-        to_field="sampler_id",
-        db_column='患者编号',
+        db_column='样本库存信息',
         blank=True,
         null=True)
     raw_id = models.CharField(
@@ -53,7 +51,6 @@ class SampleInfo(models.Model):
     send_date = models.DateField(db_column='寄送日期', blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(auto_now_add=True, db_column='创建时间')
     last_modify_time = models.DateTimeField(auto_now=True, db_column='最近修改时间')
 
@@ -63,7 +60,7 @@ class SampleInfo(models.Model):
     class Meta:
         db_table = '样本信息表'
         verbose_name = '样本信息表'
-        ordering = ['-index']
+        ordering = ['-id']
         permissions = [
             ("bulk_delete_SampleInfo", "Can bulk delete 样本信息表"),
             ("bulk_update_SampleInfo", "Can bulk update 样本信息表"),
@@ -73,20 +70,18 @@ class SampleInfo(models.Model):
 # 表3 样本提取表
 class ExtractInfo(models.Model):
     dna_id = models.CharField(db_column='核酸提取编号', unique=True, max_length=35)
-    sampler_id = models.ForeignKey(
-        "SampleInventoryInfo",
-        on_delete=models.CASCADE,
-        related_name='ExtractInfo_SampleInventoryInfo',
-        to_field="sampler_id",
-        db_column='患者编号',
-        blank=True,
-        null=True)
-    sample_id = models.ForeignKey(
+    sampleinfo = models.ForeignKey(
         "SampleInfo",
         on_delete=models.CASCADE,
         related_name='ExtractInfo_SampleInfo',
-        to_field="sample_id",
-        db_column='样本编号',
+        db_column='样本信息',
+        blank=True,
+        null=True)
+    sampleinventoryinfo = models.ForeignKey(
+        "SampleInventoryInfo",
+        on_delete=models.CASCADE,
+        related_name='ExtractInfo_SampleInventoryInfo',
+        db_column='样本库存信息',
         blank=True,
         null=True)
     extract_date = models.DateField(db_column='提取日期', blank=True, null=True)
@@ -106,7 +101,6 @@ class ExtractInfo(models.Model):
     othersM = models.FloatField(db_column='其他使用量', blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
@@ -114,39 +108,29 @@ class ExtractInfo(models.Model):
         return self.dna_id
 
     class Meta:
-        db_table = '样本提取表'
-        verbose_name = '样本提取表'
-        ordering = ['-index']
+        db_table = '样本提取信息表'
+        verbose_name = '样本提取信息表'
+        ordering = ['-id']
         permissions = [
-            ("bulk_delete_ExtractInfo", "Can bulk delete 样本提取表"),
-            ("bulk_update_ExtractInfo", "Can bulk update 样本提取表"),
+            ("bulk_delete_ExtractInfo", "Can bulk delete 样本提取信息表"),
+            ("bulk_update_ExtractInfo", "Can bulk update 样本提取信息表"),
         ]
 
 
 # 表4 样本核酸使用记录表
 class DNAUsageRecordInfo(models.Model):
-    dna_id = models.ForeignKey(
+    extractinfo = models.ForeignKey(
         "ExtractInfo",
         on_delete=models.CASCADE,
         related_name='DNAUsageRecordInfo_ExtractInfo',
-        to_field="dna_id",
-        db_column='核酸提取编号',
+        db_column='样本提取信息',
         blank=True,
         null=True)
-    sampler_id = models.ForeignKey(
+    sampleinventoryinfo = models.ForeignKey(
         "SampleInventoryInfo",
         on_delete=models.CASCADE,
         related_name='DNAUsageRecordInfo_SampleInventoryInfo',
-        to_field="sampler_id",
-        db_column='患者编号',
-        blank=True,
-        null=True)
-    sample_id = models.ForeignKey(
-        "SampleInfo",
-        on_delete=models.CASCADE,
-        related_name='DNAUsageRecordInfo_SampleInfo',
-        to_field="sample_id",
-        db_column='样本编号',
+        db_column='样本库存信息',
         blank=True,
         null=True)
     usage_date = models.DateField(db_column='使用日期', blank=True, null=True)
@@ -156,17 +140,16 @@ class DNAUsageRecordInfo(models.Model):
         db_column='建库编号', max_length=35, blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
     def __str__(self):
-        return ":".join([str(self.dna_id), str(self.index)])
+        return ":".join([str(self.extractinfo.dna_id), str(self.id)])
 
     class Meta:
         db_table = '样本核酸使用记录表'
         verbose_name = '样本核酸使用记录表'
-        ordering = ['-index']
+        ordering = ['-id']
         permissions = [
             ("bulk_delete_DNAUsageRecordInfo", "Can bulk delete 样本核酸使用记录表"),
             ("bulk_update_DNAUsageRecordInfo", "Can bulk update 样本核酸使用记录表"),

@@ -1,0 +1,58 @@
+{% extends "../registration_base.html" %}
+
+
+{% block content %}
+<!-- /.login-logo -->
+<div class="card">
+  <!-- /.login-card-body -->
+  <div class="card-body login-card-body">
+      <p class="login-box-msg">登录</p>
+      <form action="{% url 'login' %}" method="post" class="mb-2 login-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+            {% for error in form.non_field_errors %}
+              <p{% if forloop.last %} class="mb-0"{% endif %}>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+          <div class="input-group mb-3">
+            <input type="text" name='username' class="form-control" id="id_username" placeholder="Username"
+                   autofocus required>
+              <div class="input-group-append">
+                  <div class="input-group-text">
+                    <span class="fas fa-user-circle"></span>
+                  </div>
+              </div>
+          </div>
+          <div class="input-group mb-3">
+            <input type="password" name='password' class="form-control" id="id_password" placeholder="Password"
+                   required>
+              <div class="input-group-append">
+                  <div class="input-group-text">
+                      <span class="fas fa-lock"></span>
+                  </div>
+              </div>
+          </div>
+
+
+      <button type="submit" class="btn btn-primary btn-block">登录</button>
+      <input type="hidden" name="next" value="{{ next }}"/>
+    </form>
+    <p class="mb-1">
+      <a href="{% url 'password_reset' %}">忘记密码？</a>
+    </p>
+    <p class="mb-1">
+      <a href="{% url 'USER:register' %}">立即注册</a>
+    </p>
+    <p class="mb-0">
+      <a href="{% url 'USER:active_resend' %}">重新发送激活邮件</a>
+    </p>
+    <!--p class="mb-0">
+      <a href="register.html" class="text-center">注册账号</a>
+    </p-->
+  </div>
+  <!-- /.login-card-body -->
+</div>
+{% endblock %}
+

@@ -1,8 +1,8 @@
 from django.conf import settings
 from rest_framework import serializers
 
-from .models import UserInfo, DatabaseRecord
 from util.serializers import DynamicFieldsModelSerializer
+from .models import UserInfo, DatabaseRecord
 
 
 class UserInfoSerializer(DynamicFieldsModelSerializer):
@@ -20,4 +20,4 @@ class DatabaseRecordSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = DatabaseRecord
-        fields = ("nick_name", "model_changed", "operation", "memo", "index", "last_modify_time", "create_time")
+        fields = ("userinfo", "model_changed", "operation", "memo", "id", "last_modify_time", "create_time")

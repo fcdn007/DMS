@@ -1,0 +1,149 @@
+{% extends "./test_base.html" %}
+
+{% block title %}
+<title>样本库信息管理 样本提取信息</title>
+{% endblock %}
+
+{% block header_title %}
+<h1>样本提取信息</h1>
+{% endblock %}
+
+{% block header_ol %}
+    <li class="breadcrumb-item"><a href="/Home/">Home</a></li>
+    <li class="breadcrumb-item">BIS</li>
+    <li class="breadcrumb-item active">ExtractInfo</li>
+{% endblock %}
+
+{% block card-body %}
+<table id="table" class="table table-bordered table-hover dt-responsive">
+<thead>
+<tr id="table_header">
+
+</tr>
+</thead>
+</table>
+{% endblock %}
+
+{% block page-script %}
+<script>
+  $(document).ready(function () {
+      $("#sidebar_BIS>a").addClass("active");
+      $("#sidebar_BIS").addClass("menu-open");
+      $("#sidebar_BIS>ul>li:eq(2)>a").addClass("active");
+      $(".sidebar").removeAttr("hidden");
+
+      let model0 = "ExtractInfo";
+      let url0 = '/api/BIS/' + model0 + '/';
+      let url1 = '/api/BIS/SampleInfo/';
+      let id0 = 0;
+      let bulk_update_bool = {% if perms.BIS.bulk_update_ExtractInfo %} true {% else %} false {% endif %};
+      let bulk_delete_bool = {% if perms.BIS.bulk_delete_ExtractInfo %} true {% else %} false {% endif %};
+
+      function update_func(e){
+          e.preventDefault();
+          // 递交前检查，一般是检测model的外键是否存在
+          let data1 = $.ajax({
+              url: url1, dataType: 'json', contentType: "application/json",
+              type: "get", async: false, data: {sample_id: $('#sample_id').val(), fields:"id,sampleinventoryinfo"}
+          }).responseJSON[0];
+          if (data1 === undefined) {
+              $('#myModalError').text('错误！！！生物样本编号不存在，请填写正确的生物样本编号。');
+              return
+          }
+
+          let type = $('#type').val();
+          let method = '';
+          let url_ajax0 = url0;
+          let send_data0 = $("#modelForm").find(":not(#sample_id)").serialize() + '&' +
+              $.param({ sampleinfo: data1.id, sampleinventoryinfo: data1.sampleinventoryinfo });
+          if (type === 'new') {
+              // new
+              method = 'POST';
+              // POST前检查，一般是检测model的关键字段值是否存在
+              data0 = $.ajax({
+                  url: url0, dataType: 'json', contentType: "application/json",
+                  type: "get", async: false, data: { dna_id: $('#dna_id').val(), fields: "id" }
+              }).responseJSON[0];
+              if (data0 !== undefined) {
+                  $('#myModalError').text('错误！！！核酸提取编号已存在，无法添加。如需更新该条目，请在对应行进行更新操作。');
+                  return
+              }
+              send_data0 = send_data0 + '&' + $.param({ successM: 0, failM: 0, researchM: 0, othersM: 0});
+          } else {
+              // edit
+              url_ajax0 = url0 + id0 + '/';
+              method = 'PUT';
+          }
+
+          $.ajax({
+              url: url_ajax0,
+              method: method,
+              data: send_data0,
+              headers: {'X-HTTP-Method-Override': 'PATCH'},
+              success: function () {
+                  let v_tmp = $('#dna_id').val();
+                  if (type === 'new') {
+                      databaseRecordAjaxPut(model0, "单项添加", "核酸提取编号：" + v_tmp);
+                      $('#myModalError').text('添加成功！！！核酸提取编号：' + v_tmp);
+                  } else {
+                      databaseRecordAjaxPut(model0, "单项更新", "核酸提取编号：" + v_tmp);
+                      $('#myModalError').text('更新成功！！！核酸提取编号：' + v_tmp);
+                  }
+
+                  setTimeout(
+                      function () {
+                          window.location.reload(true);
+                      }, 3000
+                  );
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                  $('#myModalError').text('出现错误！！！请联系管理员');
+                  console.info(url_ajax, method, send_data);
+                  console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
+              }
+          });
+      }
+
+      let input_params = {
+          "title1_text": "样本提取信息 总条目数： ",
+          "fields": [
+              // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
+              // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
+              ["dna_id", "核酸提取编号", 1, 1, 1, "text"],
+              ["sampler_id", "华大编号", 0],
+              ["sample_id", "生物样本编号", 1, 0, 1, "text"],
+              ["extract_date", "提取日期", 1, 2, 1, "date"],
+              ["sample_type", "样本类型", 1, 3, 0, "select", [["P", "血浆"], ["L", "癌组织"],["S", "癌旁组织"], ["B", "白细胞"], ["T", "粪便"]]],
+              ["nucleic_type", "核酸类型", 1, 4, 0, "select", [["dna", "DNA"], ["rna", "RNA"]]],
+              ["sample_volume", "样本体积(ml)/质量(mg)", 1, 5, 0, "number_0.001", 0],
+              ["extract_method", "提取方法", 1, 6, 0, "text", "无"],
+              ["dna_con", "浓度(ng/ul)", 1, 7, 0, "number_0.001", 0],
+              ["dna_vol", "体积(ul)", 1, 8, 0, "number_0.001", 0],
+              ["fridge", "冰箱位置", 1, 9, 0, "text", "无"],
+              ["plate", "孔板号", 1, 10, 0, "text", "无"],
+              ["well", "孔位", 1, 11, 0, "text", "无"],
+              ["totalM", "提取总量", 0],
+              ["sample_id", "成功建库使用量", 0],
+              ["sample_id", "失败建库使用量", 0],
+              ["sample_id", "科研项目使用量", 0],
+              ["sample_id", "其他使用量", 0],
+              ["remainM", "剩余量", 0],
+              ["memo", "备注", 1, 12, 0, "text", "无"],
+              ["last_modify_time", "上次修改时间", 0],
+              ["create_time", "创建时间", 0]
+          ],
+          "update_func": update_func,
+          "delete_func": simple_delete_func,
+          "bulkDelete_func": simple_bulkDelete_func,
+          "download_excel": '/ADVANCE/download_excel/BIS_' + model0 + '/'
+      };
+      single_page_generator(model0, url0, id0, bulk_update_bool, bulk_delete_bool, input_params);
+
+      $("#sample_id").blur(
+          function () {
+              $("#dna_id").val($("#sample_id").val()+"_1");
+          }
+      );
+  });
+</script>
+{% endblock %}

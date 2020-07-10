@@ -1,0 +1,557 @@
+{% extends "../single_page.html" %}
+
+{% block title %}
+<title>病历信息管理 病理报告信息 肝癌</title>
+{% endblock %}
+
+{% block header_title %}
+<h1>病理报告信息 肝癌</h1>
+{% endblock %}
+
+{% block header_ol %}
+	<li class="breadcrumb-item"><a href="/Home/">Home</a></li>
+	<li class="breadcrumb-item">EMR</li>
+	<li class="breadcrumb-item active">LiverPathologicalInfo</li>
+{% endblock %}
+
+{% block card-body %}
+<table id="table" class="table table-bordered table-hover dt-responsive">
+<thead>
+<tr>
+	<th>索引</th>
+	<th>病理报告编号</th>
+	<th>病历编号</th>
+	<th>华大编号</th>
+	<th>检查日期</th>
+	<th>检查阶段</th>
+	<th>肿瘤类型</th>
+	<th>分化程度</th>
+	<th>肿瘤数目</th>
+	<th>肿瘤1直径</th>
+	<th>肿瘤2直径</th>
+	<th>肿瘤3直径</th>
+	<th>肝包膜侵犯（肝被膜）</th>
+	<th>淋巴结转移</th>
+	<th>淋巴结转移类型</th>
+	<th>肉眼癌栓(脉管侵犯)</th>
+	<th>微血管浸润</th>
+	<th>MVI类型</th>
+	<th>切面距癌距离(切除面)</th>
+	<th>G评分</th>
+	<th>S评分</th>
+	<th>备注</th>
+	<th>上次修改时间</th>
+	<th>创建时间</th>
+	<th>操作</th>
+</tr>
+</thead>
+</table>
+{% endblock %}
+
+{% block ModalForm %}
+	<div class="form-group InventoryForm">
+		<span><a class="text-danger front-weight-bold">* </a>
+				<label for="clinical_id"> 病历编号</label></span>
+		<input type="text" class="form-control" id="clinical_id" name="clinical_id"
+			   placeholder="请输入病历编号，必填" required="true">
+	</div>
+	<div class="form-group">
+		<span><a class="text-danger front-weight-bold">* </a>
+		<label for="pathological_id"> 病理报告编号</label></span>
+		<input type="text" class="form-control" id="pathological_id" name="pathological_id"
+			   placeholder="请输入病理报告编号，必填" required="true">
+	</div>
+	<div class="form-group">
+		<span><a class="text-danger front-weight-bold">* </a>
+			<label for="check_date"> 检查日期</label></span>
+		<input type="date" class="form-control" id="check_date" name="check_date"
+			   placeholder="检查日期，必填" required="true">
+	</div>
+	<div class="form-group">
+		<label for="check_stage"> 检查阶段</label>
+		<input type="text" class="form-control" id="check_stage" name="check_stage"
+			   placeholder="请输入检查阶段，默认：无" value="无">
+	</div>
+	<div class="form-group">
+		<label for="category"> 肿瘤类型</label>
+		<input type="text" class="form-control" id="category" name="category"
+			   placeholder="请输入肿瘤类型，默认：无" value="无">
+	</div>
+	<div class="form-group">
+		<label for="stage"> 分化程度</label>
+		<input type="text" class="form-control" id="stage" name="stage"
+			   placeholder="请输入分化程度，默认：无" value="无">
+	</div>
+	<div class="form-group">
+		<label for="tumor1_diam"> 肿瘤1直径</label>
+		<input type="number" step="0.01" class="form-control" id="tumor1_diam" name="tumor1_diam"
+			   placeholder="请输入肿瘤1直径，默认：0" value="0">
+	</div>
+	<div class="form-group">
+		<label for="tumor2_diam"> 肿瘤2直径</label>
+		<input type="number" step="0.01" class="form-control" id="tumor2_diam" name="tumor2_diam"
+			   placeholder="请输入肿瘤2直径，默认：0" value="0">
+	</div>
+	<div class="form-group">
+		<label for="tumor3_diam"> 肿瘤3直径</label>
+		<input type="number" step="0.01" class="form-control" id="tumor3_diam" name="tumor3_diam"
+			   placeholder="请输入肿瘤3直径，默认：0" value="0">
+	</div>
+	<div class="form-group">
+		<label for="capsule"> 肝包膜侵犯（肝被膜）</label>
+		<input type="text" class="form-control" id="capsule" name="capsule"
+			   placeholder="请输入肝包膜侵犯（肝被膜），默认：无" value="无">
+	</div>
+	<div class="form-group">
+		<label for="lmr"> 淋巴结转移</label>
+		<input type="text" class="form-control" id="lmr" name="lmr"
+			   placeholder="请输入淋巴结转移，默认：无" value="无">
+	</div>
+	<div class="form-group">
+		<label for="lmr_category"> 淋巴结转移类型</label>
+		<input type="text" class="form-control" id="lmr_category" name="lmr_category"
+			   placeholder="请输入淋巴结转移类型，默认：无" value="无">
+	</div>
+	<div class="form-group">
+		<span><a class="text-danger front-weight-bold">* </a>
+			<label for="vi_bool"> 肉眼癌栓(脉管侵犯)</label></span>
+		<select class="form-control" id="vi_bool" name="vi_bool">
+			<option value="否" selected="selected">否</option>
+			<option value="是">是</option>
+		</select>
+	</div>
+	<div class="form-group">
+		<span><a class="text-danger front-weight-bold">* </a>
+			<label for="bv_bool"> 微血管浸润</label></span>
+		<select class="form-control" id="bv_bool" name="bv_bool">
+			<option value="否" selected="selected">否</option>
+			<option value="是">是</option>
+		</select>
+	</div>
+	<div class="form-group">
+		<label for="mvi_category"> MVI类型</label>
+		<input type="text" class="form-control" id="mvi_category" name="mvi_category"
+			   placeholder="请输入MVI类型，默认：无" value="无">
+	</div>
+	<div class="form-group">
+		<label for="section"> 切面距癌距离(切除面)</label>
+		<input type="text" class="form-control" id="section" name="section"
+			   placeholder="请输入切面距癌距离(切除面)，默认：无" value="无">
+	</div>
+	<div class="form-group">
+		<label for="G_score"> G评分</label>
+		<input type="text" class="form-control" id="G_score" name="G_score"
+			   placeholder="请输入G评分，默认：无" value="无">
+	</div>
+	<div class="form-group">
+		<label for="S_score"> S评分</label>
+		<input type="text" class="form-control" id="S_score" name="S_score"
+			   placeholder="请输入S评分，默认：无" value="无">
+	</div>
+	<div class="form-group">
+		<label for="memo"> 备注</label>
+		<input type="text" class="form-control" id="memo" name="memo"
+			   placeholder="请输入备注，默认：无" value="无">
+	</div>
+{% endblock %}
+
+{% block page-script %}
+<script>
+	$(document).ready(function () {
+		$("#sidebar_EMR>a").addClass("active");
+		$("#sidebar_EMR").addClass("menu-open");
+		$("#sidebar_EMR>ul>li:eq(1)>a").addClass("active");
+		$("#sidebar_EMR>ul>li:eq(1)").addClass("menu-open");
+		$("#sidebar_EMR>ul>li:eq(1)>ul>li:eq(0)>a").addClass("active");
+		$(".sidebar").removeAttr("hidden");
+
+		let model0 = "LiverPathologicalInfo";
+		let url0 = '/api/EMR/Pathology/' + model0 + '/';
+		let url1 = '/api/EMR/ClinicalInfo/';
+		let id0 = 0;
+		let dataModelForm; //更新弹窗默认值，重置按钮需要
+
+		let data0 = $.ajax({
+			url: url0, dataType: 'json', contentType: "application/json",
+			type: "get", async: false, data: {fields: "id"}
+		}).responseJSON;
+		$("#card-title1").text("病理报告信息 肝癌 总条目数：" + data0.length);
+
+		function MyModelInit(title_name, data) {
+			dataModelForm = data;
+			if (title_name === '更新') {
+				$('#pathological_id').val(data['pathological_id']);
+				$('#clinical_id').val(data['clinical_id']);
+				$('#check_date').val(data['check_date']);
+				$('#check_stage').val(data['check_stage']);
+				$('#category').val(data['category']);
+				$('#stage').val(data['stage']);
+				$('#tumor_count').val(data['tumor_count']);
+				$('#tumor1_diam').val(data['tumor1_diam']);
+				$('#tumor2_diam').val(data['tumor2_diam']);
+				$('#tumor3_diam').val(data['tumor3_diam']);
+				$('#capsule').val(data['capsule']);
+				$('#lmr').val(data['lmr']);
+				$('#lmr_category').val(data['lmr_category']);
+				$('#vi_bool').val(data['vi_bool']);
+				$('#bv_bool').val(data['bv_bool']);
+				$('#mvi_category').val(data['mvi_category']);
+				$('#section').val(data['section']);
+				$('#G_score').val(data['G_score']);
+				$('#S_score').val(data['S_score']);
+				$('#memo').val(data['memo']);
+				$('#type').val('edit');
+				$('#modal_title').text('更新');
+			} else {
+				$('#pathological_id').val("");
+				$('#clinical_id').val("");
+				$('#check_date').val("");
+				$('#type').val('new');
+				$('#modal_title').text('新增');
+			}
+		}
+
+		let table = $('#table').DataTable({
+		  "paging": true,
+		  "ordering": true,
+		  "info": true,
+		  "autoWidth": false,
+		  "responsive": true,
+		  "language": {
+					"lengthMenu": "选择每页 _MENU_ 展示 ",
+					"zeroRecords": "未找到匹配结果--抱歉",
+					"info": "当前显示第 _PAGE_ 页结果，共 _PAGES_ 页",
+					"infoEmpty": "没有数据",
+					"search": "搜索",
+					"infoFiltered": "(获取 _MAX_ 项结果)",
+					"paginate": {
+						"first": "首页",
+						"previous": "上一页",
+						"next": "下一页",
+						"last": "末页"
+					}
+				},
+		  "scrollY": "500px",
+		  "scrollCollapse": true,
+		  "scrollX": true,
+		  "pagingType": "full_numbers",
+		  //"fixedColumns": true,
+		  "rowReorder": true,
+		  "colReorder": true,
+		  "searching": true,
+		  "select": true,
+		  "fixedHeader": true,
+		  "lengthChange": true,
+		  "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]],
+		  "serverSide": true,
+		  "processing": true,
+		  "deferRender": true,
+		  "dom": 'rilB<"clear">ftp',
+		  "buttons": [
+			  /*
+			  {
+				extend: 'pageLength',
+				text: '显示行数'
+			  },
+			  */
+			  {
+				  extend: 'colvisGroup',
+				  text: '显示前5列',
+				  className: 'btn btn-info fas fa-low-vision my-1',
+				  show: [0, 1, 2, 3, 4, 5, 25],
+				  hide: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ,17,
+					  18, 19, 20, 21, 22, 23, 24]
+			  },
+			  {
+				  extend: 'colvisGroup',
+				  text: '显示全部列',
+				  className: 'btn btn-info far fa-eye my-1',
+				  show: ':hidden',
+			  },
+			  {
+				  extend: 'selectAll',
+				  className: 'btn btn-primary fab fa-autoprefixer my-1',
+				  text: '全选'
+			  },
+			  {
+				  extend: 'selectRows',
+				  className: 'btn btn-primary far fa-check-circle my-1',
+				  text: '选择多行'
+			  },
+			  {
+				  extend: 'selectNone',
+				  className: 'btn btn-primary fas fa-ban my-1',
+				  text: '取消当前选择'
+			  },
+			  {
+				  extend: 'copy',
+				  text: '所选复制到剪切板',
+				  className: 'btn btn-success fas fa-copy my-1',
+				  exportOptions: {
+					  columns: range(25)
+				  }
+			  },
+			  {
+				  extend: 'csv',
+				  text: '所选输出到csv',
+				  className: 'btn btn-success fas fa-file-csv my-1',
+				  exportOptions: {
+					  columns: range(25)
+				  }
+			  },
+			  {
+				  extend: 'csv',
+				  text: '全部输出到csv',
+				  className: 'btn btn-success fas fa-file-excel my-1',
+				  exportOptions: {
+					  columns: range(25),
+					  selected: null
+				  }
+			  },
+			  {
+				  text: '添加单行',
+				  className: 'btn btn-warning fas fa-edit my-1',
+				  action: function ( e, dt, node, config ) {
+
+				  },
+				  attr: {
+					  id: 'new'
+				  }
+			  },
+			{% if perms.EMR.bulk_update_LiverPathologicalInfo %}
+			  {
+				  text: '批量添加模板下载',
+				  className: 'btn btn-success fas fa-download my-1',
+				  action: function ( e, dt, node, config ) {
+
+				  },
+				  attr: {
+					  id: 'downloadExcel'
+				  }
+			  },
+			  {
+				  text: '批量添加',
+				  className: 'btn btn-warning fas fa-upload my-1',
+				  action: function ( e, dt, node, config ) {
+
+				  },
+				  attr: {
+					  id: 'upload'
+				  }
+			  },
+			{% endif %}
+			{% if perms.EMR.bulk_delete_LiverPathologicalInfo %}
+			  {
+				  text: '批量删除',
+				  className: 'btn btn-danger fas fa-trash-alt my-1',
+				  action: function ( e, dt, node, config ) {
+
+				  },
+				  attr: {
+					  id: 'bulkDel'
+				  }
+			  },
+			{% endif %}
+		  ],
+		  "ajax": url0 + "?format=datatables",
+		  "columns": [
+			  {
+				  data: 'id',
+				  width: "1%",
+				  // 若想前端显示的不一样，则需要"render"函数
+				  'render': function (data, type, full, meta) {
+					  return meta.row + 1 + meta.settings._iDisplayStart;
+				  }
+			  },
+			  {"data": "pathological_id"},
+			  {"data": "clinical_id"},
+			  {"data": "sampler_id"},
+              {"data": "check_date"},
+			  {"data": "check_stage"},
+			  {"data": "category"},
+			  {"data": "stage"},
+			  {"data": "tumor_count"},
+			  {"data": "tumor1_diam"},
+			  {"data": "tumor2_diam"},
+			  {"data": "tumor3_diam"},
+			  {"data": "capsule"},
+			  {"data": "lmr"},
+			  {"data": "lmr_category"},
+			  {"data": "vi_bool"},
+			  {"data": "bv_bool"},
+			  {"data": "mvi_category"},
+			  {"data": "section"},
+			  {"data": "G_score"},
+			  {"data": "S_score"},
+			  {"data": "memo"},
+			  {"data": "last_modify_time"},
+			  {"data": "create_time"},
+			  {
+				  "data": null,
+				  "defaultContent": '<button type="button" class="btn btn-info">更新</button>' + '&nbsp;&nbsp' +
+					'<button type="button" class="btn btn-danger">删除</button>'
+			  }
+		  ]
+		});
+		table.button(0).trigger();
+
+		$('#table tbody').on('click', 'button', function () {
+          let data = table.row($(this).parents('tr')).data();
+          let class_name = $(this).attr('class');
+          id0 = data['id'];
+          console.info("click button, id:", id0)
+          //alert(id);
+          if (class_name === 'btn btn-info') {
+              // EDIT button
+              MyModelInit('更新', data);
+              $("#myModal").modal();
+          } else {
+              // DELETE button
+              // alert('delete '+id);
+              // $('#modal_title').text('DELETE');
+              $("#confirm").modal();
+          }
+      	});
+
+		$('#modelForm').on('submit', function (e) {
+          e.preventDefault();
+          // 递交前检查，一般是检测model的外键是否存在
+          let data1 = $.ajax({
+              url: url1, dataType: 'json', contentType: "application/json",
+              type: "get", async: false, data: {clinical_id: $('#clinical_id').val()}
+          }).responseJSON[0];
+          if (data1 === undefined) {
+              $('#myModalError').text('错误！！！病历编号不存在，请填写正确的病历编号。');
+              return
+          }
+
+          let type = $('#type').val();
+          let method = '';
+          let url_ajax0 = url0; // MethyLibraryInfo
+          let send_data0 = $(this).serialize() + '&' + $.param({ sampler_id: data1.sampler_id });
+          let old_data0;
+          if (type === 'new') {
+              // new
+              method = 'POST';
+              // POST前检查，一般是检测model的关键字段值是否存在
+              data0 = $.ajax({
+                  url: url0, dataType: 'json', contentType: "application/json",
+                  type: "get", async: false, data: {pathological_id: $('#pathological_id').val()}
+              }).responseJSON[0];
+              if (data0 !== undefined) {
+                  $('#myModalError').text('错误！！！病理报告编号已存在，无法添加。如需更新该条目，请在对应行进行更新操作。');
+                  return
+              }
+          } else {
+              // edit
+              url_ajax0 = url0 + id0 + '/';
+              method = 'PUT';
+          }
+
+          $.ajax({
+              url: url_ajax0,
+              method: method,
+              data: send_data0,
+              headers: {'X-HTTP-Method-Override': 'PATCH'},
+              success: function () {
+                  let v_tmp = $('#pathological_id').val();
+                  if (type === 'new') {
+                      databaseRecordAjaxPut(model0, "单项添加", "病理报告编号：" + v_tmp);
+                      $('#myModalError').text('添加成功！！！病理报告编号：' + v_tmp);
+                  } else {
+                      databaseRecordAjaxPut(model0, "单项更新", "病理报告编号：" + v_tmp);
+                      $('#myModalError').text('更新成功！！！病理报告编号：' + v_tmp);
+                  }
+
+                  setTimeout(
+                      function () {
+                          window.location.reload(true);
+                      }, 3000
+                  );
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                  $('#myModalError').text('出现错误！！！请联系管理员');
+                  console.info(url_ajax0, method, send_data0);
+                  console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
+              }
+          });
+      });
+
+      $('#confirm').on('click', '#delete', function (e) {
+      	let res = delete_by_id_simple(url0, id0);
+      	if (res[0] === "success") {
+              databaseRecordAjaxPut(model0, "单项删除", "id：" + res[1]);
+              window.location.reload(true);
+          } else {
+              console.log(res[1]);
+          }
+      });
+
+      $('#new').on('click', function (e) {
+          MyModelInit('新增', {});
+          $("#myModal").modal();
+      });
+
+      $('#upload').on('click', function (e) {
+          $('#uploadOperator').val("");
+          $('#uploadFile').val("");
+          $('#uploadError').val("");
+          $('#uploadUrl').val(model0);
+          $("#uploadModal").modal();
+      });
+
+      $('#bulkDel').on('click', function (e) {
+          $('#bulkDelUrl').val(model0);
+          $("#bulkDelModal").modal();
+      });
+
+      $('#bulkDelModal').on('click', '#bulkDelete', function (e) {
+            let arrayLen = table.rows(".selected").data().length;
+            if (arrayLen > 0) {
+                let delete_id_list = [];
+                for (let i = 0; i < arrayLen; i++) {
+                    let delete_id = table.rows(".selected").data()[i]['id'];
+                    let res = delete_by_id_simple(url0, delete_id);
+                    if (res[0] === "success") {
+                        delete_id_list.push(res[1]);
+                    }
+                }
+                databaseRecordAjaxPut(model0, "批量删除", "id_list：[" + delete_id_list + "]");
+                window.location.reload(true);
+            } else {
+                $('#bulkDelError').text('没有行被选中，请先选中目标行。');
+            }
+      });
+
+      $('.downloadExcel').on('click', function (e) {
+          e.preventDefault();
+          window.location.href = '/ADVANCE/download_excel/EMR_' + model0 + '/'
+      });
+
+      $('#myModalReset').on('click', function (e) {
+          e.preventDefault();
+          if ($('#modal_title').text() === '更新') {
+              MyModelInit('更新', dataModelForm);
+          } else {
+              MyModelInit('新增', {});
+          }
+      });
+
+	  $("#modelForm input[type='text']").focus(function () {
+          let key2 = $(this).attr('id');
+          let values = $.ajax({
+              url: "{% url 'ADVANCE:unique' %}", data: {model: model0, filed: key2},
+              dataType: 'json', contentType: "application/json",
+              method: "GET", async: false
+          }).responseJSON.values;
+          console.info("values:", values, "; key2:", key2);
+          input_autocomplete(values, '#' + key2);
+      });
+
+      $("#clinical_id").blur(function () {
+      	$("#pathological_id").val($("#clinical_id").val());
+      });
+
+	});
+</script>
+{% endblock %}

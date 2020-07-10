@@ -1,6 +1,6 @@
+from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render
 from rest_framework import viewsets
-from django.contrib.auth.decorators import login_required, permission_required
 
 from util.utils import get_queryset_base
 from .serializers import *
@@ -31,21 +31,21 @@ class LiverPathologicalInfoViewSet(viewsets.ModelViewSet):
         return get_queryset_base(LiverPathologicalInfo, self.request.query_params)
 
 
-class LiverTMDInfoViewSet(viewsets.ModelViewSet):
-    queryset = LiverTMDInfo.objects.all()
-    serializer_class = LiverTMDInfoSerializer
+class TMDInfoViewSet(viewsets.ModelViewSet):
+    queryset = TMDInfo.objects.all()
+    serializer_class = TMDInfoSerializer
 
     def get_queryset(self):
-        return get_queryset_base(LiverTMDInfo, self.request.query_params)
+        return get_queryset_base(TMDInfo, self.request.query_params)
 
 
 
-class LiverBiochemInfoViewSet(viewsets.ModelViewSet):
-    queryset = LiverBiochemInfo.objects.all()
-    serializer_class = LiverBiochemInfoSerializer
+class BiochemInfoViewSet(viewsets.ModelViewSet):
+    queryset = BiochemInfo.objects.all()
+    serializer_class = BiochemInfoSerializer
 
     def get_queryset(self):
-        return get_queryset_base(LiverBiochemInfo, self.request.query_params)
+        return get_queryset_base(BiochemInfo, self.request.query_params)
 
 
 @login_required
@@ -67,13 +67,13 @@ def LiverPathologicalInfoV(request):
 
 
 @login_required
-@permission_required('EMR.view_livertmdinfo')
-def LiverTMDInfoV(request):
-    return render(request, 'EMR/LiverTMDInfo.html')
+@permission_required('EMR.view_tmdinfo')
+def TMDInfoV(request):
+    return render(request, 'EMR/TMDInfo.html')
 
 
 @login_required
-@permission_required('EMR.view_liverbiocheminfo')
-def LiverBiochemInfoV(request):
-    return render(request, 'EMR/LiverBiochemInfo.html')
+@permission_required('EMR.view_biocheminfo')
+def BiochemInfoV(request):
+    return render(request, 'EMR/BiochemInfo.html')
 

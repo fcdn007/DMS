@@ -1,30 +1,33 @@
 from django.conf import settings
 from rest_framework import serializers
 
-from .models import SequencingInfo, MethyQCInfo
 from util.serializers import DynamicFieldsModelSerializer
+from .models import SequencingInfo, MethyQCInfo
 
 
 class SequencingInfoSerializer(DynamicFieldsModelSerializer):
     last_modify_time = serializers.DateTimeField(format=settings.DATETIME_FORMAT, required=False)
     create_time = serializers.DateTimeField(format=settings.DATETIME_FORMAT, required=False)
-    poolingLBName = serializers.SerializerMethodField()
+    poolingLB_id = serializers.SerializerMethodField()
 
-    def get_poolingLBName(self, obj):
+    def get_poolingLB_id(self, obj):
         names = []
-        for q_ in obj.poolingLB_id.all():
+        for q_ in obj.methycaptureinfo.all():
             names.append(q_.poolingLB_id)
         return ", ".join(names)
 
     class Meta:
         model = SequencingInfo
-        fields = ('sequencing_id', 'poolingLB_id', 'poolingLBName', 'send_date', 'start_time', 'end_time', 'machine_id',
-                  'chip_id', 'memo', 'index', 'last_modify_time', 'create_time')
+        fields = ('sequencing_id', 'poolingLB_id', 'send_date', 'start_time', 'end_time', 'machine_id', 'chip_id',
+                  'memo', 'id', 'last_modify_time', 'create_time', 'methycaptureinfo')
 
 
 class MethyQCInfoSerializer(DynamicFieldsModelSerializer):
     last_modify_time = serializers.DateTimeField(format=settings.DATETIME_FORMAT, required=False)
     create_time = serializers.DateTimeField(format=settings.DATETIME_FORMAT, required=False)
+    sampler_id = serializers.CharField(source='sampleinventoryinfo.sampler_id', read_only=True)
+    singleLB_Pooling_id = serializers.CharField(source='methypoolinginfo.singleLB_Pooling_id', read_only=True)
+    sequencing_id = serializers.CharField(source='sequencinginfo.sequencing_id', read_only=True)
 
     class Meta:
         model = MethyQCInfo
@@ -39,5 +42,5 @@ class MethyQCInfoSerializer(DynamicFieldsModelSerializer):
                   'panel_dedupped_depth_site_x_field', 'panel_coverage_site_1x_field', 'panel_coverage_site_10x_field',
                   'panel_coverage_site_20x_field', 'panel_coverage_site_50x_field', 'panel_coverage_site_100x_field',
                   'panel_uniformity_site_20_mean_field', 'strand_balance_f_field', 'strand_balance_r_field',
-                  'gc_bin_depth_ratio', 'sampler_id', 'sample_id', 'dna_id', 'singleLB_id', 'poolingLB_id',
-                  'singleLB_Pooling_id', 'sequencing_id', 'memo', 'index', 'last_modify_time', 'create_time')
+                  'gc_bin_depth_ratio', 'sampler_id', 'singleLB_Pooling_id', 'sequencing_id', 'memo', 'id',
+                  'last_modify_time', 'create_time', 'sampleinventoryinfo', 'methypoolinginfo', 'sequencing_id')

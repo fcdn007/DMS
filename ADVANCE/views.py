@@ -86,7 +86,7 @@ def uploadV(request):
             total, valid, add, warning, error_msg, fatal_error = save_records(upload_file)
             if fatal_error:
                 context2 = {
-                    'user_index': user, 'model_changed': request.POST.get('uploadUrl'),
+                    'userinfo': user, 'model_changed': request.POST.get('uploadUrl'),
                     'operation': "批量上传失败",
                     'memo': "file_path: {};fatal_error: {}".format(upload_file.uploadFile.path, fatal_error)
                 }
@@ -97,7 +97,7 @@ def uploadV(request):
                 })
             else:
                 context2 = {
-                    'user_index': user, 'model_changed': request.POST.get('uploadUrl'),
+                    'userinfo': user, 'model_changed': request.POST.get('uploadUrl'),
                     'operation': "批量上传成功",
                     'memo': "file_path: {};all_records: {};valid_records: {};error_msg_tolerant: {}".format(
                         upload_file.uploadFile.path, total, valid, error_msg)
@@ -112,7 +112,7 @@ def uploadV(request):
             # print("form.is_valid(): FALSE")
             data = {'error_msg_fatal': "严重错误！！！文件上传和批量添加失败。只允许上传以下格式文件：txt, csv and xlsx。"}
             context2 = {
-                'user_index': user, 'model_changed': request.POST.get('uploadUrl'),
+                'userinfo': user, 'model_changed': request.POST.get('uploadUrl'),
                 'operation': "批量上传文件格式错误",
                 'memo': "无"
             }

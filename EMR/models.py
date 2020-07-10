@@ -1,18 +1,15 @@
 from django.db import models
 
-from BIS.models import SampleInventoryInfo
-
 
 # Create your models here.
 class ClinicalInfo(models.Model):
     clinical_id = models.CharField(
-        db_column='病理编号', unique=True, max_length=35, blank=True, null=True)
-    sampler_id = models.ForeignKey(
+        db_column='病历编号', unique=True, max_length=35, blank=True, null=True)
+    sampleinventoryinfo = models.ForeignKey(
         "BIS.SampleInventoryInfo",
         on_delete=models.CASCADE,
-        related_name='ClinicalInfo_SampleInventoryInfo',
-        to_field="sampler_id",
-        db_column='患者编号',
+        related_name='ClinicalInfo_BIS2SampleInventoryInfo',
+        db_column='样本库存信息',
         blank=True,
         null=True)
     patientId = models.CharField(
@@ -33,7 +30,6 @@ class ClinicalInfo(models.Model):
     tumor1_diam = models.FloatField(db_column='肿瘤1直径', blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
@@ -43,7 +39,7 @@ class ClinicalInfo(models.Model):
     class Meta:
         db_table = '基本临床信息表'
         verbose_name = '基本临床信息表'
-        ordering = ['-index']
+        ordering = ['-id']
         permissions = [
             ("bulk_delete_ClinicalInfo", "Can bulk delete 基本临床信息表"),
             ("bulk_update_ClinicalInfo", "Can bulk update 基本临床信息表"),
@@ -51,22 +47,18 @@ class ClinicalInfo(models.Model):
 
 
 class FollowupInfo(models.Model):
-    followup_id = models.CharField(
-        db_column='随访记录编号', unique=True, max_length=35, blank=True, null=True)
-    clinical_id = models.ForeignKey(
+    clinicalinfo = models.ForeignKey(
         "ClinicalInfo",
         on_delete=models.CASCADE,
         related_name='FollowupInfo_ClinicalInfo',
-        to_field="clinical_id",
-        db_column='病理编号',
+        db_column='基本临床信息',
         blank=True,
         null=True)
-    sampler_id = models.ForeignKey(
+    sampleinventoryinfo = models.ForeignKey(
         "BIS.SampleInventoryInfo",
         on_delete=models.CASCADE,
-        related_name='FollowupInfo_SampleInventoryInfo',
-        to_field="sampler_id",
-        db_column='患者编号',
+        related_name='FollowupInfo_BIS2SampleInventoryInfo',
+        db_column='样本库存信息',
         blank=True,
         null=True)
     survival_status = models.CharField(
@@ -87,17 +79,16 @@ class FollowupInfo(models.Model):
         db_column='随访情况', max_length=255, blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
     def __str__(self):
-        return self.followup_id
+        return "{}_{}".format(self.clinicalinfo.clinical_id, self.followup_date)
 
     class Meta:
         db_table = '随访信息表'
         verbose_name = '随访信息表'
-        ordering = ['-index']
+        ordering = ['-id']
         permissions = [
             ("bulk_delete_FollowupInfo", "Can bulk delete 随访信息表"),
             ("bulk_update_FollowupInfo", "Can bulk update 随访信息表"),
@@ -107,20 +98,18 @@ class FollowupInfo(models.Model):
 class LiverPathologicalInfo(models.Model):
     pathological_id = models.CharField(
         db_column='病理报告编号', unique=True, max_length=35, blank=True, null=True)
-    clinical_id = models.ForeignKey(
+    clinicalinfo = models.ForeignKey(
         "ClinicalInfo",
         on_delete=models.CASCADE,
         related_name='LiverPathologicalInfo_ClinicalInfo',
-        to_field="clinical_id",
-        db_column='病理编号',
+        db_column='基本临床信息',
         blank=True,
         null=True)
-    sampler_id = models.ForeignKey(
+    sampleinventoryinfo = models.ForeignKey(
         "BIS.SampleInventoryInfo",
         on_delete=models.CASCADE,
-        related_name='LiverPathologicalInfo_SampleInventoryInfo',
-        to_field="sampler_id",
-        db_column='患者编号',
+        related_name='LiverPathologicalInfo_BIS2SampleInventoryInfo',
+        db_column='样本库存信息',
         blank=True,
         null=True)
     check_date = models.DateField(
@@ -146,7 +135,6 @@ class LiverPathologicalInfo(models.Model):
     S_score = models.CharField(db_column='S评分', max_length=15, blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
@@ -156,30 +144,26 @@ class LiverPathologicalInfo(models.Model):
     class Meta:
         db_table = '肝癌病理报告信息表'
         verbose_name = '肝癌病理报告信息表'
-        ordering = ['-index']
+        ordering = ['-id']
         permissions = [
             ("bulk_delete_LiverPathologicalInfo", "Can bulk delete 肝癌病理报告信息表"),
             ("bulk_update_LiverPathologicalInfo", "Can bulk update 肝癌病理报告信息表"),
         ]
 
 
-class LiverTMDInfo(models.Model):
-    check_id = models.CharField(
-        db_column='检测编号', unique=True, max_length=35, blank=True, null=True)
-    clinical_id = models.ForeignKey(
+class TMDInfo(models.Model):
+    clinicalinfo = models.ForeignKey(
         "ClinicalInfo",
         on_delete=models.CASCADE,
-        related_name='LiverTMDInfo_ClinicalInfo',
-        to_field="clinical_id",
-        db_column='病理编号',
+        related_name='TMDInfo_ClinicalInfo',
+        db_column='基本临床信息',
         blank=True,
         null=True)
-    sampler_id = models.ForeignKey(
+    sampleinventoryinfo = models.ForeignKey(
         "BIS.SampleInventoryInfo",
         on_delete=models.CASCADE,
-        related_name='LiverTMDInfo_SampleInventoryInfo',
-        to_field="sampler_id",
-        db_column='患者编号',
+        related_name='TMDInfo_BIS2SampleInventoryInfo',
+        db_column='样本库存信息',
         blank=True,
         null=True)
     check_date = models.DateField(
@@ -212,40 +196,35 @@ class LiverTMDInfo(models.Model):
         db_column='前列腺特异性抗原', max_length=255, blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
     def __str__(self):
-        return self.check_id
+        return "{}_{}".format(self.clinicalinfo.clinical_id, self.check_date)
 
     class Meta:
-        db_table = '肝癌肿瘤标志物检测结果信息表'
-        verbose_name = '肝癌肿瘤标志物检测结果信息表'
-        ordering = ['-index']
+        db_table = '肿瘤标志物检测结果信息表'
+        verbose_name = '肿瘤标志物检测结果信息表'
+        ordering = ['-id']
         permissions = [
-            ("bulk_delete_LiverTMDInfo", "Can bulk delete 肝癌肿瘤标志物检测结果信息表"),
-            ("bulk_update_LiverTMDInfo", "Can bulk update 肝癌肿瘤标志物检测结果信息表"),
+            ("bulk_delete_LiverTMDInfo", "Can bulk delete 肿瘤标志物检测结果信息表"),
+            ("bulk_update_LiverTMDInfo", "Can bulk update 肿瘤标志物检测结果信息表"),
         ]
 
 
-class LiverBiochemInfo(models.Model):
-    check_id = models.CharField(
-        db_column='检测编号', unique=True, max_length=35, blank=True, null=True)
-    clinical_id = models.ForeignKey(
+class BiochemInfo(models.Model):
+    clinicalinfo = models.ForeignKey(
         "ClinicalInfo",
         on_delete=models.CASCADE,
-        related_name='LiverBiochemInfo_ClinicalInfo',
-        to_field="clinical_id",
-        db_column='病理编号',
+        related_name='BiochemInfo_ClinicalInfo',
+        db_column='基本临床信息',
         blank=True,
         null=True)
-    sampler_id = models.ForeignKey(
+    sampleinventoryinfo = models.ForeignKey(
         "BIS.SampleInventoryInfo",
         on_delete=models.CASCADE,
-        related_name='LiverBiochemInfo_SampleInventoryInfo',
-        to_field="sampler_id",
-        db_column='患者编号',
+        related_name='BiochemInfo_BIS2SampleInventoryInfo',
+        db_column='样本库存信息',
         blank=True,
         null=True)
     check_date = models.DateField(
@@ -278,18 +257,17 @@ class LiverBiochemInfo(models.Model):
         db_column='前白蛋白', max_length=255, blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
     def __str__(self):
-        return self.check_id
+        return "{}_{}".format(self.clinicalinfo.clinical_id, self.check_date)
 
     class Meta:
-        db_table = '肝癌肿瘤生化检测结果信息表'
-        verbose_name = '肝癌生化检测结果信息表'
-        ordering = ['-index']
+        db_table = '肿瘤生化检测结果信息表'
+        verbose_name = '生化检测结果信息表'
+        ordering = ['-id']
         permissions = [
-            ("bulk_delete_LiverBiochemInfo", "Can bulk delete 肝癌生化检测结果信息表"),
-            ("bulk_update_LiverBiochemInfo", "Can bulk update 肝癌生化检测结果信息表"),
+            ("bulk_delete_BiochemInfo", "Can bulk delete 生化检测结果信息表"),
+            ("bulk_update_BiochemInfo", "Can bulk update 生化检测结果信息表"),
         ]

@@ -17,382 +17,36 @@
 {% block card-body %}
 <table id="table" class="table table-bordered table-hover dt-responsive">
 <thead>
-<tr>
-	<th>索引</th>
-	<th>建库编号</th>
-	<th>患者编号</th>
-	<th>样本编号</th>
-	<th>核酸提取编号</th>
-	<th>管上编号</th>
-	<th>是否临床</th>
-	<th>样本标签</th>
-	<th>文库名</th>
-	<th>index列表</th>
-	<th>建库日期</th>
-	<th>建库方法</th>
-	<th>试剂批次</th>
-	<th>核酸样本浓度</th>
-	<th>起始量</th>
-	<th>PCR循环数</th>
-	<th>文库浓度(ng/ul)</th>
-	<th>文库体积(ul)</th>
-	<th>操作人</th>
-	<th>备注</th>
-	<th>上次修改时间</th>
-	<th>创建时间</th>
-	<th>操作</th>
+<tr id="table_header">
+
 </tr>
 </thead>
 </table>
 {% endblock %}
 
-{% block ModalForm %}
-	<div class="form-group InventoryForm">
-		<span><a class="text-danger front-weight-bold">* </a>
-				<label for="dna_id"> 核酸提取编号</label></span>
-		<input type="text" class="form-control" id="dna_id" name="dna_id"
-			   placeholder="请输入核酸提取编号，必填" required="true">
-	</div>
-	<div class="form-group">
-		<span><a class="text-danger front-weight-bold">* </a>
-		<label for="singleLB_id"> 建库编号</label></span>
-		<input type="text" class="form-control" id="singleLB_id" name="singleLB_id"
-			   placeholder="请输入建库编号，必填" required="true">
-	</div>
-	<div class="form-group">
-		<label for="tube_id"> 管上编号</label>
-		<input type="text" class="form-control" id="tube_id" name="tube_id"
-			   placeholder="请输入管上编号，默认：无" value="无">
-	</div>
-	<div class="form-group">
-		<label for="clinical_boolen"> 是否临床</label>
-		<select class="form-control" id="clinical_boolen" name="clinical_boolen" required="true">
-			<option value="是" selected="selected">是</option>
-			<option value="否">否</option>
-		</select>
-	</div>
-	<div class="form-group">
-		<label for="label"> 样本标签</label>
-		<select type="text" class="form-control" id="label" name="label" required="true">
-			<option value="P" selected="selected">P</option>
-			<option value="T">T</option>
-			<option value="Frg_gDNA">Frg_gDNA</option>
-		</select>
-	</div>
-	<div class="form-group">
-		<label for="singleLB_name"> 文库名</label>
-		<input type="text" class="form-control" id="singleLB_name" name="singleLB_name"
-			   placeholder="请输入文库名，默认：无" value="无">
-	</div>
-	<div class="form-group">
-		<label for="barcodes"> index列表</label>
-		<input type="text" class="form-control" id="barcodes" name="barcodes"
-			   placeholder="请输入index列表，默认：无" value="无">
-	</div>
-	<div class="form-group">
-		<label for="LB_method"> 建库方法</label>
-		<input type="text" class="form-control" id="LB_method" name="LB_method"
-			   placeholder="请输入建库方法，默认：2.2" value="2.2">
-	</div>
-	<div class="form-group">
-		<label for="kit_batch"> 试剂批次</label>
-		<input type="text" class="form-control" id="kit_batch" name="kit_batch"
-			   placeholder="请输入试剂批次，默认：无" value="无">
-	</div>
-	<div class="form-group">
-		<label for="LB_date"> 建库日期</label>
-		<input type="date" class="form-control" id="LB_date" name="LB_date"
-			   placeholder="请输入建库日期，默认：2000-01-01" value="2000-01-01">
-	</div>
-	<div class="form-group">
-		<label for="mass"> 起始量(ng)</label>
-		<input type="number" step="0.01" class="form-control" id="mass" name="mass"
-			   placeholder="请输入起始量(ng)，默认：0" value="0">
-	</div>
-	<div class="form-group">
-		<label for="pcr_cycles"> PCR循环数</label>
-		<input type="number" class="form-control" id="pcr_cycles" name="pcr_cycles"
-			   placeholder="请输入PCR循环数，默认：0" value="0">
-	</div>
-	<div class="form-group">
-		<label for="LB_con"> 文库浓度(ng/ul)</label>
-		<input type="number" step="0.01" class="form-control" id="LB_con" name="LB_con"
-			   placeholder="请输入文库浓度(ng/ul)，默认：0" value="0">
-	</div>
-	<div class="form-group">
-		<label for="LB_vol"> 文库体积(ul)</label>
-		<input type="number" step="0.01" class="form-control" id="LB_vol" name="LB_vol"
-			   placeholder="请输入文库体积(ul)，默认：0" value="0">
-	</div>
-	<div class="form-group">
-		<label for="operator"> 操作人</label>
-		<input type="text" class="form-control" id="operator" name="operator"
-			   placeholder="请输入操作人，默认：无" value="无">
-	</div>
-	<div class="form-group">
-		<label for="memo"> 备注</label>
-		<input type="text" class="form-control" id="memo" name="memo"
-			   placeholder="请输入备注，默认：无" value="无">
-	</div>
-{% endblock %}
-
 {% block page-script %}
 <script>
-	$(document).ready(function () {
-		$("#sidebar_LIMS>a").addClass("active");
-		$("#sidebar_LIMS").addClass("menu-open");
-		$("#sidebar_LIMS>ul>li:eq(0)>a").addClass("active");
-		$("#sidebar_LIMS>ul>li:eq(0)").addClass("menu-open");
-		$("#sidebar_LIMS>ul>li:eq(0)>ul>li:eq(0)>a").addClass("active");
-		$(".sidebar").removeAttr("hidden");
+  $(document).ready(function () {
+      $("#sidebar_LIMS>a").addClass("active");
+      $("#sidebar_LIMS").addClass("menu-open");
+      $("#sidebar_LIMS>ul>li:eq(0)>a").addClass("active");
+      $("#sidebar_LIMS>ul>li:eq(0)>ul>li:eq(0)>a").addClass("active");
+      $(".sidebar").removeAttr("hidden");
 
-		let model0 = 'MethyLibraryInfo';
-		let url0 = '/api/LIMS/Methy/' + model0 + '/';
-		let url1 = '/api/BIS/ExtractInfo/';
-		let url2 = '/api/BIS/DNAUsageRecordInfo/';
-		let id0 = 0;
-		let dataModelForm; //更新弹窗默认值，重置按钮需要
+      let model0 = 'MethyLibraryInfo';
+      let url0 = '/api/LIMS/Methy/' + model0 + '/';
+      let url1 = '/api/BIS/ExtractInfo/';
+      let url2 = '/api/BIS/DNAUsageRecordInfo/';
+      let id0 = 0;
+      let bulk_update_bool = {% if perms.BIS.bulk_update_MethyLibraryInfo %} true {% else %} false {% endif %};
+      let bulk_delete_bool = {% if perms.BIS.bulk_delete_MethyLibraryInfo %} true {% else %} false {% endif %};
 
-		let data0 = $.ajax({
-			url: url0, dataType: 'json', contentType: "application/json",
-			type: "get", async: false, data: {fields: "index"}
-		}).responseJSON;
-		$("#card-title1").text("甲基化检测 甲基化建库信息 总条目数：" + data0.length);
-
-		function MyModelInit(title_name, data) {
-			dataModelForm = data;
-			if (title_name === '更新') {
-				$('#singleLB_id').val(data['singleLB_id']);
-				$('#dna_id').val(data['dna_id']);
-				$('#tube_id').val(data['tube_id']);
-				$('#clinical_boolen').val(data['clinical_boolen']);
-				$('#label').val(data['label']);
-				$('#singleLB_name').val(data['singleLB_name']);
-				$('#barcodes').val(data['barcodes']);
-				$('#LB_date').val(data['LB_date']);
-				$('#LB_method').val(data['LB_method']);
-				$('#kit_batch').val(data['kit_batch']);
-				$('#mass').val(data['mass']);
-				$('#pcr_cycles').val(data['pcr_cycles']);
-				$('#LB_con').val(data['LB_con']);
-				$('#LB_vol').val(data['LB_vol']);
-				$('#operator').val(data['operator']);
-				$('#memo').val(data['memo']);
-				$('#type').val('edit');
-				$('#modal_title').text('更新');
-			} else {
-				$('#singleLB_id').val("");
-				$('#dna_id').val("");
-				$('#type').val('new');
-				$('#modal_title').text('新增');
-			}
-		}
-
-		let table = $('#table').DataTable({
-		  "paging": true,
-		  "ordering": true,
-		  "info": true,
-		  "autoWidth": false,
-		  "responsive": true,
-		  "language": {
-					"lengthMenu": "选择每页 _MENU_ 展示 ",
-					"zeroRecords": "未找到匹配结果--抱歉",
-					"info": "当前显示第 _PAGE_ 页结果，共 _PAGES_ 页",
-					"infoEmpty": "没有数据",
-					"search": "搜索",
-					"infoFiltered": "(获取 _MAX_ 项结果)",
-					"paginate": {
-						"first": "首页",
-						"previous": "上一页",
-						"next": "下一页",
-						"last": "末页"
-					}
-				},
-		  "scrollY": "500px",
-		  "scrollCollapse": true,
-		  "scrollX": true,
-		  "pagingType": "full_numbers",
-		  //"fixedColumns": true,
-		  "rowReorder": true,
-		  "colReorder": true,
-		  "searching": true,
-		  "select": true,
-		  "fixedHeader": true,
-		  "lengthChange": true,
-		  "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]],
-		  "serverSide": true,
-		  "processing": true,
-		  "deferRender": true,
-		  "dom": 'rilB<"clear">ftp',
-		  "buttons": [
-			  /*
-			  {
-				extend: 'pageLength',
-				text: '显示行数'
-			  },
-			  */
-			  {
-				  extend: 'colvisGroup',
-				  text: '显示前5列',
-				  className: 'btn btn-info fas fa-low-vision my-1',
-				  show: [0, 1, 2, 3, 4, 5, 22],
-				  hide: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
-			  },
-			  {
-				  extend: 'colvisGroup',
-				  text: '显示全部列',
-				  className: 'btn btn-info far fa-eye my-1',
-				  show: ':hidden',
-			  },
-			  {
-				  extend: 'selectAll',
-				  className: 'btn btn-primary fab fa-autoprefixer my-1',
-				  text: '全选'
-			  },
-			  {
-				  extend: 'selectRows',
-				  className: 'btn btn-primary far fa-check-circle my-1',
-				  text: '选择多行'
-			  },
-			  {
-				  extend: 'selectNone',
-				  className: 'btn btn-primary fas fa-ban my-1',
-				  text: '取消当前选择'
-			  },
-			  {
-				  extend: 'copy',
-				  text: '所选复制到剪切板',
-				  className: 'btn btn-success fas fa-copy my-1',
-				  exportOptions: {
-					  columns: range(22)
-				  }
-			  },
-			  {
-				  extend: 'csv',
-				  text: '所选输出到csv',
-				  className: 'btn btn-success fas fa-file-csv my-1',
-				  exportOptions: {
-					  columns: range(22)
-				  }
-			  },
-			  {
-				  extend: 'csv',
-				  text: '全部输出到csv',
-				  className: 'btn btn-success fas fa-file-excel my-1',
-				  exportOptions: {
-					  columns: range(22),
-					  selected: null
-				  }
-			  },
-			  {
-				  text: '添加单行',
-				  className: 'btn btn-warning fas fa-edit my-1',
-				  action: function ( e, dt, node, config ) {
-
-				  },
-				  attr: {
-					  id: 'new'
-				  }
-			  },
-			{% if perms.LIMS.bulk_update_MethyLibraryInfo %}
-			  {
-				  text: '批量添加模板下载',
-				  className: 'btn btn-success fas fa-download my-1',
-				  action: function ( e, dt, node, config ) {
-
-				  },
-				  attr: {
-					  id: 'downloadExcel'
-				  }
-			  },
-			  {
-				  text: '批量添加',
-				  className: 'btn btn-warning fas fa-upload my-1',
-				  action: function ( e, dt, node, config ) {
-
-				  },
-				  attr: {
-					  id: 'upload'
-				  }
-			  },
-			{% endif %}
-            {% if perms.LIMS.bulk_delete_MethyLibraryInfo %}
-			  {
-				  text: '批量删除',
-				  className: 'btn btn-danger fas fa-trash-alt my-1',
-				  action: function ( e, dt, node, config ) {
-
-				  },
-				  attr: {
-					  id: 'bulkDel'
-				  }
-			  },
-			{% endif %}
-		  ],
-		  "ajax": url0 + "?format=datatables",
-		  "columns": [
-			  {
-				  data: 'index',
-				  width: "1%",
-				  // 若想前端显示的不一样，则需要"render"函数
-				  'render': function (data, type, full, meta) {
-					  return meta.row + 1 + meta.settings._iDisplayStart;
-				  }
-			  },
-			  {"data": "singleLB_id"},
-			  {"data": "sampler_id"},
-              {"data": "sample_id"},
-              {"data": "dna_id"},
-			  {"data": "tube_id"},
-			  {"data": "clinical_boolen"},
-			  {"data": "label"},
-			  {"data": "singleLB_name"},
-			  {"data": "barcodes"},
-			  {"data": "LB_date"},
-			  {"data": "LB_method"},
-			  {"data": "kit_batch"},
-			  {"data": "dnaCon", "name": "dna_id__dna_con"},
-			  {"data": "mass"},
-			  {"data": "pcr_cycles"},
-			  {"data": "LB_con"},
-			  {"data": "LB_vol"},
-			  {"data": "operator"},
-			  {"data": "memo"},
-			  {"data": "last_modify_time"},
-			  {"data": "create_time"},
-			  {
-				  "data": null,
-				  "defaultContent": '<button type="button" class="btn btn-info">更新</button>' + '&nbsp;&nbsp' +
-					'<button type="button" class="btn btn-danger">删除</button>'
-			  }
-		  ]
-	  });
-		table.button(0).trigger();
-
-		$('#table tbody').on('click', 'button', function () {
-          let data = table.row($(this).parents('tr')).data();
-          let class_name = $(this).attr('class');
-          id0 = data['index'];
-          console.info("click button, id:", id0)
-          //alert(id);
-          if (class_name === 'btn btn-info') {
-              // EDIT button
-              MyModelInit('更新', data);
-              $("#myModal").modal();
-          } else {
-              // DELETE button
-              // alert('delete '+id);
-              // $('#modal_title').text('DELETE');
-              $("#confirm").modal();
-          }
-      	});
-
-		$('#modelForm').on('submit', function (e) {
+      function update_func(e){
           e.preventDefault();
           // 递交前检查，一般是检测model的外键是否存在
           let data1 = $.ajax({
               url: url1, dataType: 'json', contentType: "application/json",
-              type: "get", async: false, data: {dna_id: $('#dna_id').val()}
+              type: "get", async: false, data: { dna_id: $('#dna_id').val(), fields: "id,sampleinventoryinfo,successM" }
           }).responseJSON[0];
           if (data1 === undefined) {
               $('#myModalError').text('错误！！！核酸提取编号不存在，请填写正确的核酸提取编号。');
@@ -402,10 +56,10 @@
           let type = $('#type').val();
           let method = '';
           let url_ajax0 = url0; // MethyLibraryInfo
-          let url_ajax1 = url1 + data1.dna_id + '/'; // ExtractInfo
+          let url_ajax1 = url1 + data1.id + '/'; // ExtractInfo
           let url_ajax2 = url2; // DNAUsageRecordInfo
-          let send_data0 = $(this).serialize() + '&' + $.param({
-			  sampler_id: data1.sampler_id, sample_id: data1.sample_id
+          let send_data0 = $("#modelForm").find(":not(#dna_id)").serialize() + '&' + $.param({
+			  extractinfo: data1.id, sampleinventoryinfo: data1.sampleinventoryinfo
           });
           let old_data0;
           if (type === 'new') {
@@ -414,7 +68,7 @@
               // POST前检查，一般是检测model的关键字段值是否存在
               data0 = $.ajax({
                   url: url0, dataType: 'json', contentType: "application/json",
-                  type: "get", async: false, data: {singleLB_id: $('#singleLB_id').val()}
+                  type: "get", async: false, data: {singleLB_id: $('#singleLB_id').val(), fields: "id"}
               }).responseJSON[0];
               if (data0 !== undefined) {
                   $('#myModalError').text('错误！！！建库编号已存在，无法添加。如需更新该条目，请在对应行进行更新操作。');
@@ -426,7 +80,7 @@
               method = 'PUT';
               old_data0 = $.ajax({
                   url: url_ajax0, dataType: 'json', contentType: "application/json",
-                  type: "get", async: false
+                  type: "get", async: false, data: {fields: "id,dna_id,usage,mass,singleLB_id"}
               }).responseJSON;
           }
 
@@ -444,13 +98,17 @@
                   } else {
                       databaseRecordAjaxPut(model0, "单项更新", "建库编号：" + v_tmp);
                       $('#myModalError').text('更新成功！！！建库编号：' + v_tmp);
-                      data1.successM = parseFloat(data1.successM) + parseFloat($('#mass').val()) - parseFloat(old_data0.othersM);
+                      data1.successM = parseFloat(data1.successM) + parseFloat($('#mass').val()) -
+							  parseFloat(old_data0.mass);
                   }
-                  // 添加/修改核酸提取
+                  // 修改核酸提取
+				  console.info(">>>>url_ajax1: ", url_ajax1);
 				  $.ajax({
                       url: url_ajax1,
-                      method: 'PUT',
-                      data: $.param(data1),
+                      method: 'PATCH',
+                      data: $.param({
+                          successM: data1.successM
+                      }),
                       headers: {'X-HTTP-Method-Override': 'PATCH'},
                       success: function () {
                           databaseRecordAjaxPut("ExtractInfo", "单项更新", "核酸提取编号：" + data1.sample_id);
@@ -465,7 +123,7 @@
                       url: url_ajax2,
                       method: 'POST',
                       data: $.param({
-						  sampler_id: data1.sampler_id, sample_id: data1.sample_id, dna_id: data1.dna_id,
+						  sampleinventoryinfo: data1.sampleinventoryinfo, extractinfo: data1.id,
 						  usage_date: $('#LB_date').val(), mass: $('#mass').val(), usage: "建库成功",
 						  singleLB_id: $('#singleLB_id').val(), memo: "无"
 					  }),
@@ -490,13 +148,13 @@
                   console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
               }
           });
-      });
+      }
 
-	  function delete_by_id(id_func) {
+      function delete_by_id (id_func){
           let url_ajax0 = url0 + id_func + '/';
           let old_data0 = $.ajax({
               url: url_ajax0, dataType: 'json', contentType: "application/json",
-              type: "get", async: false
+              type: "get", async: false, data: {fields: "id,dna_id,usage,mass,singleLB_id"}
           }).responseJSON;
           let res = [];
           $.ajax({
@@ -508,17 +166,17 @@
                   // 更新样本提取表
                   let data1 = $.ajax({
                       url: url1, dataType: 'json', contentType: "application/json",
-                      type: "get", async: false, data: {dna_id: old_data0.dna_id}
+                      type: "get", async: false, data: { dna_id: old_data0.dna_id, fields: "id,sampleinventoryinfo,successM" }
                   }).responseJSON[0];
                   data1.successM = parseFloat(data1.successM) - parseFloat(old_data0.mass);
                   $.ajax({
-                      url: url1 + data1.index + '/',
-                      method: 'PUT',
-                      data: $.param(data1),
+                      url: url1 + data1.id + '/',
+                      method: 'PATCH',
+                      data: $.param({ successM: data1.successM }),
                       headers: {'X-HTTP-Method-Override': 'PATCH'},
                       success: function () {
                           res.push("success");
-                          res.push(data1.index);
+                          res.push(data1.id);
                       },
                       error: function (jqXHR, textStatus, errorThrown) {
                           res.push("error");
@@ -531,11 +189,11 @@
                       type: "get", async: false, data: {singleLB_id: old_data0.singleLB_id}
                   }).responseJSON[0];
 				  $.ajax({
-					  url: url2 + data2.index + '/',
+					  url: url2 + data2.id + '/',
 					  method: 'DELETE',
 					  success: function () {
 					  	res.push("success");
-					  	res.push(data2.index);
+					  	res.push(data2.id);
 					  },
 					  error: function (jqXHR, textStatus, errorThrown) {
 					  	res.push("error");
@@ -555,101 +213,90 @@
           return res;
       }
 
-      $('#confirm').on('click', '#delete', function (e) {
-      	let res = delete_by_id(id0);
+      function delete_func(model0, url0, id0){
+          let res = delete_by_id(id0);
         if (res[4] === "success") {
-              databaseRecordAjaxPut("DNAUsageRecordInfo", "单项删除", "index：" + res[5]);
+              databaseRecordAjaxPut("DNAUsageRecordInfo", "单项删除", "id：" + res[5]);
           } else {
               console.log(res[5]);
           }
       	if (res[2] === "success") {
-              databaseRecordAjaxPut("ExtractInfo", "单项更新", "index：" + res[3]);
+              databaseRecordAjaxPut("ExtractInfo", "单项更新", "id：" + res[3]);
           } else {
               console.log(res[3]);
           }
           if (res[0] === "success") {
-              databaseRecordAjaxPut(model0, "单项删除", "index：" + res[1]);
+              databaseRecordAjaxPut(model0, "单项删除", "id：" + res[1]);
               window.location.reload(true);
           } else {
               console.log(res[1]);
           }
-      });
+      }
 
-      $('#new').on('click', function (e) {
-          MyModelInit('新增', {});
-          $("#myModal").modal();
-      });
-
-      $('#upload').on('click', function (e) {
-          $('#uploadOperator').val("");
-          $('#uploadFile').val("");
-          $('#uploadError').val("");
-          $('#uploadUrl').val(model0);
-          $("#uploadModal").modal();
-      });
-
-      $('#bulkDel').on('click', function (e) {
-          $('#bulkDelUrl').val(model0);
-          $("#bulkDelModal").modal();
-      });
-
-      $('#bulkDelModal').on('click', '#bulkDelete', function (e) {
-            let arrayLen = table.rows(".selected").data().length;
+      function bulkDelete_func(table, model0, url0){
+          let arrayLen = table.rows(".selected").data().length;
             if (arrayLen > 0) {
-                let index_list0 = [];
-                let index_list1 = [];
-                let index_list2 = [];
+                let id_list0 = [];
+                let id_list1 = [];
+                let id_list2 = [];
                 for (let i = 0; i < arrayLen; i++) {
-                    let delete_index = table.rows(".selected").data()[i]['index'];
-                    let res = delete_by_id(delete_index);
+                    let delete_id = table.rows(".selected").data()[i]['id'];
+                    let res = delete_by_id(delete_id);
                     if (res[0] === "success") {
-                        index_list0.push(res[1]);
+                        id_list0.push(res[1]);
                     }
                     if (res[2] === "success") {
-                        index_list1.push(res[3]);
+                        id_list1.push(res[3]);
                     }
                     if (res[3] === "success") {
-                        index_list2.push(res[3]);
+                        id_list2.push(res[3]);
                     }
                 }
-                databaseRecordAjaxPut(model0, "批量删除", "index_list：[" + index_list0 + "]");
-                databaseRecordAjaxPut("ExtractInfo", "批量更新", "index_list：[" + index_list1 + "]");
-                databaseRecordAjaxPut("DNAUsageRecordInfo", "批量删除", "index_list：[" + index_list2 + "]");
+                databaseRecordAjaxPut(model0, "批量删除", "id_list：[" + id_list0 + "]");
+                databaseRecordAjaxPut("ExtractInfo", "批量更新", "id_list：[" + id_list1 + "]");
+                databaseRecordAjaxPut("DNAUsageRecordInfo", "批量删除", "id_list：[" + id_list2 + "]");
                 window.location.reload(true);
             } else {
                 $('#bulkDelError').text('没有行被选中，请先选中目标行。');
             }
-      });
+      }
 
-      $('.downloadExcel').on('click', function (e) {
-          e.preventDefault();
-          window.location.href = '/ADVANCE/download_excel/LIMS_' + model0 + '/'
-      });
-
-      $('#myModalReset').on('click', function (e) {
-          e.preventDefault();
-          if ($('#modal_title').text() === '更新') {
-              MyModelInit('更新', dataModelForm);
-          } else {
-              MyModelInit('新增', {});
-          }
-      });
-
-	  $("#modelForm input[type='text']").focus(function () {
-          let key2 = $(this).attr('id');
-          let values = $.ajax({
-              url: "{% url 'ADVANCE:unique' %}", data: {model: model0, filed: key2},
-              dataType: 'json', contentType: "application/json",
-              method: "GET", async: false
-          }).responseJSON.values;
-          console.info("values:", values, "; key2:", key2);
-          input_autocomplete(values, '#' + key2);
-      });
+      let input_params = {
+          "title1_text": "甲基化检测 甲基化建库信息 总条目数： ",
+		  "fields": [
+              // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
+              // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
+              ["singleLB_id", "建库编号", 1, 1, 1, "text"],
+              ["sampler_id", "华大编号", 0],
+              ["dna_id", "核酸提取编号", 1, 0, 1, "text"],
+              ["tube_id", "管上编号", 1, 2, 0, "text", "无"],
+              ["clinical_boolen", "是否临床", 1, 3, 1, "select", [["是", "是"], ["否", "否"]]],
+              ["label", "样本标签", 1, 4, 1, "select", [["P", "P"], ["T", "T"],["Frg_gDNA", "Frg_gDNA"]]],
+              ["singleLB_name", "文库名", 1, 5, 0, "text", "无"],
+              ["barcodes", "index列表", 1, 6, 0, "text", "无"],
+              ["LB_date", "建库日期", 1, 7, 1, "date"],
+              ["LB_method", "建库方法", 1, 8, 0, "text", "无"],
+              ["kit_batch", "试剂批次", 1, 9, 0, "text", "无"],
+              ["dna_con", "核酸样本浓度(ug/ul)", 0],
+              ["mass", "起始量(ng)", 1, 10, 1, "number_0.001"],
+              ["pcr_cycles", "PCR循环数", 1, 11, 0, "number_1", 0],
+              ["LB_con", "文库浓度(ng/ul)", 1, 12, 0, "number_0.001", 0],
+              ["LB_vol", "文库体积(ul)", 1, 13, 0, "number_0.001", 0],
+              ["operator", "操作人", 1, 14, 0, "text", "无"],
+              ["memo", "备注", 1, 15, 0, "text", "无"],
+              ["last_modify_time", "上次修改时间", 0],
+              ["create_time", "创建时间", 0]
+          ],
+          "update_func": update_func,
+          "delete_func": delete_func,
+          "bulkDelete_func": bulkDelete_func,
+          "download_excel": '/ADVANCE/download_excel/LIMS_' + model0 + '/'
+      };
+      single_page_generator(model0, url0, id0, bulk_update_bool, bulk_delete_bool, input_params);
 
       $("#dna_id").blur(function () {
-      	$("#singleLB_id").val($("#dna_id").val()+"_m1");
+          $("#singleLB_id").val($("#dna_id").val()+"_m1");
       });
-
-	});
+  });
 </script>
 {% endblock %}

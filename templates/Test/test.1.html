@@ -1,0 +1,130 @@
+{% extends "./test_base.html" %}
+
+{% block specific_page_css %}
+  <style>
+    button.button_group1+div+div {
+        width: 200px;
+        margin-top: 7px;
+        margin-left: 1em;
+        z-index: 1000;
+    }
+  </style>
+{% endblock %}
+
+{% block title %}
+<title>样本库信息管理 样本库存信息</title>
+{% endblock %}
+
+{% block header_title %}
+<h1>样本库存信息</h1>
+{% endblock %}
+
+{% block header_ol %}
+    <li class="breadcrumb-item"><a href="/Home/">Home</a></li>
+    <li class="breadcrumb-item">BIS</li>
+    <li class="breadcrumb-item active">SampleInventoryInfo</li>
+{% endblock %}
+
+{% block card-body %}
+<table id="table" class="table table-bordered table-hover dt-responsive">
+<thead>
+<tr id="table_header">
+
+</tr>
+</thead>
+</table>
+{% endblock %}
+
+{% block page-script %}
+<script>
+  $(document).ready(function () {
+      $("#sidebar_BIS>a").addClass("active");
+      $("#sidebar_BIS").addClass("menu-open");
+      $("#sidebar_BIS>ul>li:eq(0)>a").addClass("active");
+      $(".sidebar").removeAttr("hidden");
+
+      let model0 = "SampleInventoryInfo";
+      let url0 = '/api/BIS/' + model0 + '/';
+      let id0 = 0;
+      let bulk_update_bool = {% if perms.BIS.bulk_update_SampleInventoryInfo %} true {% else %} false {% endif %};
+      let bulk_delete_bool = {% if perms.BIS.bulk_delete_SampleInventoryInfo %} true {% else %} false {% endif %};
+
+      function update_func(e){
+          e.preventDefault();
+          // 递交前检查，一般是检测model的外键是否存在
+
+          let type = $('#type').val();
+          let method = '';
+          let url_ajax0 = url0;
+          let send_data0 = $("#modelForm").serialize();
+          if (type === 'new') {
+              // new
+              method = 'POST';
+              // POST前检查，一般是检测model的关键字段值是否存在
+              data0 = $.ajax({
+                  url: url0, dataType: 'json', contentType: "application/json",
+                  type: "get", async: false, data: { sampler_id: $('#sampler_id').val(), fields: "id" }
+              }).responseJSON[0];
+              if (data0 !== undefined) {
+                  $('#myModalError').text('错误！！！华大编号已存在，无法添加。如需更新该条目，请在对应行进行更新操作。');
+                  return
+              }
+          } else {
+              // edit
+              url_ajax0 = url0 + id0 + '/';
+              method = 'PUT';
+          }
+
+          $.ajax({
+              url: url_ajax0,
+              method: method,
+              data: send_data0,
+              headers: {'X-HTTP-Method-Override': 'PATCH'},
+              success: function () {
+                  let v_tmp = $('#sampler_id').val();
+                  if (type === 'new') {
+                      databaseRecordAjaxPut(model0, "单项添加", "华大编号：" + v_tmp);
+                      $('#myModalError').text('添加成功！！！华大编号：' + v_tmp);
+                  } else {
+                      databaseRecordAjaxPut(model0, "单项更新", "华大编号：" + v_tmp);
+                      $('#myModalError').text('更新成功！！！华大编号：' + v_tmp);
+                  }
+
+                  setTimeout(
+                      function () {
+                          window.location.reload(true);
+                      }, 3000
+                  );
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                  $('#myModalError').text('出现错误！！！请联系管理员');
+                  console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
+              }
+          });
+      }
+
+      let input_params = {
+          "title1_text": "样本库存信息 总条目数： ",
+          "fields": [
+              // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
+              // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
+              ["sampler_id", "华大编号", 1, 0, 1, "text"],
+              ["plasma_num", "血浆管数", 1, 1, 0, "number_1", 0],
+              ["cancer_tissue_num", "癌组织样本数量", 1, 2, 0, "number_1", 0],
+              ["adjacent_mucosa_num", "癌旁组织样本数量", 1, 3, 0, "number_1", 0],
+              ["WBC_num", "白细胞样本数量", 1, 4, 0, "number_1", 0],
+              ["stool_num", "粪便样本数量", 1, 5, 0, "number_1", 0],
+              ["memo", "备注", 1, 6, 0, "text", "无"],
+              ["last_modify_time", "上次修改时间", 0],
+              ["create_time", "创建时间", 0]
+          ],
+          "update_func": update_func,
+          "delete_func": simple_delete_func,
+          "bulkDelete_func": simple_bulkDelete_func,
+          "download_excel": '/ADVANCE/download_excel/BIS_' + model0 + '/'
+      };
+      single_page_generator(model0, url0, id0, bulk_update_bool, bulk_delete_bool, input_params);
+
+  });
+</script>
+{% endblock %}

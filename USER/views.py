@@ -64,7 +64,7 @@ def UserInfoV(request):
             # user.role = 4
             user.save()
             context2 = {
-                'user_index': user, 'model_changed': "UserInfo",
+                'userinfo': user, 'model_changed': "UserInfo",
                 'operation': "修改资料成功", 'memo': "create_time: {}; role: {}".format(
                     user.create_time, user.role)
             }
@@ -102,7 +102,7 @@ def RegisterV(request):
             user.role = 4
             user.save()
             context2 = {
-                'user_index': user, 'model_changed': "UserInfo",
+                'userinfo': user, 'model_changed': "UserInfo",
                 'operation': "注册", 'memo': "create_time: {}; role: {}".format(user.create_time, user.role)
             }
             record_obj = DatabaseRecord(**context2)
@@ -113,7 +113,7 @@ def RegisterV(request):
             # 激活链接格式: /user/active/用户身份加密后的信息 /user/active/token
 
             # 加密用户的身份信息，生成激活token
-            token = custom_token_generator(user.index)
+            token = custom_token_generator(user.id)
             # 发送邮件 celery:异步执行任务
             # print(">>>>>>>>>>>>>> user.email: %s >>>>>>>>>>>" % user.email)
             # print(">>>>>>>>>>>>>> user.username: %s >>>>>>>>>>>" % user.username)
@@ -140,13 +140,13 @@ def ActiveV(request, token):
     try:
         info = serializer.loads(token)
         # 获取待激活用户的id
-        user_index = info['confirm']
+        userinfo = info['confirm']
         # 根据id获取用户信息
-        user = UserInfo.objects.get(index=user_index)
+        user = UserInfo.objects.get(id=userinfo)
         user.is_active = 1
         user.save()
         context2 = {
-            'user_index': user, 'model_changed': "User",
+            'userinfo': user, 'model_changed': "User",
             'operation': "激活成功", 'memo': "无"
         }
         record_obj = DatabaseRecord(**context2)
@@ -170,7 +170,7 @@ def Active_resendV(request):
             if user.is_active:
                 return JsonResponse({'error_msg': '用户已激活，请返回登录页面进行登录。'})
             else:
-                token = custom_token_generator(user.index)
+                token = custom_token_generator(user.id)
                 # 找其他人帮助我们发送邮件 celery:异步执行任务
                 # print(">>>>>>>>>>>>>> user.email: %s >>>>>>>>>>>" % user.email)
                 # print(">>>>>>>>>>>>>> user.username: %s >>>>>>>>>>>" % user.username)

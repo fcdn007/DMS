@@ -1,0 +1,110 @@
+{% extends "../registration_base.html" %}
+
+{% block content %}
+<!-- /.login-logo -->
+<div class="card">
+    <!-- /.login-card-body -->
+    <div class="card-body register-card-body">
+        <p class="login-box-msg">用户注册</p>
+        <form action="{% url 'USER:register' %}" method="post" class="mb-2 login-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+                {% for error in form.non_field_errors %}
+                  <p{% if forloop.last %} class="mb-0"{% endif %}>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+<!--            {% for field in form %}-->
+<!--          <div class="form-group">-->
+<!--            {{ field.label_tag }}-->
+<!--            {{ field }}-->
+<!--            {{ field.errors }}-->
+<!--&lt;!&ndash;            {% if field.help_text %}&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="alert alert-info">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p class="help text-small text-muted">{{ field.help_text|safe }}</p>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            {% endif %}&ndash;&gt;-->
+<!--          </div>-->
+<!--          {% endfor %}-->
+
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="请输入用户名" name="username" autofocus
+                     required id="id_username">
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <span class="fas fa-user"></span>
+                </div>
+              </div>
+            </div>
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="请输入昵称" name="nick_name"
+                     required id="id_nick_name">
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <span class="far fa-grin-squint"></span>
+                </div>
+              </div>
+            </div>
+            <div class="input-group mb-3">
+              <input type="email" class="form-control" placeholder="请输入邮箱" name="email"
+                     required id="id_email">
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <span class="fas fa-envelope"></span>
+                </div>
+              </div>
+            </div>
+            <div class="input-group mb-3">
+              <input type="password" class="form-control" placeholder="请输入密码" name="password1"
+                     required id="id_password1">
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <span class="fas fa-lock"></span>
+                </div>
+              </div>
+            </div>
+            <div class="input-group mb-3">
+              <input type="password" class="form-control" placeholder="请再次输入密码" name="password2"
+                     required id="id_password2">
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <span class="fas fa-lock"></span>
+                </div>
+              </div>
+            </div>
+            <div class="input-group mb-3">
+              <input type="file" class="form-control" name="avatar"
+                     id="id_avatar" accept="image/*">
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  请上传头像&emsp;<span class="fas fa-image"></span>
+                </div>
+              </div>
+            </div>
+            <div class="input-group mb-3">
+              <textarea class="form-control"  name="memo" id="id_memo"
+                  placeholder="请输入备注，默认：无" value="无"></textarea>
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <span class="far fa-edit"></span>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">注册</button>
+            <input type="hidden" name="next" value="{{ next }}"/>
+        </form>
+        <p class="mb-1">{{ post_result }}</p>
+        <p class="mb-1">
+            <a href="{% url 'login' %}">已有账户登录</a>
+        </p>
+        <!--p class="mb-0">
+        <a href="register.html" class="text-center">注册账号</a>
+        </p-->
+    </div>
+  <!-- /.login-card-body -->
+</div>
+{% endblock %}
+

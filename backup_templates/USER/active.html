@@ -1,0 +1,45 @@
+{% extends "../registration_base.html" %}
+{% block content %}
+<!-- /.login-logo -->
+<div class="card">
+  <!-- /.login-card-body -->
+  <div class="card-body login-card-body">
+      <p class="login-box-msg">激活确认</p>
+      {% if success_msg %}
+      <p>
+          你的账号已成功激活。现在你可以进行登录。
+      </p>
+      <a href="{% url 'login' %}">返回登录页面</a>
+      {% elif error_msg %}
+      <p>
+          你的激活链接已过期。请重新注册。
+      </p>
+      <a href="{% url 'USER:activate_resend' %}">返回"重新发送激活邮件"页面</a>
+      {% endif %}
+    <!--p class="mb-0">
+      <a href="register.html" class="text-center">注册账号</a>
+    </p-->
+  </div>
+  <!-- /.login-card-body -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        $(document).ready(function () {
+            {% if success_msg %}
+                setTimeout(
+                    function () {
+                        window.location.href = "{% url 'login' %}"
+                    }, 3000
+                );
+            {% elif error_msg %}
+                setTimeout(
+                    function () {
+                        window.location.href = "{% url 'USER:activate_resend' %}"
+                    }, 3000
+                );
+            {% endif %}
+        })
+    </script>
+{% endblock %}

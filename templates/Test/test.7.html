@@ -1,0 +1,147 @@
+{% extends "./test_base.html" %}
+
+{% block specific_page_css %}
+  <style>
+    button.button_group1+div+div {
+        width: 200px;
+        margin-top: 7px;
+        margin-left: 1em;
+        z-index: 1000;
+    }
+  </style>
+{% endblock %}
+
+{% block title %}
+<title>实验项目信息管理 甲基化检测 pooling映射信息</title>
+{% endblock %}
+
+{% block header_title %}
+<h1>甲基化检测 pooling映射信息</h1>
+{% endblock %}
+
+{% block header_ol %}
+	<li class="breadcrumb-item"><a href="/Home/">Home</a></li>
+	<li class="breadcrumb-item">LIMS</li>
+	<li class="breadcrumb-item active">MethyPoolingInfo</li>
+{% endblock %}
+
+{% block card-body %}
+<table id="table" class="table table-bordered table-hover dt-responsive">
+<thead>
+<tr id="table_header">
+
+</tr>
+</thead>
+</table>
+{% endblock %}
+
+{% block page-script %}
+<script>
+  $(document).ready(function () {
+      $("#sidebar_LIMS>a").addClass("active");
+	  $("#sidebar_LIMS").addClass("menu-open");
+	  $("#sidebar_LIMS>ul>li:eq(0)>a").addClass("active");
+	  $("#sidebar_LIMS>ul>li:eq(0)>ul>li:eq(2)>a").addClass("active");
+	  $(".sidebar").removeAttr("hidden");
+
+	  let model0 = "MethyPoolingInfo";
+	  let url0 = '/api/LIMS/Methy/' + model0 + '/';
+	  let url1 = '/api/LIMS/Methy/MethyLibraryInfo/';
+	  let url2 = '/api/LIMS/Methy/MethyCaptureInfo/';
+	  let id0 = 0;
+      let bulk_update_bool = {% if perms.BIS.bulk_update_MethyPoolingInfo %} true {% else %} false {% endif %};
+      let bulk_delete_bool = {% if perms.BIS.bulk_delete_MethyPoolingInfo %} true {% else %} false {% endif %};
+
+      function update_func(e){
+          e.preventDefault();
+		    // 递交前检查，一般是检测model的外键是否存在
+			let data1 = $.ajax({
+				url: url1, dataType: 'json', contentType: "application/json",
+				type: "get", async: false, data: { singleLB_id: $('#singleLB_id').val(), fields:"id,sampleinventoryinfo" }
+			}).responseJSON[0];
+			if (data1 === undefined) {
+				$('#myModalError').text('错误！！！建库编号不存在，请填写正确的建库编号。');
+				return
+			}
+			let data2 = $.ajax({
+				url: url2, dataType: 'json', contentType: "application/json",
+				type: "get", async: false, data: {poolingLB_id: $('#poolingLB_id').val()}
+			}).responseJSON[0];
+			if (data2 === undefined) {
+				$('#myModalError').text('错误！！！捕获文库名不存在，请填写正确的捕获文库名。');
+				return
+			}
+
+            let type = $('#type').val();
+            let method = '';
+            let url_ajax0 = url0;
+            let send_data0 = $("#modelForm").find(":not(#singleLB_id, #poolingLB_id)").serialize() + '&' + $.param({
+				methylibraryinfo: data1.id, methycaptureInfo: data2.id, sampleinventoryinfo: data1.sampleinventoryinfo
+			});
+            if (type === 'new') {
+                // new
+                method = 'POST';
+                // POST前检查，一般是检测model的关键字段值是否存在
+                data0 = $.ajax({
+                    url: url0, dataType: 'json', contentType: "application/json",
+                    type: "get", async: false, data: { singleLB_Pooling_id: $('#singleLB_Pooling_id').val(), fields: "id" }
+                }).responseJSON[0];
+                if (data0 !== undefined) {
+                    $('#myModalError').text('错误！！！测序文库编号已存在，无法添加。如需更新该条目，请在对应行进行更新操作。');
+                    return
+                }
+            } else {
+                // edit
+                url_ajax0 = url0 + id0 + '/';
+                method = 'PUT';
+            }
+
+            $.ajax({
+                url: url_ajax0,
+                method: method,
+                data: send_data0,
+                headers: {'X-HTTP-Method-Override': 'PATCH'},
+                success: function () {
+                    let v_tmp = $('#singleLB_Pooling_id').val();
+                    if (type === 'new') {
+                      databaseRecordAjaxPut(model0, "单项添加", "测序文库编号：" + v_tmp);
+                      $('#myModalError').text('添加成功！！！捕获文库名：' + v_tmp);
+                  } else {
+                      databaseRecordAjaxPut(model0, "单项更新", "测序文库编号：" + v_tmp);
+                      $('#myModalError').text('更新成功！！！测序文库编号：' + v_tmp);
+                  }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    $('#myModalError').text('出现错误！！！请联系管理员');
+                    console.info(url_ajax0, method, send_data0);
+                    console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
+                }
+            });
+      }
+
+      let input_params = {
+          "title1_text": "甲基化检测 pooling映射信息 总条目数： ",
+		  "fields": [
+              // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
+              // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
+              ["singleLB_id", "建库编号", 1, 0, 1, "text"],
+              ["poolingLB_id", "捕获文库名", 1, 1, 1, "text"],
+              ["singleLB_Pooling_id", "测序文库编号", 1, 2, 1, "text"],
+              ["sampler_id", "华大编号", 0],
+              ["pooling_ratio", "pooling比例", 1, 3, 0, "number_0.001", 1],
+              ["mass", "取样(ng)", 1, 4, 0, "number_0.001", 0],
+              ["volume", "体积(ul)", 1, 5, 0, "number_0.001", 0],
+              ["memo", "备注", 1, 6, 0, "text", "无"],
+              ["last_modify_time", "上次修改时间", 0],
+              ["create_time", "创建时间", 0]
+          ],
+          "update_func": update_func,
+          "delete_func": simple_delete_func,
+          "bulkDelete_func": simple_bulkDelete_func,
+          "download_excel": '/ADVANCE/download_excel/LIMS_' + model0 + '/'
+      };
+      single_page_generator(model0, url0, id0, bulk_update_bool, bulk_delete_bool, input_params);
+
+  });
+</script>
+{% endblock %}

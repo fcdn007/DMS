@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block page_css %}
+  <style type="text/css">
+      /* fontawesome有些fas图标在谷歌/火狐浏览器无法显示，解决方法参见：
+            https://github.com/FortAwesome/Font-Awesome/issues/11946
+      */
+      .fa-low-vision:before {
+          content: "\f2a8";
+          font-weight: 900;
+      }
+
+      .fa-ban:before {
+          content: "\f05e";
+          font-weight: 900;
+      }
+
+      .fa-file-csv:before {
+          content: "\f6dd";
+          font-weight: 900;
+      }
+
+      .fa-file-excel:before {
+          content: "\f1c3";
+          font-weight: 900;
+      }
+
+      .fa-download:before {
+          content: "\f019";
+          font-weight: 900;
+      }
+
+      .fa-upload:before {
+          content: "\f093";
+          font-weight: 900;
+      }
+
+      .ui-autocomplete {
+          background-color: white;
+          width: 400px;
+          border: 1em;
+          padding: 30px;
+          z-index: 2147483647;
+        }
+  </style>
+{% block specific_page_css %}
+{% endblock %}
+
+{% endblock %}
+
+{% block card-title %}
+<h3 class="card-title" id="card-title1"></h3>
+{% endblock %}
+
+{% block modal_html %}
+<!-- NEW and EDIT Modal -->
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modal_title"></h4>
+            </div>
+            <div class="modal-body">
+                {% block ModalFormHeader %}
+
+                {% endblock %}
+                <form id="modelForm">
+                    {% csrf_token %}
+                    {% block ModalForm %}
+
+                    {% endblock %}
+                    <input type="hidden" id="type" name="type" value="">
+                    <button id="submit" type="submit" class="btn btn-success btn-block">OK</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <p id="myModalError"></p>
+                <button type="button" class="btn btn-warning" id='myModalReset'>重置</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- upload Modal -->
+<div class="modal fade" id="uploadModal">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="uploadModal_title"> 上传文件进行批量添加</h4>
+            </div>
+            <div class="modal-body">
+                <form id="UploadForm" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="uploadUrl"> 数据表名称</label>
+                        <input type="text" class="form-control" id="uploadUrl" name="uploadUrl"
+                               placeholder="请输入数据表名称" required="true">
+                    </div>
+                    <div class="form-group" id="upload_file">
+                        <label for="uploadFile"> 上传文件</label>
+                        <input type="file" class="form-control" id="uploadFile" name="uploadFile"
+                               placeholder="请上传文件" required="true">
+                    </div>
+                    <button id='uploadSubmit' type="submit" class="btn btn-success btn-block">提交上传</button>
+                </form>
+                <br>
+                <dl>
+                    <dt class="text-primary front-weight-bold">上传结果信息：</dt>
+                    <dd id="uploadInfo" class="text-primary" style="white-space: pre-line"></dd>
+                    <dt class="text-danger front-weight-bold">报错信息：</dt>
+                    <dd id="uploadError" class="text-danger front-weight-bold" style="white-space: pre-line"></dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info downloadExcel">模板下载</button>
+                <button type="button" class="btn btn-warning" id='uploadReset'>重置</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="confirm">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title text-danger">是否确认删除?</h4>
+            </div>
+            <div class="modal-body">
+                <button type="button" data-dismiss="modal" class="btn btn-danger" id="delete">确认删除</button>
+                <button type="button" data-dismiss="modal" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Delete Modal -->
+<div class="modal fade" id="bulkDelModal">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title text-danger">是否确认批量删除?</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="bulkDelUrl" value="">
+                <button type="button" data-dismiss="modal" class="btn btn-danger" id="bulkDelete">确认删除</button>
+                <button type="button" data-dismiss="modal" class="btn">取消</button>
+            </div>
+            <div class="modal-footer">
+                <p id="bulkDelError"></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modal_js %}
+<script>
+    $(document).ready(function () {
+        $('#uploadSubmit').on('click', function (e) {
+            e.preventDefault();
+            if ($("#uploadUrl").val() === '0') {
+                $('#uploadError').text("操作失败！！！上传文件类型不能为空");
+            } else if ($("#uploadFile").val() === "" || $('#uploadFile').val() === undefined || $('#uploadFile').val() === null) {
+                $('#uploadError').text("操作失败！！！上传文件不能为空");
+            } else {
+                // 构建FormData对象
+                let form_data = new FormData();
+                form_data.append('uploadFile', $('#uploadFile')[0].files[0]);
+                form_data.append('uploadUrl', $('#uploadUrl').val());
+                form_data.append('uploadOperator', "{{ user.username }}");
+                let urlUpload = "{% url 'ADVANCE:upload' %}";
+
+                $.ajax({
+                    async: true, url: urlUpload, processData: false,
+                    method: 'POST', data: form_data, dataType: 'json',
+                    contentType: false,
+                    success: function (data) {
+                        if (data.error_msg_fatal) {
+                            // alert('文件上传和批量添加失败。' + data['error_msg']);
+                            $('#uploadInfo').text("");
+                            $('#uploadError').text(data.error_msg_fatal);
+                        } else {
+                            let update_records = parseInt(data.all_records) - parseInt(data.add_records);
+                            /* alert('文件上传和批量添加成功，有效输入记录共有' + data.all_records +
+                                "行。\n其中往数据库中增加" + data.add_records + '行记录，更新了' +
+                               update_records + '行记录。'); */
+                            $('#uploadInfo').text('文件上传和批量添加成功，输入记录共有' + data.all_records +
+                                '行，有效的共有' + data.valid_records + "行。\n其中往数据库中增加" +
+                                data.add_records + '行记录，更新了' + update_records + '行记录。' + data.warning);
+                            $('#uploadError').text(data.error_msg_tolerant);
+                            /* $("#uploadModal").find('form').trigger("reset");
+                            $('#uploadModal').modal('hide');
+                            location.reload(); */
+                            setTimeout(
+                                function () {
+                                    window.location.reload(true);
+                                }, 30000
+                            );
+                        }
+                    }
+                });
+            }
+        });
+
+        $('#uploadReset').on('click', function (e) {
+            e.preventDefault();
+            $("#uploadFile").val("");
+            $('#uploadInfo').text("");
+            $('#uploadError').text("");
+        });
+
+    });
+</script>
+{% endblock %}

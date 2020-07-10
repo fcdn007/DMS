@@ -23,7 +23,6 @@ class UploadFile(models.Model):
         blank=True,
         null=True)
     uploadTime = models.DateTimeField(db_column='上传时间', auto_now=True)
-    index = models.AutoField(primary_key=True)
 
     def __str__(self):
         return self.uploadFile.url

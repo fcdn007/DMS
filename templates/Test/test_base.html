@@ -1,0 +1,550 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block page_css %}
+  <style>
+      /* fontawesome有些fas图标在谷歌/火狐浏览器无法显示，解决方法参见：
+            https://github.com/FortAwesome/Font-Awesome/issues/11946
+      */
+      .fa-low-vision:before {
+          content: "\f2a8";
+          font-weight: 900;
+      }
+
+      .fa-ban:before {
+          content: "\f05e";
+          font-weight: 900;
+      }
+
+      .fa-file-csv:before {
+          content: "\f6dd";
+          font-weight: 900;
+      }
+
+      .fa-file-excel:before {
+          content: "\f1c3";
+          font-weight: 900;
+      }
+
+      .fa-download:before {
+          content: "\f019";
+          font-weight: 900;
+      }
+
+      .fa-upload:before {
+          content: "\f093";
+          font-weight: 900;
+      }
+
+      .ui-autocomplete {
+          background-color: white;
+          width: 400px;
+          border: 1em;
+          padding: 30px;
+          z-index: 2147483647;
+        }
+  </style>
+{% endblock %}
+
+{% block card-title %}
+<h3 class="card-title" id="card-title1"></h3>
+{% endblock %}
+
+{% block modal_html %}
+<!-- NEW and EDIT Modal -->
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modal_title"></h4>
+            </div>
+            <div class="modal-body">
+                {% block ModalFormHeader %}
+
+                {% endblock %}
+                <form id="modelForm">
+                    {% csrf_token %}
+                    {% block ModalForm %}
+
+                    {% endblock %}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <p id="myModalError"></p>
+                <button type="button" class="btn btn-warning" id='myModalReset'>重置</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- upload Modal -->
+<div class="modal fade" id="uploadModal">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="uploadModal_title"> 上传文件进行批量添加</h4>
+            </div>
+            <div class="modal-body">
+                <form id="UploadForm" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="uploadUrl"> 数据表名称</label>
+                        <input type="text" class="form-control" id="uploadUrl" name="uploadUrl"
+                               placeholder="请输入数据表名称" required="true">
+                    </div>
+                    <div class="form-group" id="upload_file">
+                        <label for="uploadFile"> 上传文件</label>
+                        <input type="file" class="form-control" id="uploadFile" name="uploadFile"
+                               placeholder="请上传文件" required="true">
+                    </div>
+                    <button id='uploadSubmit' type="submit" class="btn btn-success btn-block">提交上传</button>
+                </form>
+                <br>
+                <dl>
+                    <dt class="text-primary front-weight-bold">上传结果信息：</dt>
+                    <dd id="uploadInfo" class="text-primary" style="white-space: pre-line"></dd>
+                    <dt class="text-danger front-weight-bold">报错信息：</dt>
+                    <dd id="uploadError" class="text-danger front-weight-bold" style="white-space: pre-line"></dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info downloadExcel">模板下载</button>
+                <button type="button" class="btn btn-warning" id='uploadReset'>重置</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="confirm">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title text-danger">是否确认删除?</h4>
+            </div>
+            <div class="modal-body">
+                <button type="button" data-dismiss="modal" class="btn btn-danger" id="delete">确认删除</button>
+                <button type="button" data-dismiss="modal" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Delete Modal -->
+<div class="modal fade" id="bulkDelModal">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title text-danger" id="bulkDelModalInfo"></h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="bulkDelUrl" value="">
+                <button type="button" data-dismiss="modal" class="btn btn-danger" id="bulkDelete">确认删除</button>
+                <button type="button" data-dismiss="modal" class="btn">取消</button>
+            </div>
+            <div class="modal-footer">
+                <p id="bulkDelError"></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modal_js %}
+<script>
+    function simple_delete_func(model0, url0, id0){
+        let res = delete_by_id_simple(url0, id0);
+        if (res[0] === "success") {
+            databaseRecordAjaxPut(model0, "单项删除", "id：" + res[1]);
+            window.location.reload(true);
+        } else {
+            console.log(res[1]);
+        }
+    }
+
+    function simple_bulkDelete_func(table, model0, url0){
+    let arrayLen = table.rows(".selected").data().length;
+    if (arrayLen > 0) {
+        let delete_id_list = [];
+        for (let i = 0; i < arrayLen; i++) {
+            let delete_id = table.rows(".selected").data()[i]['id'];
+            let res = delete_by_id_simple(url0, delete_id);
+            if (res[0] === "success") {
+                delete_id_list.push(res[1]);
+            }
+        }
+        databaseRecordAjaxPut(model0, "批量删除", "id_list：[" + delete_id_list + "]");
+        window.location.reload(true);
+    } else {
+        $('#bulkDelError').text('没有行被选中，请先选中目标行。');
+    }
+}
+
+    function single_page_generator(model0, url0, id0, button_bool1, button_bool2, input_params){
+        let dataModelForm; //更新弹窗默认值，重置按钮需要
+        let data0 = $.ajax({
+            url: url0, dataType: 'json', contentType: "application/json",
+            type: "get", async: false, data: {fields: "id"}
+        }).responseJSON;
+        $("#card-title1").text(input_params["title1_text"] + data0.length);
+
+        // 生成table的表头和table的columns变量
+        let table_columns = [];
+        let hide_col = [];
+        let modal_dict = {};
+        let new_modal_fields = [];
+        let edit_modal_fields = [];
+        let tmp_id = $("#table_header");
+        tmp_id.append("<th>索引</th>");
+        table_columns.push({
+            data: 'id', width: "1%",
+            // 若想前端显示的不一样，则需要"render"函数
+            'render': function (data, type, full, meta) {
+                return meta.row + 1 + meta.settings._iDisplayStart;
+            }
+        });
+        $.each(input_params.fields, function (i, v) {
+            tmp_id.append("<th>" + v[1] + "</th>");
+            table_columns.push({ "data": v[0] });
+
+            if (v[2] === 1){ // 出现在modal
+                let label_str = '<label for="' + v[0] + '"> ' + v[1] + '</label>';
+                edit_modal_fields.push(v[0]);
+                let input_str;
+                // 根据input类型生成input_str
+                if (v[5]==='select') {
+                    input_str = '<select type="text" class="form-control" id="' + v[0] + '" name="' + v[0] + '" ';
+                } else if (v[5]==='select_multiple'){
+                    input_str = '<select type="text" class="form-control" multiple="multiple" id="' + v[0] + '" name="' + v[0] + '" ';
+                } else if (v[5]==='text'){
+                    input_str = '<input type="text" class="form-control" id="' + v[0] + '" name="' + v[0] +
+                        '" placeholder="请输入' + v[1] + '，';
+                } else if (v[5]==='number_1'){
+                    input_str = '<input type="number" step="1" class="form-control" id="' + v[0] + '" name="' + v[0] +
+                        '" placeholder="请输入' + v[1] + '，';
+                } else if (v[5]==='number_0.001'){
+                    input_str = '<input type="number" step="0.001" class="form-control" id="' + v[0] + '" name="' + v[0] +
+                        '" placeholder="请输入' + v[1] + '，';
+                } else if (v[5]==='number_0.0001'){
+                    input_str = '<input type="number" step="0.0001" class="form-control" id="' + v[0] + '" name="' + v[0] +
+                        '" placeholder="请输入' + v[1] + '，';
+                } else if (v[5]==='date'){
+                    input_str = '<input type="date" class="form-control" id="' + v[0] + '" name="' + v[0] +
+                        '" placeholder="请输入' + v[1] + '，';
+                }
+                modal_dict[v[3]] = '<div class="form-group">';
+                if (v[4] === 1){
+                    // 如果必填，label前面增加*号
+                    modal_dict[v[3]] += '<span><a class="text-danger front-weight-bold">* </a>' + label_str + '</span>';
+                    if (v[5] === 'select' || v[5] === 'select_multiple') {
+                        input_str += 'required="true">';
+                        $.each(v[6], function (i2, v2) {
+                            if (i2===0){
+                                input_str += '<option value="' + v2[0] + '" selected="selected">' + v2[1] + '</option>';
+                            } else {
+                                input_str += '<option value="' + v2[0] + '">' + v2[1] + '</option>';
+                            }
+                        });
+                        input_str += '</select>';
+                    } else {
+                        new_modal_fields.push(v[0]);
+                        input_str += '，必填" required="true">';
+                    }
+                } else {
+                    modal_dict[v[3]] += label_str;
+                    if (v[5] === 'select') {
+                        input_str += '>';
+                        $.each(v[6], function (i2, v2) {
+                            if (i2===0){
+                                input_str += '<option value="' + v2[0] + '" selected="selected">' + v2[1] + '</option>';
+                            } else {
+                                input_str += '<option value="' + v2[0] + '">' + v2[1] + '</option>';
+                            }
+                        });
+                        input_str += '</select>';
+                    } else {
+                        input_str += '，默认：' + v[6] + '" value="' + v[6] + '">';
+                    }
+                }
+                modal_dict[v[3]] += input_str;
+                modal_dict[v[3]] += '</div>';
+            }
+        });
+        tmp_id.append("<th>操作</th>");
+        table_columns.push({
+            data: null,
+            "defaultContent": '<button type="button" class="btn btn-primary mt-1 mr-1">更新</button>' +
+                '<button type="button" class="btn btn-danger mt-1 ml-1">删除</button>'
+        });
+        if (table_columns.length > 7) {
+            hide_col = range(6, table_columns.length-1)
+        }
+
+        // 生成modal
+        tmp_id = $("#modelForm");
+        for (let i=0; i < Object.keys(modal_dict).length; i++){
+            tmp_id.append(modal_dict[i]);
+        }
+        tmp_id.append('<input type="hidden" id="type" name="type" value="">');
+        tmp_id.append('<button id="submit" type="submit" class="btn btn-success btn-block">OK</button>');
+        function MyModelInit(title_name, data) {
+            dataModelForm = data;
+            if (title_name === '更新') {
+                $.each(edit_modal_fields, function (i, v) {
+                    $('#'+v).val(data[v]);
+                });
+                $('#type').val('edit');
+                $('#modal_title').text('更新');
+            } else {
+                $.each(new_modal_fields, function (i, v) {
+                    $('#'+v).val("");
+                });
+                $('#type').val('new');
+                $('#modal_title').text('新增');
+            }
+        }
+
+        // 构建table
+        let bulk_buttons = [];
+        if (button_bool1===true) {
+            bulk_buttons.push({
+                text: '批量添加模板下载', attr: { id: 'downloadExcel' },
+                action: function ( e, dt, node, config ) {
+                    window.location.href = input_params["download_excel"];
+                },
+                className: 'btn btn-info fas fa-download my-1'
+            });
+            bulk_buttons.push({
+                text: '批量添加', attr: { id: 'upload' },
+                action: function ( e, dt, node, config ) {
+                    $('#uploadFile').val("");
+                    $('#uploadError').val("");
+                    $('#uploadUrl').val(model0);
+                    $("#uploadModal").modal();
+                },
+                className: 'btn btn-primary fas fa-upload my-1'
+
+            });
+        }
+        if (button_bool2===true) {
+            bulk_buttons.push({
+                text: '批量删除', attr: { id: 'bulkDel' },
+                action: function ( e, dt, node, config ) {
+                    $('#bulkDelModalInfo').text('是否确认批量删除?(' + $('span.select-info>span').text() + ')');
+                    $('#bulkDelUrl').val(model0);
+                    $("#bulkDelModal").modal();
+                },
+                className: 'btn btn-danger fas fa-trash-alt my-1'
+
+            });
+        }
+        let buttons_list = [
+            {
+                text: '指定显示列', extend: 'colvis',
+                className: 'btn btn-primary far fa-eye my-1 dropdown-toggle button_group1',
+                postfixButtons: [
+                    {
+                        extend: 'colvisGroup', text: '显示默认', hide: hide_col,
+                        className: 'dt-button buttons-columnVisibility'
+                    },
+                    {
+                        extend: 'colvisGroup', text: '显示全部', show: ':hidden',
+                        className: 'dt-button buttons-columnVisibility'
+
+                    }],
+                columnText: function (dt, idx, title) {
+                    return (idx + 1) + ': ' + title;
+                }
+            },
+            {
+                extend: 'selectNone', text: '取消当前选择',
+                className: 'btn btn-secondary fas fa-ban my-1',
+            },
+            {
+                extend: 'collection', text: '输出',
+                className: 'btn btn-primary far fa-save my-1 dropdown-toggle button_group2',
+                buttons: [
+                    {
+                        extend: 'copy', text: '所选复制到剪切板',
+                        className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-copy my-1',
+                        exportOptions: { columns: range(table_columns.length-1) }
+                    },
+                    {
+                        extend: 'csv', text: '所选输出到csv',
+                        className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-csv my-1',
+                        exportOptions: { columns: range(table_columns.length-1) }
+                    },
+                    {
+                        extend: 'csv', text: '全部输出到csv',
+                        className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-excel my-1',
+                        exportOptions: { columns: range(table_columns.length-1), selected: null }
+                    }
+                ]
+            },
+            {
+                text: '添加单行', className: 'btn btn-primary fas fa-edit my-1',
+                attr: { id: 'new' }
+            },
+            {
+                extend: 'collection', text: '批量操作', buttons: bulk_buttons,
+                className: 'btn btn-warning fas fa-wrench my-1 dropdown-toggle button_group3'
+            }
+        ];
+        let table = $('#table').DataTable({
+            "paging": true, "ordering": true,
+            "info": true, "autoWidth": false,
+            "responsive": false, "pagingType": "full_numbers",
+            "language": {
+                "lengthMenu": "选择每页 _MENU_ 展示 ",
+                "zeroRecords": "未找到匹配结果--抱歉",
+                "info": "当前显示第 _PAGE_ 页结果，共 _PAGES_ 页",
+                "infoEmpty": "没有数据",
+                "search": "搜索",
+                "infoFiltered": "(获取 _MAX_ 项结果)",
+                "paginate": {
+                    "first": "首页", "previous": "上一页",
+                    "next": "下一页", "last": "末页"
+                },
+                "select": {
+                    "rows": "%d行已选"
+                }
+            },
+            "scrollY": "500px", "scrollCollapse": true,
+            "scrollX": true, "fixedColumns": true,
+            "rowReorder": true, "colReorder": true,
+            "searching": true, "select": true,
+            "fixedHeader": true, "lengthChange": true,
+            "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]],
+            "serverSide": true, "processing": true,
+            "deferRender": true, "dom": 'rBlftip',
+            "buttons": buttons_list, "ajax": url0 + "?format=datatables",
+            "columns": table_columns, "columnDefs": [ {"targets": hide_col, "visible": false}]
+        });
+        $('#table tbody').on( 'click', 'tr', function () {
+            $(this).toggleClass('selected');
+        });
+        if (input_params["action_afterTableInit"] !== undefined){
+            input_params["action_afterTableInit"](table);
+        }
+
+        // 调用modal
+        $('#table tbody').on('click', 'button', function () {
+            let data = table.row($(this).parents('tr')).data();
+            let class_name = $(this).attr('class');
+            id0 = data['id'];
+            console.info("click button, id:", id0)
+            //alert(id);
+            if (class_name.split(" ")[1] === 'btn-primary') {
+                // EDIT button
+                MyModelInit('更新', data);
+                $("#myModal").modal();
+            } else {
+                // DELETE button
+                // alert('delete '+id);
+                // $('#modal_title').text('DELETE');
+                $("#confirm").modal();
+            }
+        });
+        $('#modelForm').on('submit', function (e) {
+            e.preventDefault();
+            input_params["update_func"](e);
+        });
+        $('#confirm').on('click', '#delete', function (e) {
+            input_params["delete_func"](model0, url0, id0);
+        });
+        $('#new').on('click', function (e) {
+            e.preventDefault();
+            MyModelInit('新增', {});
+            if (input_params["ModalFormHeader_p"] !== undefined){
+                $('#ModalFormHeader').text(input_params["ModalFormHeader_p"]);
+            }
+            $("#myModal").modal();
+        });
+        $('#bulkDelModal').on('click', '#bulkDelete', function (e) {
+            e.preventDefault();
+            input_params["bulkDelete_func"](table, model0, url0);
+        });
+        $('#myModalReset').on('click', function (e) {
+            e.preventDefault();
+            if ($('#modal_title').text() === '更新') {
+                MyModelInit('更新', dataModelForm);
+            } else {
+                MyModelInit('新增', {});
+            }
+        });
+        $("#modelForm input[type='text']").focus(function () {
+            let key2 = $(this).attr('id');
+            let values = $.ajax({
+                url: "{% url 'ADVANCE:unique' %}", data: { model: model0, filed: key2 },
+                dataType: 'json', contentType: "application/json",
+                method: "GET", async: false
+            }).responseJSON.values;
+            console.info("values:", values, "; key2:", key2);
+            input_autocomplete(values, '#' + key2);
+        });
+    }
+
+    $(document).ready(function () {
+        $('#uploadSubmit').on('click', function (e) {
+            e.preventDefault();
+            if ($("#uploadUrl").val() === '0') {
+                $('#uploadError').text("操作失败！！！上传文件类型不能为空");
+            } else if ($("#uploadFile").val() === "" || $('#uploadFile').val() === undefined || $('#uploadFile').val() === null) {
+                $('#uploadError').text("操作失败！！！上传文件不能为空");
+            } else {
+                // 构建FormData对象
+                let form_data = new FormData();
+                form_data.append('uploadFile', $('#uploadFile')[0].files[0]);
+                form_data.append('uploadUrl', $('#uploadUrl').val());
+                form_data.append('uploadOperator', "{{ user.username }}");
+                let urlUpload = "{% url 'ADVANCE:upload' %}";
+
+                $.ajax({
+                    async: true, url: urlUpload, processData: false,
+                    method: 'POST', data: form_data, dataType: 'json',
+                    contentType: false,
+                    success: function (data) {
+                        if (data.error_msg_fatal) {
+                            // alert('文件上传和批量添加失败。' + data['error_msg']);
+                            $('#uploadInfo').text("");
+                            $('#uploadError').text(data.error_msg_fatal);
+                        } else {
+                            let update_records = parseInt(data.all_records) - parseInt(data.add_records);
+                            /* alert('文件上传和批量添加成功，有效输入记录共有' + data.all_records +
+                                "行。\n其中往数据库中增加" + data.add_records + '行记录，更新了' +
+                               update_records + '行记录。'); */
+                            $('#uploadInfo').text('文件上传和批量添加成功，输入记录共有' + data.all_records +
+                                '行，有效的共有' + data.valid_records + "行。\n其中往数据库中增加" +
+                                data.add_records + '行记录，更新了' + update_records + '行记录。' + data.warning);
+                            $('#uploadError').text(data.error_msg_tolerant);
+                            /* $("#uploadModal").find('form').trigger("reset");
+                            $('#uploadModal').modal('hide');
+                            location.reload(); */
+                            setTimeout(
+                                function () {
+                                    window.location.reload(true);
+                                }, 30000
+                            );
+                        }
+                    }
+                });
+            }
+        });
+
+        $('#uploadReset').on('click', function (e) {
+            e.preventDefault();
+            $("#uploadFile").val("");
+            $('#uploadInfo').text("");
+            $('#uploadError').text("");
+        });
+
+    });
+</script>
+{% endblock %}
+

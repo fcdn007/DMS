@@ -17,16 +17,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 
 from BIS.views import SampleInventoryInfoViewSet, SampleInfoViewSet, ExtractInfoViewSet, DNAUsageRecordInfoViewSet
-from EMR.views import ClinicalInfoViewSet, FollowupInfoViewSet, LiverPathologicalInfoViewSet, LiverTMDInfoViewSet
-from EMR.views import LiverBiochemInfoViewSet
+from EMR.views import BiochemInfoViewSet
+from EMR.views import ClinicalInfoViewSet, FollowupInfoViewSet, LiverPathologicalInfoViewSet, TMDInfoViewSet
 from LIMS.views import MethyLibraryInfoViewSet, MethyCaptureInfoViewSet, MethyPoolingInfoViewSet
 from SEQ.views import SequencingInfoViewSet, MethyQCInfoViewSet
 from USER.views import UserInfoViewSet, DatabaseRecordViewSet
-from .views import HomeV
+from .views import HomeV, TestV
 
 router = DefaultRouter()
 router.register(r'BIS/SampleInventoryInfo', SampleInventoryInfoViewSet)
@@ -36,8 +36,8 @@ router.register(r'BIS/DNAUsageRecordInfo', DNAUsageRecordInfoViewSet)
 router.register(r'EMR/ClinicalInfo', ClinicalInfoViewSet)
 router.register(r'EMR/FollowupInfo', FollowupInfoViewSet)
 router.register(r'EMR/Pathology/LiverPathologicalInfo', LiverPathologicalInfoViewSet)
-router.register(r'EMR/Test/LiverTMDInfo', LiverTMDInfoViewSet)
-router.register(r'EMR/Test/LiverBiochemInfo', LiverBiochemInfoViewSet)
+router.register(r'EMR/Test/TMDInfo', TMDInfoViewSet)
+router.register(r'EMR/Test/BiochemInfo', BiochemInfoViewSet)
 router.register(r'LIMS/Methy/MethyLibraryInfo', MethyLibraryInfoViewSet)
 router.register(r'LIMS/Methy/MethyCaptureInfo', MethyCaptureInfoViewSet)
 router.register(r'LIMS/Methy/MethyPoolingInfo', MethyPoolingInfoViewSet)
@@ -59,6 +59,7 @@ urlpatterns = [
     path('ADVANCE/', include('ADVANCE.urls', namespace='ADVANCE')),
     # for rest_framework
     path('api/', include(router.urls)),
+    re_path(r'Test/(?P<id>.*)/$', TestV, name='Test'),
 ]
 
 if settings.DEBUG:

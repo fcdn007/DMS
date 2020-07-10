@@ -1,4 +1,16 @@
 {% extends "../single_page.html" %}
+{% load static %}
+
+{% block specific_page_css %}
+<style>
+	body button.button_group1+div+div {
+      width: 700px;
+      margin-top: 7px;
+      margin-left: 1em;
+      z-index: 1000;
+    }
+</style>
+{% endblock %}
 
 {% block title %}
 <title>分析结果管理 QC信息 甲基化检测</title>
@@ -17,600 +29,36 @@
 {% block card-body %}
 <table id="table" class="table table-bordered table-hover dt-responsive">
 <thead>
-<tr>
-	<th>索引</th>
-    <th>Sample</th>
-    <th>Data_Size(Gb)</th>
-    <th>Clean_Rate(%)</th>
-    <th>R1_Q20</th>
-    <th>R2_Q20</th>
-    <th>R1_Q30</th>
-    <th>R2_Q30</th>
-    <th>GC_Content</th>
-    <th>BS_conversion_rate(lambda_DNA)</th>
-    <th>BS_conversion_rate(CHH)</th>
-    <th>BS_conversion_rate(CHG)</th>
-    <th>Uniquely_Paired_Mapping_Rate</th>
-    <th>Mismatch_and_InDel_Rate</th>
-    <th>Mode_Fragment_Length(bp)</th>
-    <th>Genome_Duplication_Rate</th>
-    <th>Genome_Depth(X)</th>
-    <th>Genome_Dedupped_Depth(X)</th>
-    <th>Genome_Coverage</th>
-    <th>Genome_4X_CpG_Depth(X)</th>
-    <th>Genome_4X_CpG_Coverage</th>
-    <th>Genome_4X_CpG_methylation_level</th>
-    <th>Panel_4X_CpG_Depth(X)</th>
-    <th>Panel_4X_CpG_Coverage</th>
-    <th>Panel_4X_CpG_methylation_level</th>
-    <th>Panel_Ontarget_Rate(region)</th>
-    <th>Panel_Duplication_Rate(region)</th>
-    <th>Panel_Depth(site,X)</th>
-    <th>Panel_Dedupped_Depth(site,X)</th>
-    <th>Panel_Coverage(site,1X)</th>
-    <th>Panel_Coverage(site,10X)</th>
-    <th>Panel_Coverage(site,20X)</th>
-    <th>Panel_Coverage(site,50X)</th>
-    <th>Panel_Coverage(site,100X)</th>
-    <th>Panel_Uniformity(site,>20%mean)</th>
-    <th>Strand_balance(F)</th>
-    <th>Strand_balance(R)</th>
-    <th>GC_bin_depth_ratio</th>
-    <th>患者编号</th>
-    <th>样本编号</th>
-    <th>核酸提取编号</th>
-    <th>建库编号</th>
-    <th>捕获文库名</th>
-    <th>测序文库编号</th>
-    <th>上机文库号</th>
-    <th>备注</th>
-    <th>上次修改时间</th>
-    <th>创建时间</th>
-    <th>操作</th>
+<tr id="table_header">
+
 </tr>
 </thead>
 </table>
 {% endblock %}
 
-{% block ModalForm %}
-    <div class="form-group">
-        <span><a class="text-danger front-weight-bold">* </a>
-            <label for="singleLB_Pooling_id"> 测序文库编号</label></span>
-        <input type="text" class="form-control" id="singleLB_Pooling_id" name="singleLB_Pooling_id"
-               placeholder="请输入测序文库编号" required="true">
-    </div>
-    <div class="form-group">
-        <span><a class="text-danger front-weight-bold">* </a>
-            <label for="sequencing_id"> 上机文库号</label></span>
-        <input type="text" class="form-control" id="sequencing_id" name="sequencing_id"
-               placeholder="请输入上机文库号" required="true">
-    </div>
-    <div class="form-group">
-        <span><a class="text-danger front-weight-bold">* </a>
-            <label for="QC_id"> Sample</label></span>
-        <input type="text" class="form-control" id="QC_id" name="QC_id"
-               placeholder="请输入Sample" required="true">
-    </div>
-    <div class="form-group">
-        <label for="data_size_gb_field"> Data_Size(Gb)</label>
-        <input type="number" step="0.01" class="form-control" id="data_size_gb_field" name="data_size_gb_field"
-               placeholder="请输入Data_Size(Gb)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="clean_rate_field"> Clean_Rate(%)</label>
-        <input type="number" step="0.0001" class="form-control" id="clean_rate_field" name="clean_rate_field"
-               placeholder="请输入Clean_Rate(%)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="r1_q20"> R1_Q20</label>
-        <input type="number" step="0.0001" class="form-control" id="r1_q20" name="r1_q20"
-               placeholder="请输入R1_Q20，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="r2_q20"> R2_Q20</label>
-        <input type="number" step="0.0001" class="form-control" id="r2_q20" name="r2_q20"
-               placeholder="请输入R2_Q20，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="r1_q30"> R1_Q30</label>
-        <input type="number" step="0.0001" class="form-control" id="r1_q30" name="r1_q30"
-               placeholder="请输入R1_Q30，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="r2_q30"> R2_Q30</label>
-        <input type="number" step="0.0001" class="form-control" id="r2_q30" name="r2_q30"
-               placeholder="请输入R2_Q30，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="gc_content"> GC_Content</label>
-        <input type="number" step="0.0001" class="form-control" id="gc_content" name="gc_content"
-               placeholder="请输入GC_Content，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="bs_conversion_rate_lambda_dna_field"> BS_conversion_rate(lambda_DNA)</label>
-        <input type="number" step="0.0001" class="form-control" id="bs_conversion_rate_lambda_dna_field"
-               name="bs_conversion_rate_lambda_dna_field"
-               placeholder="请输入BS_conversion_rate(lambda_DNA)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="bs_conversion_rate_chh_field"> BS_conversion_rate(CHH)</label>
-        <input type="number" step="0.0001" class="form-control" id="bs_conversion_rate_chh_field"
-               name="bs_conversion_rate_chh_field"
-               placeholder="请输入BS_conversion_rate(CHH)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="bs_conversion_rate_chg_field"> BS_conversion_rate(CHG)</label>
-        <input type="number" step="0.0001" class="form-control" id="bs_conversion_rate_chg_field"
-               name="bs_conversion_rate_chg_field"
-               placeholder="请输入BS_conversion_rate(CHG)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="uniquely_paired_mapping_rate"> Uniquely_Paired_Mapping_Rate</label>
-        <input type="number" step="0.0001" class="form-control" id="uniquely_paired_mapping_rate"
-               name="uniquely_paired_mapping_rate"
-               placeholder="请输入Uniquely_Paired_Mapping_Rate，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="mismatch_and_indel_rate"> Mismatch_and_InDel_Rate</label>
-        <input type="number" step="0.0001" class="form-control" id="mismatch_and_indel_rate"
-               name="mismatch_and_indel_rate"
-               placeholder="请输入Mismatch_and_InDel_Rate，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="mode_fragment_length_bp_field"> Mode_Fragment_Length(bp)</label>
-        <input type="number" class="form-control" id="mode_fragment_length_bp_field"
-               name="mode_fragment_length_bp_field"
-               placeholder="请输入Mode_Fragment_Length(bp)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="genome_duplication_rate"> Genome_Duplication_Rate</label>
-        <input type="number" step="0.0001" class="form-control" id="genome_duplication_rate"
-               name="genome_duplication_rate"
-               placeholder="请输入Genome_Duplication_Rate，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="genome_depth_x_field"> Genome_Depth(X)</label>
-        <input type="number" step="0.01" class="form-control" id="genome_depth_x_field" name="genome_depth_x_field"
-               placeholder="请输入Genome_Depth(X)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="genome_dedupped_depth_x_field"> Genome_Dedupped_Depth(X)</label>
-        <input type="number" step="0.01" class="form-control" id="genome_dedupped_depth_x_field"
-               name="genome_dedupped_depth_x_field"
-               placeholder="请输入Genome_Dedupped_Depth(X)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="genome_coverage"> Genome_Coverage</label>
-        <input type="number" step="0.0001" class="form-control" id="genome_coverage" name="genome_coverage"
-               placeholder="请输入Genome_Coverage，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="genome_4x_cpg_depth_x_field"> Genome_4X_CpG_Depth(X)</label>
-        <input type="number" step="0.01" class="form-control" id="genome_4x_cpg_depth_x_field"
-               name="genome_4x_cpg_depth_x_field" placeholder="请输入Genome_4X_CpG_Depth(X)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="genome_4x_cpg_coverage"> Genome_4X_CpG_Coverage</label>
-        <input type="number" step="0.0001" class="form-control" id="genome_4x_cpg_coverage"
-               name="genome_4x_cpg_coverage" placeholder="请输入Genome_4X_CpG_Coverage，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="genome_4x_cpg_methylation_level"> Genome_4X_CpG_methylation_level</label>
-        <input type="number" step="0.0001" class="form-control" id="genome_4x_cpg_methylation_level"
-               name="genome_4x_cpg_methylation_level"
-               placeholder="请输入Genome_4X_CpG_methylation_level，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_4x_cpg_depth_x_field"> Panel_4X_CpG_Depth(X)</label>
-        <input type="number" step="0.01" class="form-control" id="panel_4x_cpg_depth_x_field"
-               name="panel_4x_cpg_depth_x_field" placeholder="请输入Panel_4X_CpG_Depth(X)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_4x_cpg_coverage"> Panel_4X_CpG_Coverage</label>
-        <input type="number" step="0.0001" class="form-control" id="panel_4x_cpg_coverage" name="panel_4x_cpg_coverage"
-               placeholder="请输入Panel_4X_CpG_Coverage，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_4x_cpg_methylation_level"> Panel_4X_CpG_methylation_level</label>
-        <input type="number" step="0.0001" class="form-control" id="panel_4x_cpg_methylation_level"
-               name="panel_4x_cpg_methylation_level" placeholder="请输入Panel_4X_CpG_methylation_level，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_ontarget_rate_region_field"> Panel_Ontarget_Rate(region)</label>
-        <input type="number" step="0.0001" class="form-control" id="panel_ontarget_rate_region_field"
-               name="panel_ontarget_rate_region_field" placeholder="请输入Panel_Ontarget_Rate(region)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_duplication_rate_region_field"> Panel_Duplication_Rate(region)</label>
-        <input type="number" step="0.0001" class="form-control" id="panel_duplication_rate_region_field"
-               name="panel_duplication_rate_region_field"
-               placeholder="请输入Panel_Duplication_Rate(region)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_depth_site_x_field"> Panel_Depth(site,X)</label>
-        <input type="number" step="0.01" class="form-control" id="panel_depth_site_x_field"
-               name="panel_depth_site_x_field"
-               placeholder="请输入Panel_Depth(site,X)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_dedupped_depth_site_x_field"> Panel_Dedupped_Depth(site,X)</label>
-        <input type="number" step="0.01" class="form-control" id="panel_dedupped_depth_site_x_field"
-               name="panel_dedupped_depth_site_x_field"
-               placeholder="请输入Panel_Dedupped_Depth(site,X)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_coverage_site_1x_field"> Panel_Coverage(site,1X)</label>
-        <input type="number" step="0.0001" class="form-control" id="panel_coverage_site_1x_field"
-               name="panel_coverage_site_1x_field"
-               placeholder="请输入Panel_Coverage(site,1X)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_coverage_site_10x_field"> Panel_Coverage(site,10X)</label>
-        <input type="number" step="0.0001" class="form-control" id="panel_coverage_site_10x_field"
-               name="panel_coverage_site_10x_field"
-               placeholder="请输入Panel_Coverage(site,10X)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_coverage_site_20x_field"> Panel_Coverage(site,20X)</label>
-        <input type="number" step="0.0001" class="form-control" id="panel_coverage_site_20x_field"
-               name="panel_coverage_site_20x_field"
-               placeholder="请输入Panel_Coverage(site,20X)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_coverage_site_50x_field"> Panel_Coverage(site,50X)</label>
-        <input type="number" step="0.0001" class="form-control" id="panel_coverage_site_50x_field"
-               name="panel_coverage_site_50x_field"
-               placeholder="请输入Panel_Coverage(site,50X)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_coverage_site_100x_field"> Panel_Coverage(site,100X)</label>
-        <input type="number" step="0.0001" class="form-control" id="panel_coverage_site_100x_field"
-               name="panel_coverage_site_100x_field"
-               placeholder="请输入Panel_Coverage(site,100X)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="panel_uniformity_site_20_mean_field"> Panel_Uniformity(site,>20%mean)</label>
-        <input type="number" step="0.0001" class="form-control" id="panel_uniformity_site_20_mean_field"
-               name="panel_uniformity_site_20_mean_field"
-               placeholder="请输入Panel_Uniformity(site,>20%mean)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="strand_balance_f_field"> Strand_balance(F)</label>
-        <input type="number" step="0.0001" class="form-control" id="strand_balance_f_field"
-               name="strand_balance_f_field"
-               placeholder="请输入Strand_balance(F)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="strand_balance_r_field"> Strand_balance(R)</label>
-        <input type="number" step="0.0001" class="form-control" id="strand_balance_r_field"
-               name="strand_balance_r_field"
-               placeholder="请输入Strand_balance(R)，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="gc_bin_depth_ratio"> GC_bin_depth_ratio</label>
-        <input type="number" step="0.0001" class="form-control" id="gc_bin_depth_ratio" name="gc_bin_depth_ratio"
-               placeholder="请输入GC_bin_depth_ratio，默认：0" value="0">
-    </div>
-    <div class="form-group">
-        <label for="memo"> 备注</label>
-        <input type="text" class="form-control" id="memo" name="memo"
-               placeholder="请输入备注，默认：无" value="无">
-    </div>
-{% endblock %}
-
 {% block page-script %}
 <script>
-    $(document).ready(function () {
-		$("#sidebar_SEQ>a").addClass("active");
-		$("#sidebar_SEQ").addClass("menu-open");
-		$("#sidebar_SEQ>ul>li:eq(1)>a").addClass("active");
-        $("#sidebar_SEQ>ul>li:eq(1)").addClass("menu-open");
-        $("#sidebar_SEQ>ul>li:eq(1)>ul>li:eq(0)>a").addClass("active");
-        $(".sidebar").removeAttr("hidden");
+  $(document).ready(function () {
+      $("#sidebar_SEQ>a").addClass("active");
+	  $("#sidebar_SEQ").addClass("menu-open");
+	  $("#sidebar_SEQ>ul>li:eq(1)>a").addClass("active");
+	  $("#sidebar_SEQ>ul>li:eq(1)>ul>li:eq(0)>a").addClass("active");
+	  $(".sidebar").removeAttr("hidden");
 
-		let model0 = "MethyQCInfo";
-		let url0 = '/api/SEQ/QC/' + model0 + '/';
-		let url1 = '/api/LIMS/Methy/MethyPoolingInfo/';
-		let url2 = '/api/SEQ/SequencingInfo/';
-		let id0 = 0;
-		let dataModelForm; //更新弹窗默认值，重置按钮需要
+	  let model0 = "MethyQCInfo";
+	  let url0 = '/api/SEQ/QC/' + model0 + '/';
+	  let url1 = '/api/LIMS/Methy/MethyPoolingInfo/';
+	  let url2 = '/api/SEQ/SequencingInfo/';
+	  let id0 = 0;
+      let bulk_update_bool = {% if perms.BIS.bulk_update_MethyQCInfo %} true {% else %} false {% endif %};
+      let bulk_delete_bool = {% if perms.BIS.bulk_delete_MethyQCInfo %} true {% else %} false {% endif %};
 
-        let data0 = $.ajax({
-			url: url0, dataType: 'json', contentType: "application/json",
-			type: "get", async: false, data: {fields: "index"}
-		}).responseJSON;
-		$("#card-title1").text("分析结果管理 QC信息 甲基化检测 总条目数：" + data0.length);
-
-		function MyModelInit(title_name, data) {
-            dataModelForm = data;
-            if (title_name === '更新') {
-                $('#QC_id').val(data['QC_id']);
-                $('#data_size_gb_field').val(data['data_size_gb_field']);
-                $('#clean_rate_field').val(data['clean_rate_field']);
-                $('#r1_q20').val(data['r1_q20']);
-                $('#r2_q20').val(data['r2_q20']);
-                $('#r1_q30').val(data['r1_q30']);
-                $('#r2_q30').val(data['r2_q30']);
-                $('#gc_content').val(data['gc_content']);
-                $('#bs_conversion_rate_lambda_dna_field').val(data['bs_conversion_rate_lambda_dna_field']);
-                $('#bs_conversion_rate_chh_field').val(data['bs_conversion_rate_chh_field']);
-                $('#bs_conversion_rate_chg_field').val(data['bs_conversion_rate_chg_field']);
-                $('#uniquely_paired_mapping_rate').val(data['uniquely_paired_mapping_rate']);
-                $('#mismatch_and_indel_rate').val(data['mismatch_and_indel_rate']);
-                $('#mode_fragment_length_bp_field').val(data['mode_fragment_length_bp_field']);
-                $('#genome_duplication_rate').val(data['genome_duplication_rate']);
-                $('#genome_depth_x_field').val(data['genome_depth_x_field']);
-                $('#genome_dedupped_depth_x_field').val(data['genome_dedupped_depth_x_field']);
-                $('#genome_coverage').val(data['genome_coverage']);
-                $('#genome_4x_cpg_depth_x_field').val(data['genome_4x_cpg_depth_x_field']);
-                $('#genome_4x_cpg_coverage').val(data['genome_4x_cpg_coverage']);
-                $('#genome_4x_cpg_methylation_level').val(data['genome_4x_cpg_methylation_level']);
-                $('#panel_4x_cpg_depth_x_field').val(data['panel_4x_cpg_depth_x_field']);
-                $('#panel_4x_cpg_coverage').val(data['panel_4x_cpg_coverage']);
-                $('#panel_4x_cpg_methylation_level').val(data['panel_4x_cpg_methylation_level']);
-                $('#panel_ontarget_rate_region_field').val(data['panel_ontarget_rate_region_field']);
-                $('#panel_duplication_rate_region_field').val(data['panel_duplication_rate_region_field']);
-                $('#panel_depth_site_x_field').val(data['panel_depth_site_x_field']);
-                $('#panel_dedupped_depth_site_x_field').val(data['panel_dedupped_depth_site_x_field']);
-                $('#panel_coverage_site_1x_field').val(data['panel_coverage_site_1x_field']);
-                $('#panel_coverage_site_10x_field').val(data['panel_coverage_site_10x_field']);
-                $('#panel_coverage_site_20x_field').val(data['panel_coverage_site_20x_field']);
-                $('#panel_coverage_site_50x_field').val(data['panel_coverage_site_50x_field']);
-                $('#panel_coverage_site_100x_field').val(data['panel_coverage_site_100x_field']);
-                $('#panel_uniformity_site_20_mean_field').val(data['panel_uniformity_site_20_mean_field']);
-                $('#strand_balance_f_field').val(data['strand_balance_f_field']);
-                $('#strand_balance_r_field').val(data['strand_balance_r_field']);
-                $('#gc_bin_depth_ratio').val(data['gc_bin_depth_ratio']);
-                $('#singleLB_Pooling_id').val(data['singleLB_Pooling_id']);
-                $('#sequencing_id').append(data['sequencing_id']);
-                $('#memo').val(data['memo']);
-                $('#type').val('edit');
-                $('#modal_title').text('更新');
-            } else {
-                $('#QC_id').val("");
-                $('#singleLB_Pooling_id').val("");
-                $('#sequencing_id').val("");
-                $('#type').val('new');
-                $('#modal_title').text('新增');
-            }
-        }
-
-        let table = $('#table').DataTable({
-		  "paging": true,
-		  "ordering": true,
-		  "info": true,
-		  "autoWidth": false,
-		  "responsive": true,
-		  "language": {
-					"lengthMenu": "选择每页 _MENU_ 展示 ",
-					"zeroRecords": "未找到匹配结果--抱歉",
-					"info": "当前显示第 _PAGE_ 页结果，共 _PAGES_ 页",
-					"infoEmpty": "没有数据",
-					"search": "搜索",
-					"infoFiltered": "(获取 _MAX_ 项结果)",
-					"paginate": {
-						"first": "首页",
-						"previous": "上一页",
-						"next": "下一页",
-						"last": "末页"
-					}
-				},
-		  "scrollY": "500px",
-		  "scrollCollapse": true,
-		  "scrollX": true,
-		  "pagingType": "full_numbers",
-		  //"fixedColumns": true,
-		  "rowReorder": true,
-		  "colReorder": true,
-		  "searching": true,
-		  "select": true,
-		  "fixedHeader": true,
-		  "lengthChange": true,
-		  "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]],
-		  "serverSide": true,
-		  "processing": true,
-		  "deferRender": true,
-		  "dom": 'rilB<"clear">ftp',
-		  "buttons": [
-			  /*
-			  {
-				extend: 'pageLength',
-				text: '显示行数'
-			  },
-			  */
-			  {
-				  extend: 'colvisGroup',
-				  text: '显示前5列',
-				  className: 'btn btn-info fas fa-low-vision my-1',
-				  show: [0, 1, 2, 3, 4, 5, 48],
-                  hide: [
-                    6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-                    17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
-                    27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-                    37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47
-                  ]
-			  },
-			  {
-				  extend: 'colvisGroup',
-				  text: '显示全部列',
-				  className: 'btn btn-info far fa-eye my-1',
-				  show: ':hidden',
-			  },
-			  {
-				  extend: 'selectAll',
-				  className: 'btn btn-primary fab fa-autoprefixer my-1',
-				  text: '全选'
-			  },
-			  {
-				  extend: 'selectRows',
-				  className: 'btn btn-primary far fa-check-circle my-1',
-				  text: '选择多行'
-			  },
-			  {
-				  extend: 'selectNone',
-				  className: 'btn btn-primary fas fa-ban my-1',
-				  text: '取消当前选择'
-			  },
-              {
-                  extend: 'copy',
-                  text: '所选复制到剪切板',
-                  className: 'btn btn-success fas fa-copy my-1',
-                  exportOptions: {
-                      columns: range(48)
-                  }
-              },
-              {
-                  extend: 'csv',
-                  text: '所选输出到csv',
-                  className: 'btn btn-success fas fa-file-csv my-1',
-                  exportOptions: {
-                      columns: range(48)
-                  }
-              },
-              {
-                  extend: 'csv',
-                  text: '全部输出到csv',
-                  className: 'btn btn-success fas fa-file-excel my-1',
-                  exportOptions: {
-                      columns: range(48),
-                      selected: null
-                  }
-              },
-              {
-                  text: '添加单行',
-                  className: 'btn btn-warning fas fa-edit my-1',
-                  action: function (e, dt, node, config) {
-
-				  },
-				  attr: {
-					  id: 'new'
-				  }
-			  },
-            {% if perms.SEQ.bulk_update_MethyQCInfo %}
-			  {
-				  text: '批量添加模板下载',
-				  className: 'btn btn-success fas fa-download my-1',
-				  action: function ( e, dt, node, config ) {
-
-				  },
-				  attr: {
-					  id: 'downloadExcel'
-				  }
-			  },
-			  {
-				  text: '批量添加',
-				  className: 'btn btn-warning fas fa-upload my-1',
-				  action: function ( e, dt, node, config ) {
-
-				  },
-				  attr: {
-					  id: 'upload'
-				  }
-			  },
-            {% endif %}
-            {% if perms.SEQ.bulk_delete_MethyQCInfo %}
-			  {
-				  text: '批量删除',
-				  className: 'btn btn-danger fas fa-trash-alt my-1',
-				  action: function ( e, dt, node, config ) {
-
-				  },
-				  attr: {
-					  id: 'bulkDel'
-				  }
-			  },
-            {% endif %}
-		  ],
-		  "ajax": url0 + "?format=datatables",
-		  "columns": [
-			  {
-				  data: 'index',
-				  width: "1%",
-				  // 若想前端显示的不一样，则需要"render"函数
-				  'render': function (data, type, full, meta) {
-					  return meta.row + 1 + meta.settings._iDisplayStart;
-				  }
-			  },
-			  {"data": "QC_id"},
-            {"data": "data_size_gb_field"},
-            {"data": "clean_rate_field"},
-            {"data": "r1_q20"},
-            {"data": "r2_q20"},
-            {"data": "r1_q30"},
-            {"data": "r2_q30"},
-            {"data": "gc_content"},
-            {"data": "bs_conversion_rate_lambda_dna_field"},
-            {"data": "bs_conversion_rate_chh_field"},
-            {"data": "bs_conversion_rate_chg_field"},
-            {"data": "uniquely_paired_mapping_rate"},
-            {"data": "mismatch_and_indel_rate"},
-            {"data": "mode_fragment_length_bp_field"},
-            {"data": "genome_duplication_rate"},
-            {"data": "genome_depth_x_field"},
-            {"data": "genome_dedupped_depth_x_field"},
-            {"data": "genome_coverage"},
-            {"data": "genome_4x_cpg_depth_x_field"},
-            {"data": "genome_4x_cpg_coverage"},
-            {"data": "genome_4x_cpg_methylation_level"},
-            {"data": "panel_4x_cpg_depth_x_field"},
-            {"data": "panel_4x_cpg_coverage"},
-            {"data": "panel_4x_cpg_methylation_level"},
-            {"data": "panel_ontarget_rate_region_field"},
-            {"data": "panel_duplication_rate_region_field"},
-            {"data": "panel_depth_site_x_field"},
-            {"data": "panel_dedupped_depth_site_x_field"},
-            {"data": "panel_coverage_site_1x_field"},
-            {"data": "panel_coverage_site_10x_field"},
-            {"data": "panel_coverage_site_20x_field"},
-            {"data": "panel_coverage_site_50x_field"},
-            {"data": "panel_coverage_site_100x_field"},
-            {"data": "panel_uniformity_site_20_mean_field"},
-            {"data": "strand_balance_f_field"},
-            {"data": "strand_balance_r_field"},
-            {"data": "gc_bin_depth_ratio"},
-            {"data": "sampler_id", "name": "sampler_id__sampler_id"},
-            {"data": "sample_id", "name": "sample_id__sample_id"},
-            {"data": "dna_id", "name": "dna_id__dna_id"},
-            {"data": "singleLB_id", "name": "singleLB_id__singleLB_id"},
-            {"data": "poolingLB_id", "name": "poolingLB_id__poolingLB_id"},
-            {"data": "singleLB_Pooling_id", "name": "singleLB_Pooling_id__singleLB_Pooling_id"},
-            {"data": "sequencing_id", "name": "sequencing_id__sequencing_id"},
-            {"data": "memo"},
-            {"data": "last_modify_time"},
-            {"data": "create_time"},
-            {
-                "data": null,
-                "defaultContent": '<button type="button" class="btn btn-info">更新</button>' + '&nbsp;&nbsp' +
-                    '<button type="button" class="btn btn-danger">删除</button>'
-            }
-		  ]
-	    });
-		table.button(0).trigger();
-
-		$('#table tbody').on('click', 'button', function () {
-          let data = table.row($(this).parents('tr')).data();
-          let class_name = $(this).attr('class');
-          id0 = data['index'];
-          console.info("click button, id:", id0)
-          //alert(id);
-          if (class_name === 'btn btn-info') {
-              // EDIT button
-              MyModelInit('更新', data);
-              $("#myModal").modal();
-          } else {
-              // DELETE button
-              // alert('delete '+id);
-              // $('#modal_title').text('DELETE');
-              $("#confirm").modal();
-          }
-      	});
-
-		$('#modelForm').on('submit', function (e) {
-		    e.preventDefault();
+      function update_func(e){
+          e.preventDefault();
 		    // 递交前检查，一般是检测model的外键是否存在
 			let data1 = $.ajax({
 				url: url1, dataType: 'json', contentType: "application/json",
-				type: "get", async: false, data: {singleLB_Pooling_id: $('#singleLB_Pooling_id').val()}
+				type: "get", async: false, data: { singleLB_Pooling_id: $('#singleLB_Pooling_id').val(), fields: "id,sampleinventoryinfo" }
 			}).responseJSON[0];
 			if (data1 === undefined) {
 				$('#myModalError').text('错误！！！测序文库编号不存在，请填写正确的测序文库编号。');
@@ -618,7 +66,7 @@
 			}
 			let data2 = $.ajax({
 				url: url2, dataType: 'json', contentType: "application/json",
-				type: "get", async: false, data: {sequencing_id: $('#sequencing_id').val()}
+				type: "get", async: false, data: { sequencing_id: $('#sequencing_id').val(), fields: "id" }
 			}).responseJSON[0];
 			if (data2 === undefined) {
 				$('#myModalError').text('错误！！！上机文库号不存在，请填写正确的上机文库号。');
@@ -628,9 +76,8 @@
             let type = $('#type').val();
             let method = '';
             let url_ajax0 = url0;
-            let send_data0 = $(this).serialize() + '&' + $.param({
-				sampler_id: data1.sampler_id, sample_id: data1.sample_id, dna_id: data1.dna_id,
-                singleLB_id: data1.singleLB_id, poolingLB_id: data1.poolingLB_id
+            let send_data0 = $("#modelForm").find(":not(#singleLB_Pooling_id, #sequencing_id)").serialize() + '&' + $.param({
+				methypoolinginfo: data1.id, sequencing_id: data2.id, sampleinventoryinfo: data1.sampleinventoryinfo
 			});
             if (type === 'new') {
                 // new
@@ -638,7 +85,7 @@
               // POST前检查，一般是检测model的关键字段值是否存在
                 data0 = $.ajax({
                     url: url0, dataType: 'json', contentType: "application/json",
-                    type: "get", async: false, data: {sequencing_id: $('#sequencing_id').val()}
+                    type: "get", async: false, data: { sequencing_id: $('#sequencing_id').val(), fields: "id" }
                 }).responseJSON[0];
                 if (data0 !== undefined) {
                     $('#myModalError').text('错误！！！Sample已存在，无法添加。如需更新该条目，请在对应行进行更新操作。');
@@ -671,79 +118,64 @@
                     console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
                 }
             });
-        });
+      }
 
-		$('#confirm').on('click', '#delete', function (e) {
-		    let res = delete_by_id_simple(url0, id0);
-		    if (res[0] === "success") {
-		        databaseRecordAjaxPut(model0, "单项删除", "index：" + res[1]);
-		        window.location.reload(true);
-		    } else {
-		        console.log(res[1]);
-		    }
-		});
+      let input_params = {
+          "title1_text": "分析结果管理 QC信息 甲基化检测 总条目数：",
+		  "fields": [
+              // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
+              // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
+              ["Sample", "Sample", 1, 2, 1, "text"],
+			  ["data_size_gb_field", "Data_Size(Gb)", 1, 3, 0, "number_0.001", 0],
+			  ["clean_rate_field", "Clean_Rate(%)", 1, 4, 0, "number_0.001", 0],
+			  ["r1_q20", "R1_Q20", 1, 5, 0, "number_0.0001", 0],
+			  ["r2_q20", "R2_Q20", 1, 6, 0, "number_0.0001", 0],
+			  ["r1_q30", "R1_Q30", 1, 7, 0, "number_0.0001", 0],
+			  ["r2_q30", "R2_Q30", 1, 8, 0, "number_0.0001", 0],
+			  ["gc_content", "GC_Content", 1, 9, 0, "number_0.0001", 0],
+			  ["bs_conversion_rate_lambda_dna_field", "BS_conversion_rate(lambda_DNA)", 1, 10, 0, "number_0.0001", 0],
+			  ["bs_conversion_rate_chh_field", "BS_conversion_rate(CHH)", 1, 11, 0, "number_0.0001", 0],
+			  ["bs_conversion_rate_chg_field", "BS_conversion_rate(CHG)", 1, 12, 0, "number_0.0001", 0],
+			  ["uniquely_paired_mapping_rate", "Uniquely_Paired_Mapping_Rate", 1, 13, 0, "number_0.0001", 0],
+			  ["mismatch_and_indel_rate", "Mismatch_and_InDel_Rate", 1, 14, 0, "number_0.0001", 0],
+			  ["mode_fragment_length_bp_field", "Mode_Fragment_Length(bp)", 1, 15, 0, "number_0.0001", 0],
+			  ["genome_duplication_rate", "Genome_Duplication_Rate", 1, 16, 0, "number_0.0001", 0],
+			  ["genome_depth_x_field", "Genome_Depth(X)", 1, 17, 0, "number_0.001", 0],
+			  ["genome_dedupped_depth_x_field", "Genome_Dedupped_Depth(X)", 1, 18, 0, "number_0.001", 0],
+			  ["genome_coverage", "Genome_Coverage", 1, 19, 0, "number_0.0001", 0],
+			  ["genome_4x_cpg_depth_x_field", "Genome_4X_CpG_Depth(X)", 1, 20, 0, "number_0.001", 0],
+			  ["genome_4x_cpg_coverage", "Genome_4X_CpG_Coverage", 1, 21, 0, "number_0.0001", 0],
+			  ["genome_4x_cpg_methylation_level", "Genome_4X_CpG_methylation_level", 1, 22, 0, "number_0.0001", 0],
+			  ["panel_4x_cpg_depth_x_field", "Panel_4X_CpG_Depth(X)", 1, 23, 0, "number_0.001", 0],
+			  ["panel_4x_cpg_coverage", "Panel_4X_CpG_Coverage", 1, 24, 0, "number_0.0001", 0],
+			  ["panel_4x_cpg_methylation_level", "Panel_4X_CpG_methylation_level", 1, 25, 0, "number_0.0001", 0],
+			  ["panel_ontarget_rate_region_field", "Panel_Ontarget_Rate(region)", 1, 26, 0, "number_0.0001", 0],
+			  ["panel_duplication_rate_region_field", "Panel_Duplication_Rate(region)", 1, 27, 0, "number_0.0001", 0],
+			  ["panel_depth_site_x_field", "Panel_Depth(site,X)", 1, 28, 0, "number_0.001", 0],
+			  ["panel_dedupped_depth_site_x_field", "Panel_Dedupped_Depth(site,X)", 1, 29, 0, "number_0.001", 0],
+			  ["panel_coverage_site_1x_field", "Panel_Coverage(site,1X)", 1, 30, 0, "number_0.0001", 0],
+			  ["panel_coverage_site_10x_field", "Panel_Coverage(site,10X)", 1, 31, 0, "number_0.0001", 0],
+			  ["panel_coverage_site_20x_field", "Panel_Coverage(site,20X)", 1, 32, 0, "number_0.0001", 0],
+			  ["panel_coverage_site_50x_field", "Panel_Coverage(site,50X)", 1, 33, 0, "number_0.0001", 0],
+			  ["panel_coverage_site_100x_field", "Panel_Coverage(site,100X)", 1, 34, 0, "number_0.0001", 0],
+			  ["panel_uniformity_site_20_mean_field", "Panel_Uniformity(site,>20%mean)", 1, 35, 0, "number_0.0001", 0],
+			  ["strand_balance_f_field", "Strand_balance(F)", 1, 36, 0, "number_0.0001", 0],
+			  ["strand_balance_r_field", "Strand_balance(R)", 1, 37, 0, "number_0.0001", 0],
+			  ["gc_bin_depth_ratio", "GC_bin_depth_ratio", 1, 38, 0, "number_0.0001", 0],
+              ["sampler_id", "华大编号", 0],
+			  ["singleLB_Pooling_id", "测序文库编号", 1, 0, 1, "text"],
+			  ["sequencing_id", "上机文库号", 1, 1, 1, "text"],
+			  ["memo", "备注", 1, 39, 0, "text", "无"],
+              ["last_modify_time", "上次修改时间", 0],
+              ["create_time", "创建时间", 0]
+          ],
+          "update_func": update_func,
+          "delete_func": simple_delete_func,
+          "bulkDelete_func": simple_bulkDelete_func,
+          "download_excel": '/ADVANCE/download_excel/SEQ_' + model0 + '/'
+      };
+      single_page_generator(model0, url0, id0, bulk_update_bool, bulk_delete_bool, input_params);
 
-		$('#new').on('click', function (e) {
-		    MyModelInit('新增', {});
-		    $("#myModal").modal();
-		});
-
-		$('#upload').on('click', function (e) {
-		    $('#uploadOperator').val("");
-		    $('#uploadFile').val("");
-		    $('#uploadError').val("");
-		    $('#uploadUrl').val(model0);
-		    $("#uploadModal").modal();
-		});
-
-		$('#bulkDel').on('click', function (e) {
-		    $('#bulkDelUrl').val(model0);
-		    $("#bulkDelModal").modal();
-		});
-
-		$('#bulkDelModal').on('click', '#bulkDelete', function (e) {
-		    let arrayLen = table.rows(".selected").data().length;
-		    if (arrayLen > 0) {
-		        let delete_index_list = [];
-		        for (let i = 0; i < arrayLen; i++) {
-		            let delete_index = table.rows(".selected").data()[i]['index'];
-		            let res = delete_by_id_simple(url0, delete_index);
-		            if (res[0] === "success") {
-		                delete_index_list.push(res[1]);
-		            }
-		        }
-		        databaseRecordAjaxPut(model0, "批量删除", "index_list：[" + delete_index_list + "]");
-		        window.location.reload(true);
-		    } else {
-		        $('#bulkDelError').text('没有行被选中，请先选中目标行。');
-		    }
-		});
-
-		$('.downloadExcel').on('click', function (e) {
-		    e.preventDefault();
-		    window.location.href = '/ADVANCE/download_excel/SEQ_' + model0 + '/'
-		});
-
-		$('#myModalReset').on('click', function (e) {
-		    e.preventDefault();
-		    if ($('#modal_title').text() === '更新') {
-		        MyModelInit('更新', dataModelForm);
-		    } else {
-		        MyModelInit('新增', {});
-		    }
-		});
-
-		$("#modelForm input[type='text']").focus(function () {
-		    let key2 = $(this).attr('id');
-		    let values = $.ajax({
-                url: "{% url 'ADVANCE:unique' %}", data: {model: model0, filed: key2},
-                dataType: 'json', contentType: "application/json",
-                method: "GET", async: false
-            }).responseJSON.values;
-            console.info("values:", values, "; key2:", key2);
-            input_autocomplete(values, '#' + key2);
-		});
-
-    });
+  });
 </script>
 {% endblock %}

@@ -27,7 +27,6 @@ class UserInfo(AbstractUser):
                                  processors=[ResizeToFill(100, 100)], format='JPEG', options={'quality': 95})
     role = models.SmallIntegerField(db_column='角色', choices=ROLE_CHOICES, default=4)
     memo = models.TextField(db_column="备注", blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_login_time = models.DateTimeField(db_column='最近登录时间', blank=True, null=True)
 
@@ -42,12 +41,11 @@ class UserInfo(AbstractUser):
 
 # 数据库增删改记录表
 class DatabaseRecord(models.Model):
-    user_index = models.ForeignKey(
+    userinfo = models.ForeignKey(
         "UserInfo",
         on_delete=models.CASCADE,
         related_name='DatabaseRecord_UserInfo',
-        to_field="index",
-        db_column='用户index',
+        db_column='用户信息',
         blank=True,
         null=True)
     model_changed = models.CharField(
@@ -56,7 +54,6 @@ class DatabaseRecord(models.Model):
         db_column='操作', max_length=25, blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
-    index = models.AutoField(primary_key=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
