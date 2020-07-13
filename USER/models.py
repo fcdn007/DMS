@@ -58,7 +58,8 @@ class DatabaseRecord(models.Model):
     last_modify_time = models.DateTimeField(db_column='最近修改时间', auto_now=True)
 
     def __str__(self):
-        return "{}对{}进行{}操作(时间为{})".format(self.nick_name, self.model_changed, self.operation, self.created)
+        return "{}对{}进行{}操作(时间为{})".format(self.userinfo, self.model_changed, self.operation,
+                                           self.create_time)
 
     class Meta:
         db_table = '数据库增删改记录表'

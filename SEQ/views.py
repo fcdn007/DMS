@@ -1,7 +1,8 @@
+from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render
 from rest_framework import viewsets
-from django.contrib.auth.decorators import login_required, permission_required
 
+from databaseDemo.tasks import add_modelViewRecord_by_celery
 from util.utils import get_queryset_base
 from .serializers import *
 
@@ -26,12 +27,14 @@ class MethyQCInfoViewSet(viewsets.ModelViewSet):
 @login_required
 @permission_required('SEQ.view_sequencinginfo')
 def SequencingInfoV(request):
+    add_modelViewRecord_by_celery("SequencingInfo", request.user.username)
     return render(request, 'SEQ/SequencingInfo.html')
 
 
 @login_required
 @permission_required('SEQ.view_methyqcinfo')
 def MethyQCInfoV(request):
+    add_modelViewRecord_by_celery("MethyQCInfo", request.user.username)
     return render(request, 'SEQ/MethyQCInfo.html')
 
 

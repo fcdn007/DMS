@@ -11,7 +11,7 @@ class UserInfoSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = UserInfo
-        fields = ("username", "nick_name", "email", "password", "memo", "create_time", "last_login_time")
+        fields = ("username", "nick_name", "email", "password", "memo", "id", "create_time", "last_login_time")
 
 
 class DatabaseRecordSerializer(DynamicFieldsModelSerializer):

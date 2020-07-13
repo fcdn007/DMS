@@ -50,7 +50,7 @@
       let bulk_update_bool = {% if perms.BIS.bulk_update_ClinicalInfo %} true {% else %} false {% endif %};
       let bulk_delete_bool = {% if perms.BIS.bulk_delete_ClinicalInfo %} true {% else %} false {% endif %};
 
-      function update_func(e){
+      function update_func(e, id0){
           e.preventDefault();
           // 递交前检查，一般是检测model的外键是否存在
           let data1 = $.ajax({
@@ -66,7 +66,7 @@
           let method = '';
           let url_ajax0 = url0; // ClinicalInfo
           let send_data0 = $("#modelForm").find(":not(#sampler_id)").serialize() + '&' +
-              $.param({ sampleinventoryinfo: data1.sampleinventoryinfo });
+              $.param({ sampleinventoryinfo: data1.id });
           if (type === 'new') {
               // new
               method = 'POST';
@@ -108,8 +108,10 @@
               },
               error: function (jqXHR, textStatus, errorThrown) {
                   $('#myModalError').text('出现错误！！！请联系管理员');
-                  console.info(url_ajax0, method, send_data0);
-                  console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
+                  console.info(">>>>url_ajax0:", url_ajax0);
+                  console.info(">>>>method:", send_data0);
+                  console.info(">>>>send_data0:", send_data0);
+                  console.info(jqXHR,  textStatus, errorThrown);
               }
           });
       }
@@ -126,7 +128,7 @@
               ["department", "科室", 1, 2, 0, "text", "无"],
               ["name", "姓名", 1, 5, 0, "text", "无"],
               ["gender", "性别", 1, 6, 0, "select", [["男", "男"], ["女", "女"]]],
-              ["age", "年龄", 1, 7, 0, "date", "2000-01-01"],
+              ["age", "年龄", 1, 7, 0, "number_1", 0],
               ["record_date", "记录日期", 1, 8, 0, "date", "2000-01-01"],
               ["category", "肿瘤类型", 1, 9, 0, "text", "无"],
               ["stage", "分化程度", 1, 10, 0, "text", "无"],
@@ -143,7 +145,19 @@
       single_page_generator(model0, url0, id0, bulk_update_bool, bulk_delete_bool, input_params);
 
       $("#hospital").blur(function () {
-          $("#clinical_id").val($("#hospital").val()+'_'+$("#patientId").val());
+		  if ($("#patientId").val()!=="" && $("#hospital").val()!==""){
+		  	$("#clinical_id").val($("#hospital").val()+'_'+$("#patientId").val());
+		  } else {
+		  	$("#clinical_id").val("");
+		  }
+      });
+
+      $("#patientId").blur(function () {
+          if ($("#patientId").val()!=="" && $("#hospital").val()!==""){
+		  	$("#clinical_id").val($("#hospital").val()+'_'+$("#patientId").val());
+		  } else {
+		  	$("#clinical_id").val("");
+		  }
       });
   });
 </script>

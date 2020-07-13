@@ -1,12 +1,15 @@
+import datetime
 import subprocess
 
 from celery import shared_task
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db.models import Q
 
+from USER.models import UserInfo, DatabaseRecord
+from util.merge_df import make_new_merge_df, check_new_merge_df_all
 from .celerys import app
 from .settings import SERVER_HOST
-from util.merge_df import make_new_merge_df, check_new_merge_df_all
 
 
 @app.task
@@ -42,4 +45,20 @@ def keep_merge_df_newest_by_celery():
 @app.task
 def backup_db_by_celery():
     subprocess.run(["bash", "../bkdb.sh"])
+    return True
+
+@shared_task
+def add_modelViewRecord_by_celery(model_, username):
+    user = UserInfo.objects.get(username=username)
+    last_record = DatabaseRecord.objects.filter(Q(model_changed=model_) & Q(userinfo=user) & Q(operation="访问")
+                                                ).order_by("-create_time")
+    now = datetime.datetime.now()
+    if (now - last_record[0].create_time.replace(tzinfo=None)).seconds > 60:
+        new_record = {
+            'userinfo': user, 'model_changed': model_,
+            'operation': "访问",
+            'memo': "无"
+        }
+        record_obj = DatabaseRecord(**new_record)
+        record_obj.save()
     return True

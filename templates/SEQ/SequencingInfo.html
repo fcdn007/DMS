@@ -54,31 +54,43 @@
 	  let id0 = 0;
       let bulk_update_bool = {% if perms.BIS.bulk_update_SequencingInfo %} true {% else %} false {% endif %};
       let bulk_delete_bool = {% if perms.BIS.bulk_delete_SequencingInfo %} true {% else %} false {% endif %};
+	  let data1 = {};
+	  let poolingLB_id_list = [];
+	  $.each($.ajax({
+				  url: url1, data: {fields: "id,poolingLB_id"},
+				  dataType: 'json', contentType: "application/json",
+				  method: "GET", async: false
+			  }).responseJSON, function (i, v) {
+			data1[v.poolingLB_id]= parseInt(v.id);
+			poolingLB_id_list.push(v.poolingLB_id);
+	  });
 
-      function update_func(e){
+      function update_func(e, id0){
           e.preventDefault();
 		    // 递交前检查，一般是检测model的外键是否存在
 			let arr = modal2poolingLB_id.val();
-			let data1_ids = [];
+			let poolingLB_ids_send = [];
+			let unique_dict = {};
 			for (let idx in arr) {
-				let data1 = $.ajax({
-					url: url1, dataType: 'json', contentType: "application/json",
-					type: "get", async: false, data: { poolingLB_id: arr[idx], fields: "id" }
-				}).responseJSON[0];
-				if (data1 === undefined) {
+				if (unique_dict[arr[idx]] === undefined) {
+					unique_dict[arr[idx]] = 1;
+				} else {
+					unique_dict[arr[idx]] += 1;
+					continue;
+				}
+				if (data1[arr[idx]] === undefined) {
 					$('#myModalError').text('错误！！！捕获文库名' + arr[idx] + '不存在，请填写正确的捕获文库名。');
 					return
 				} else {
-					data1_ids.push(data1.id);
+					poolingLB_ids_send.push(data1[arr[idx]]);
 				}
 			}
 
             let type = $('#type').val();
             let method = '';
             let url_ajax0 = url0;
-            let send_data0 = $("#modelForm").find(":not(#poolingLB_id)").serialize() + '&' + $.param({
-				methycaptureinfo: data1_ids
-            });
+            let send_data0 = $("#modelForm").find(":not(#poolingLB_id)").serialize() + '&' +
+					$.param({ methycaptureinfo: poolingLB_ids_send }, true);
             if (type === 'new') {
                 // new
                 method = 'POST';
@@ -97,25 +109,33 @@
                 method = 'PUT';
             }
 
+			console.info(">>>>>url_ajax0:", url_ajax0, ";send_data0:",send_data0);
+            console.info(">>>>>poolingLB_ids_send:", poolingLB_ids_send);
             $.ajax({
                 url: url_ajax0,
                 method: method,
                 data: send_data0,
                 headers: {'X-HTTP-Method-Override': 'PATCH'},
                 success: function () {
-                    let v_tmp = $('#poolingLB_id').val();
+                    let v_tmp = $('#sequencing_id').val();
                     if (type === 'new') {
-                      databaseRecordAjaxPut(model0, "单项添加", "上机文库号：" + v_tmp);
-                      $('#myModalError').text('添加成功！！！上机文库号：' + v_tmp);
-                  } else {
-                      databaseRecordAjaxPut(model0, "单项更新", "上机文库号：" + v_tmp);
-                      $('#myModalError').text('更新成功！！！上机文库号：' + v_tmp);
-                  }
+                      	databaseRecordAjaxPut(model0, "单项添加", "上机文库号：" + v_tmp);
+                      	$('#myModalError').text('添加成功！！！上机文库号：' + v_tmp);
+                  	} else {
+                      	databaseRecordAjaxPut(model0, "单项更新", "上机文库号：" + v_tmp);
+                      	$('#myModalError').text('更新成功！！！上机文库号：' + v_tmp);
+                  	}
+
+                    setTimeout(
+                      	function () {
+                          	window.location.reload(true);
+                      	}, 3000
+                  	);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     $('#myModalError').text('出现错误！！！请联系管理员');
                     console.info(url_ajax0, method, send_data0);
-                    console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
+                    console.info(jqXHR, textStatus, errorThrown)
                 }
             });
       }
@@ -151,11 +171,7 @@
 		  multiple: true,
 		  maximumInputLength: 25,//允许长度
 		  //data: initdata
-		  data: $.ajax({
-			  url: "{% url 'ADVANCE:unique' %}", data: {model: "MethyCaptureInfo", filed: "poolingLB_id"},
-			  dataType: 'json', contentType: "application/json",
-			  method: "GET", async: false
-		  }).responseJSON.values,
+		  data: poolingLB_id_list
 	  });
   });
 </script>

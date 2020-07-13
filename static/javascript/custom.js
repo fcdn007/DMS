@@ -19,7 +19,7 @@ function range(size, startAt = 0) {
 function databaseRecordAjaxPut(model_changed_txt, operation_txt, others_txt) {
     let url_record = '/api/USER/DatabaseRecord/';
     let data_record = $.param({
-        "user_index": "{{ user.index }}",
+        "userinfo": "{{ user.id }}",
         "model_changed": model_changed_txt,
         "operation": operation_txt,
         "memo": others_txt

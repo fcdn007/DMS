@@ -52,7 +52,7 @@
       let bulk_update_bool = {% if perms.BIS.bulk_update_MethyPoolingInfo %} true {% else %} false {% endif %};
       let bulk_delete_bool = {% if perms.BIS.bulk_delete_MethyPoolingInfo %} true {% else %} false {% endif %};
 
-      function update_func(e){
+      function update_func(e, id0){
           e.preventDefault();
 		    // 递交前检查，一般是检测model的外键是否存在
 			let data1 = $.ajax({
@@ -104,12 +104,17 @@
                 success: function () {
                     let v_tmp = $('#singleLB_Pooling_id').val();
                     if (type === 'new') {
-                      databaseRecordAjaxPut(model0, "单项添加", "测序文库编号：" + v_tmp);
-                      $('#myModalError').text('添加成功！！！捕获文库名：' + v_tmp);
-                  } else {
-                      databaseRecordAjaxPut(model0, "单项更新", "测序文库编号：" + v_tmp);
-                      $('#myModalError').text('更新成功！！！测序文库编号：' + v_tmp);
-                  }
+                      	databaseRecordAjaxPut(model0, "单项添加", "测序文库编号：" + v_tmp);
+                      	$('#myModalError').text('添加成功！！！捕获文库名：' + v_tmp);
+                  	} else {
+                      	databaseRecordAjaxPut(model0, "单项更新", "测序文库编号：" + v_tmp);
+                      	$('#myModalError').text('更新成功！！！测序文库编号：' + v_tmp);
+					}
+                    setTimeout(
+                    	function () {
+                    		window.location.reload(true);
+                    		}, 3000
+					);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     $('#myModalError').text('出现错误！！！请联系管理员');

@@ -53,7 +53,7 @@
       let bulk_update_bool = {% if perms.BIS.bulk_update_MethyQCInfo %} true {% else %} false {% endif %};
       let bulk_delete_bool = {% if perms.BIS.bulk_delete_MethyQCInfo %} true {% else %} false {% endif %};
 
-      function update_func(e){
+      function update_func(e, id0){
           e.preventDefault();
 		    // 递交前检查，一般是检测model的外键是否存在
 			let data1 = $.ajax({
@@ -77,7 +77,7 @@
             let method = '';
             let url_ajax0 = url0;
             let send_data0 = $("#modelForm").find(":not(#singleLB_Pooling_id, #sequencing_id)").serialize() + '&' + $.param({
-				methypoolinginfo: data1.id, sequencing_id: data2.id, sampleinventoryinfo: data1.sampleinventoryinfo
+				methypoolinginfo: data1.id, sequencinginfo: data2.id, sampleinventoryinfo: data1.sampleinventoryinfo
 			});
             if (type === 'new') {
                 // new
@@ -85,7 +85,7 @@
               // POST前检查，一般是检测model的关键字段值是否存在
                 data0 = $.ajax({
                     url: url0, dataType: 'json', contentType: "application/json",
-                    type: "get", async: false, data: { sequencing_id: $('#sequencing_id').val(), fields: "id" }
+                    type: "get", async: false, data: { QC_id: $('#QC_id').val(), fields: "id" }
                 }).responseJSON[0];
                 if (data0 !== undefined) {
                     $('#myModalError').text('错误！！！Sample已存在，无法添加。如需更新该条目，请在对应行进行更新操作。');
@@ -97,20 +97,28 @@
                 method = 'PUT';
             }
 
+            console.info(">>> send_data0:", send_data0);
+            console.info(">>> url_ajax0:", url_ajax0);
+            console.info(">>> method:", method);
             $.ajax({
                 url: url_ajax0,
                 method: method,
                 data: send_data0,
                 headers: {'X-HTTP-Method-Override': 'PATCH'},
                 success: function () {
-                    let v_tmp = $('#poolingLB_id').val();
+                    let v_tmp = $('#QC_id').val();
                     if (type === 'new') {
-                      databaseRecordAjaxPut(model0, "单项添加", "上机文库号：" + v_tmp);
-                      $('#myModalError').text('添加成功！！！Sample：' + v_tmp);
-                  } else {
-                      databaseRecordAjaxPut(model0, "单项更新", "上机文库号：" + v_tmp);
-                      $('#myModalError').text('更新成功！！！Sample：' + v_tmp);
-                  }
+						databaseRecordAjaxPut(model0, "单项添加", "上机文库号：" + v_tmp);
+						$('#myModalError').text('添加成功！！！Sample：' + v_tmp);
+					} else {
+						databaseRecordAjaxPut(model0, "单项更新", "上机文库号：" + v_tmp);
+						$('#myModalError').text('更新成功！！！Sample：' + v_tmp);
+					}
+                    setTimeout(
+                    	function () {
+                    		window.location.reload(true);
+                    		}, 3000
+					);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     $('#myModalError').text('出现错误！！！请联系管理员');
@@ -125,7 +133,7 @@
 		  "fields": [
               // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
               // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
-              ["Sample", "Sample", 1, 2, 1, "text"],
+              ["QC_id", "Sample", 1, 2, 1, "text"],
 			  ["data_size_gb_field", "Data_Size(Gb)", 1, 3, 0, "number_0.001", 0],
 			  ["clean_rate_field", "Clean_Rate(%)", 1, 4, 0, "number_0.001", 0],
 			  ["r1_q20", "R1_Q20", 1, 5, 0, "number_0.0001", 0],

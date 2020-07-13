@@ -8,7 +8,7 @@ from itsdangerous import SignatureExpired
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer_its
 from rest_framework import viewsets
 
-from databaseDemo.tasks import send_register_active_email
+from databaseDemo.tasks import send_register_active_email, add_modelViewRecord_by_celery
 from util.utils import get_queryset_base, custom_token_generator
 from .forms import RegisterForm, UpdateForm
 from .models import UserInfo, DatabaseRecord
@@ -75,6 +75,7 @@ def UserInfoV(request):
             print("form.is_invalid: {}".format(form.errors))
             return render(request, 'USER/UserInfo.html', {'post_result': "%s" % form.errors})
     else:
+        add_modelViewRecord_by_celery("UserInfo", request.user.username)
         return render(request, 'USER/UserInfo.html')
 
 

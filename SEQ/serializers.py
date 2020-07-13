@@ -43,4 +43,4 @@ class MethyQCInfoSerializer(DynamicFieldsModelSerializer):
                   'panel_coverage_site_20x_field', 'panel_coverage_site_50x_field', 'panel_coverage_site_100x_field',
                   'panel_uniformity_site_20_mean_field', 'strand_balance_f_field', 'strand_balance_r_field',
                   'gc_bin_depth_ratio', 'sampler_id', 'singleLB_Pooling_id', 'sequencing_id', 'memo', 'id',
-                  'last_modify_time', 'create_time', 'sampleinventoryinfo', 'methypoolinginfo', 'sequencing_id')
+                  'last_modify_time', 'create_time', 'sampleinventoryinfo', 'methypoolinginfo', 'sequencinginfo')

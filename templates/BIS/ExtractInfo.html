@@ -39,7 +39,7 @@
       let bulk_update_bool = {% if perms.BIS.bulk_update_ExtractInfo %} true {% else %} false {% endif %};
       let bulk_delete_bool = {% if perms.BIS.bulk_delete_ExtractInfo %} true {% else %} false {% endif %};
 
-      function update_func(e){
+      function update_func(e, id0){
           e.preventDefault();
           // 递交前检查，一般是检测model的外键是否存在
           let data1 = $.ajax({

@@ -1,7 +1,8 @@
+from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render
 from rest_framework import viewsets
-from django.contrib.auth.decorators import login_required, permission_required
 
+from databaseDemo.tasks import add_modelViewRecord_by_celery
 from util.utils import get_queryset_base
 from .serializers import *
 
@@ -42,22 +43,26 @@ class DNAUsageRecordInfoViewSet(viewsets.ModelViewSet):
 @login_required
 @permission_required('BIS.view_sampleinventoryinfo')
 def SampleInventoryInfoV(request):
+    add_modelViewRecord_by_celery("SampleInventoryInfo", request.user.username)
     return render(request, 'BIS/SampleInventoryInfo.html')
 
 
 @login_required
 @permission_required('BIS.view_sampleinfo')
 def SampleInfoV(request):
+    add_modelViewRecord_by_celery("SampleInfo", request.user.username)
     return render(request, 'BIS/SampleInfo.html')
 
 
 @login_required
 @permission_required('BIS.view_extractinfo')
 def ExtractInfoV(request):
+    add_modelViewRecord_by_celery("ExtractInfo", request.user.username)
     return render(request, 'BIS/ExtractInfo.html')
 
 
 @login_required
 @permission_required('BIS.view_dnausagerecordinfo')
 def DNAUsageRecordInfoV(request):
+    add_modelViewRecord_by_celery("DNAUsageRecordInfo", request.user.username)
     return render(request, 'BIS/DNAUsageRecordInfo.html')

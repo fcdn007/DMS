@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render
 from rest_framework import viewsets
 
+from databaseDemo.tasks import add_modelViewRecord_by_celery
 from util.utils import get_queryset_base
 from .serializers import *
 
@@ -51,29 +52,34 @@ class BiochemInfoViewSet(viewsets.ModelViewSet):
 @login_required
 @permission_required('EMR.view_clinicalinfo')
 def ClinicalInfoV(request):
+    add_modelViewRecord_by_celery("ClinicalInfo", request.user.username)
     return render(request, 'EMR/ClinicalInfo.html')
 
 
 @login_required
 @permission_required('EMR.view_followupinfo')
 def FollowupInfoV(request):
+    add_modelViewRecord_by_celery("FollowupInfo", request.user.username)
     return render(request, 'EMR/FollowupInfo.html')
 
 
 @login_required
 @permission_required('EMR.view_liverpathologicalinfo')
 def LiverPathologicalInfoV(request):
+    add_modelViewRecord_by_celery("LiverPathologicalInfo", request.user.username)
     return render(request, 'EMR/LiverPathologicalInfo.html')
 
 
 @login_required
 @permission_required('EMR.view_tmdinfo')
 def TMDInfoV(request):
+    add_modelViewRecord_by_celery("TMDInfo", request.user.username)
     return render(request, 'EMR/TMDInfo.html')
 
 
 @login_required
 @permission_required('EMR.view_biocheminfo')
 def BiochemInfoV(request):
+    add_modelViewRecord_by_celery("BiochemInfo", request.user.username)
     return render(request, 'EMR/BiochemInfo.html')
 

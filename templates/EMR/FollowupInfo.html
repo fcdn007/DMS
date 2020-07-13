@@ -50,7 +50,7 @@
       let bulk_update_bool = {% if perms.BIS.bulk_update_FollowupInfo %} true {% else %} false {% endif %};
       let bulk_delete_bool = {% if perms.BIS.bulk_delete_FollowupInfo %} true {% else %} false {% endif %};
 
-      function update_func(e){
+      function update_func(e, id0){
           e.preventDefault();
           // 递交前检查，一般是检测model的外键是否存在
           let data1 = $.ajax({
@@ -101,8 +101,10 @@
               },
               error: function (jqXHR, textStatus, errorThrown) {
                   $('#myModalError').text('出现错误！！！请联系管理员');
-                  console.info(url_ajax0, method, send_data0);
-                  console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
+                  console.info(">>>>url_ajax0:", url_ajax0);
+                  console.info(">>>>method:", send_data0);
+                  console.info(">>>>send_data0:", send_data0);
+                  console.info(jqXHR,  textStatus, errorThrown);
               }
           });
       }
@@ -116,8 +118,8 @@
               ["sampler_id", "华大编号", 0],
               ["survival_status", "生存状态", 1, 1, 1, "select", [["存活", "存活"], ["死亡", "死亡"]]],
               ["death_date", "死亡日期", 1, 2, 0, "date", "2000-01-01"],
-              ["death_bool", "死因是否与肿瘤相关", 1, 3, 0, "select", [["存活", "存活"], ["死亡", "死亡"]]],
-              ["recur_bool", "是否复发", 1, 4, 0, "select", [["存活", "存活"], ["死亡", "死亡"]]],
+              ["death_bool", "死因是否与肿瘤相关", 1, 3, 0, "select", [["否", "否"], ["是", "是"]]],
+              ["recur_bool", "是否复发", 1, 4, 0, "select", [["否", "否"], ["是", "是"]]],
               ["recur_date", "复发日期", 1, 5, 0, "date", "2000-01-01"],
               ["recur_status", "复发状态", 1, 6, 0, "text", "无"],
               ["followup_date", "随访日期", 1, 7, 1, "date"],
