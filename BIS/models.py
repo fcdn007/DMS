@@ -7,11 +7,11 @@ class SampleInventoryInfo(models.Model):
     sampler_id = models.CharField(
         db_column='华大编号', unique=True, max_length=35, blank=True, null=True)
     plasma_num = models.PositiveIntegerField(db_column='血浆管数', default=0)
+    cancer_tissue_num = models.PositiveIntegerField(db_column='癌组织样本数量', default=0)
     adjacent_mucosa_num = models.PositiveIntegerField(
-        db_column='癌旁组织', default=0)
-    cancer_tissue_num = models.PositiveIntegerField(db_column='癌组织', default=0)
-    WBC_num = models.PositiveIntegerField(db_column='白细胞', default=0)
-    stool_num = models.PositiveIntegerField(db_column='粪便', default=0)
+        db_column='癌旁组织样本数量', default=0)
+    WBC_num = models.PositiveIntegerField(db_column='白细胞样本数量', default=0)
+    stool_num = models.PositiveIntegerField(db_column='粪便样本数量', default=0)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
@@ -70,13 +70,6 @@ class SampleInfo(models.Model):
 # 表3 样本提取表
 class ExtractInfo(models.Model):
     dna_id = models.CharField(db_column='核酸提取编号', unique=True, max_length=35)
-    sampleinfo = models.ForeignKey(
-        "SampleInfo",
-        on_delete=models.CASCADE,
-        related_name='ExtractInfo_SampleInfo',
-        db_column='样本信息',
-        blank=True,
-        null=True)
     sampleinventoryinfo = models.ForeignKey(
         "SampleInventoryInfo",
         on_delete=models.CASCADE,
@@ -84,21 +77,28 @@ class ExtractInfo(models.Model):
         db_column='样本库存信息',
         blank=True,
         null=True)
+    sampleinfo = models.ForeignKey(
+        "SampleInfo",
+        on_delete=models.CASCADE,
+        related_name='ExtractInfo_SampleInfo',
+        db_column='样本信息',
+        blank=True,
+        null=True)
     extract_date = models.DateField(db_column='提取日期', blank=True, null=True)
     sample_type = models.CharField(db_column='样本类型', max_length=50)
     nucleic_type = models.CharField(db_column='核酸类型', max_length=50)
-    sample_volume = models.FloatField(db_column='样本体积', blank=True, null=True)
+    sample_volume = models.FloatField(db_column='样本体积(ml)/质量(mg)', blank=True, null=True)
     extract_method = models.CharField(
         db_column='提取方法', max_length=50, blank=True, null=True)
-    dna_con = models.FloatField(db_column='浓度', blank=True, null=True)
-    dna_vol = models.FloatField(db_column='体积', blank=True, null=True)
+    dna_con = models.FloatField(db_column='浓度(ng/ul)', blank=True, null=True)
+    dna_vol = models.FloatField(db_column='体积(ul)', blank=True, null=True)
     fridge = models.CharField(db_column='冰箱位置', max_length=50)
     plate = models.CharField(db_column='孔板号', max_length=50)
     well = models.CharField(db_column='孔位', max_length=50)
-    successM = models.FloatField(db_column='成功建库使用量', blank=True, null=True)
-    failM = models.FloatField(db_column='失败建库使用量', blank=True, null=True)
-    researchM = models.FloatField(db_column='科研项目使用量', blank=True, null=True)
-    othersM = models.FloatField(db_column='其他使用量', blank=True, null=True)
+    successM = models.FloatField(db_column='成功建库使用量(ng)', default=0)
+    failM = models.FloatField(db_column='失败建库使用量(ng)', default=0)
+    researchM = models.FloatField(db_column='科研项目使用量(ng)', default=0)
+    othersM = models.FloatField(db_column='其他使用量(ng)', default=0)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
@@ -134,10 +134,10 @@ class DNAUsageRecordInfo(models.Model):
         blank=True,
         null=True)
     usage_date = models.DateField(db_column='使用日期', blank=True, null=True)
-    mass = models.FloatField(db_column='使用量', blank=True, null=True)
+    mass = models.FloatField(db_column='使用量(ng)', blank=True, null=True)
     usage = models.CharField(db_column='用途', max_length=25)
     singleLB_id = models.CharField(
-        db_column='建库编号', max_length=35, blank=True, null=True)
+        db_column='建库编号(如有)', max_length=35, blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)

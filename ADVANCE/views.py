@@ -2,6 +2,7 @@ import datetime
 import os
 import re
 import time
+from collections import defaultdict
 
 import pandas as pd
 from django.contrib.auth.decorators import login_required, permission_required
@@ -13,9 +14,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 from USER.models import UserInfo, DatabaseRecord
 from databaseDemo.settings import BASE_DIR, MEDIA_ROOT
-from databaseDemo.tasks import make_new_merge_df_by_celery
-from util.merge_df import model_links, models_set2
-from util.merge_df import save_records, check_new_merge_df_all, FOREIGNKEY_TO_MODEL, KEY1_TO_MODEL, special_fields
+from databaseDemo.tasks import make_new_merge_df_partly_by_celery
+from util.merge_df import models_set2, FILECOLUMN_FOREIGNKEY_TO_MODEL, KEY1_TO_MODEL, apps
+from util.merge_df import save_records, check_new_merge_df_all, get_merge_df_cols, make_new_merge_df_all
 from util.utils import read_file_by_stream, condition_filter
 from .forms import FileUploadModelForm
 
@@ -25,45 +26,28 @@ def uniqueV(request):
     foreign_keys = {
         'SampleInfo': ['sampler_id'],
         'ExtractInfo': ['sampler_id', 'sample_id'],
-        'DNAUsageRecordInfo': ['sampler_id', 'sample_id', 'dna_id'],
-        'MethyLibraryInfo': ['sampler_id', 'sample_id', 'dna_id'],
-        'MethyPoolingInfo': ['sampler_id', 'sample_id', 'dna_id', 'singleLB_id', 'poolingLB_id'],
+        'DNAUsageRecordInfo': ['sampler_id', 'dna_id'],
+        'MethyLibraryInfo': ['sampler_id', 'dna_id'],
+        'MethyPoolingInfo': ['sampler_id', 'singleLB_id', 'poolingLB_id'],
         'SequencingInfo': ['poolingLB_id'],
-        'MethyQCInfo': ['sampler_id', 'sample_id', 'dna_id', 'singleLB_id', 'poolingLB_id', 'singleLB_Pooling_id',
-                        'sequencing_id'],
+        'MethyQCInfo': ['sampler_id', 'singleLB_Pooling_id', 'sequencing_id'],
         'ClinicalInfo': ['sampler_id'],
-        'FollowupInfo': ['sampler_id', 'Clinical_id'],
-        'LiverPathologicalInfo': ['sampler_id', 'Clinical_id'],
-        'LiverTMDInfo': ['sampler_id', 'Clinical_id'],
-        'LiverBiochemInfo': ['sampler_id', 'Clinical_id']
-    }
-    query_fields = {
-        'SampleInfo': ["sample_id", "name", "gender", "patientId", "category", "stage", "diagnose", "diagnose_others",
-                       "centrifugation_date", "hospital", "department", "send_date", "memo"],
-        'ExtractInfo': ['sample_id', 'dna_id', 'extract_date', 'sample_type', 'extract_method', 'memo'],
-        'DNAUsageRecordInfo': ['sample_id', 'dna_id', 'usage_date', 'singleLB_id', 'memo'],
-        'DNAInventoryInfo': ['sample_id', 'dna_id'],
-        'LibraryInfo': ['sample_id', 'dna_id', 'singleLB_id', 'tube_id', 'clinical_boolen', 'singleLB_name', 'label',
-                        'barcodes', 'LB_date', 'LB_method', 'kit_batch', 'operator', 'memo'],
-        'CaptureInfo': ['poolingLB_id', 'hybrid_date', 'probes', 'operator', 'memo'],
-        'PoolingInfo': ['sample_id', 'dna_id', 'singleLB_id', 'poolingLB_id', 'singleLB_Pooling_id', 'memo'],
-        'SequencingInfo': ['poolingLB_id', 'sequencing_id', 'send_date', 'start_time', 'end_time', 'machine_id',
-                           'chip_id', 'memo'],
-        'QCInfo': ['sample_id', 'dna_id', 'singleLB_id', 'poolingLB_id', 'singleLB_Pooling_id', 'sequencing_id',
-                   'memo']
+        'FollowupInfo': ['sampler_id', 'clinical_id'],
+        'LiverPathologicalInfo': ['sampler_id', 'clinical_id'],
+        'LiverTMDInfo': ['sampler_id', 'clinical_id'],
+        'LiverBiochemInfo': ['sampler_id', 'clinical_id']
     }
     data = {}
     key1 = request.GET['model']
     key2 = request.GET['filed']
-    if key1 in query_fields and key2 in query_fields[key1]:
+    try:
         if key1 in foreign_keys and key2 in foreign_keys[key1]:
-            data['values'] = [x[0] for x in
-                              FOREIGNKEY_TO_MODEL[key2].objects.values_list(key2).distinct().order_by(key2)]
+            data['values'] = [x[0] for x in FILECOLUMN_FOREIGNKEY_TO_MODEL[key2].objects.values_list(key2).distinct(
+                              ).order_by(key2)]
         else:
             data['values'] = [x[0] for x in
                               KEY1_TO_MODEL[key1].objects.values_list(key2).distinct().order_by(key2)]
-
-    else:
+    except:
         data['values'] = []
     return JsonResponse(data)
 
@@ -125,238 +109,112 @@ def uploadV(request):
 @login_required
 @never_cache
 def AdvanceUploadV(request):
-    return render(request, 'ADVANCE/AdvancedUpload.html')
+    return render(request, 'ADVANCE/AdvanceUpload.html')
 
 
 @login_required
-@csrf_exempt
 @permission_required('ADVANCE.access_Advance')
-def AdvancedSearchV(request):
+def AdvanceSearchV(request):
     # 合并所有model，形成一张大表
     # 检测所有model的最新修改时间time1，
     # > 如果time1等于已有json文件的时间戳time2，直接读取已有的json文件，
     # > 否则重新创建merge_df，并把merge_df输出为json文件，打上时间戳。清除旧的json文件(保留10个)
-    merge_df = []
-    flag_update, json_files, time2, time2_json, time2_total_json = check_new_merge_df_all()
-    if len(flag_update) > 0:
-        # 使用djcelery异步执行make_new_merge_df
-        print("do make_new_merge_df_by_celery")
-        make_new_merge_df_by_celery.delay(json_files, time2)
-    else:
-        merge_df = pd.read_json(time2_total_json)
-        for col_ in ['ClinicalInfo_centrifugation_date', 'ClinicalInfo_send_date', 'ExtractInfo_extract_date',
-                     'DNAUsageRecordInfo_usage_date', 'LibraryInfo_LB_date', 'CaptureInfo_hybrid_date',
-                     'SequencingInfo_send_date', 'SequencingInfo_start_time', 'SequencingInfo_end_time']:
-            merge_df.loc[:, col_] = [datetime.datetime.strptime(date_, '%Y-%m-%dT%H:%M:%S.%fZ').date()
-                                     if re.match(r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+Z', date_)
-                                     else datetime.datetime.strptime('2000-01-01', '%Y-%m-%d').date() for date_ in
-                                     merge_df.loc[:, col_]]
+    merge_df = ""
+    flag_update_list, time2_list, json_files_list = check_new_merge_df_all()
+    wait_update = []
+    time_stamp = 0
+    for i in range(len(flag_update_list)):
+        if time2_list[i] > time_stamp:
+            time_stamp = time2_list[i]
+
+        if flag_update_list[i]:
+            wait_update.append(i)
+            make_new_merge_df_partly_by_celery.delay(json_files_list[i], time2_list[i], i)
+
+    if len(wait_update) == 0:
         print("read merge_df.json")
+    else:
+        print("rebuild merge_df.json")
 
     if request.method == 'POST':
-        # print("request.method == 'POST'")
-        if flag_update:  # "等待异步task make_new_merge_df完成"
-            sleep_flag = True
+        if len(wait_update) > 0:
             sleep_n = 0
-            while sleep_flag:
+            while len(wait_update) > 0:
                 print("sleep {}".format(5 * sleep_n))
-                for file in os.listdir(os.path.join(MEDIA_ROOT, "json")):
-                    if re.match(r'[0-9]+.*\.merge_df.json', file):
-                        time2_tmp, _, _ = file.split('.')
-                        time2_tmp = int(time2_tmp)
-                        # print("time2_tmp: {}".format(time2_tmp))
-                        if time2_tmp == time2:
-                            time2_json = os.path.join(MEDIA_ROOT, "json", file)
-                            sleep_flag = False
-                            flag_update = False
+                for i in wait_update:
+                    done_file = os.path.join(MEDIA_ROOT, "json", '{}.{}.rebuild_done.json'.format(time2_list[i],
+                                                                                                  apps[i]))
+                    if os.path.exists(done_file):
+                        wait_update.remove(i)
                 time.sleep(5)
                 sleep_n += 1
+            make_new_merge_df_all(time2_list, json_files_list)
 
-            merge_df = pd.read_json(time2_json)
-            for col_ in ['ClinicalInfo_centrifugation_date', 'ClinicalInfo_send_date', 'ExtractInfo_extract_date',
-                         'DNAUsageRecordInfo_usage_date', 'LibraryInfo_LB_date', 'CaptureInfo_hybrid_date',
-                         'SequencingInfo_send_date', 'SequencingInfo_start_time', 'SequencingInfo_end_time']:
+        merge_df = pd.read_json(os.path.join(MEDIA_ROOT, "json", '{}.ALL.merge_df.json'.format(time_stamp)))
+        for col_ in list(merge_df.columns):
+            if re.match(r'.+date$', col_) or re.match(r'.+time$', col_):
                 merge_df.loc[:, col_] = [datetime.datetime.strptime(date_, '%Y-%m-%dT%H:%M:%S.%fZ').date()
-                                         if re.match(r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+Z', date_)
-                                         else datetime.datetime.strptime('2000-01-01', '%Y-%m-%d').date() for date_ in
-                                         merge_df.loc[:, col_]]
-        # print(merge_df)
+                                         if re.match(r'\d+-\d+-\d+T\d+:\d+:\d+\.\d+Z', str(date_))
+                                         else datetime.datetime.strptime('2000-01-01', '%Y-%m-%d').date() for date_
+                                         in merge_df.loc[:, col_]]
         merge_df_columns = list(merge_df.columns)
-        filed_idx = [6, 24, 31, 36, 42, 56, 64, 68, 74, 112]
-        model_list = request.POST['modellist'].split(', ')
-        # print(">>>>>>>>>>>>>> model_list >>>>>>>>")
-        # pprint(model_list)
-        links_dict = {}
-        res_columns_normal = []
-        for m in range(len(models_set2)):
-            if models_set2[m] in model_list:
-                res_columns_normal = res_columns_normal + merge_df_columns[filed_idx[m]:filed_idx[m + 1]]
-                for link in model_links[models_set2[m]]:
-                    links_dict[link] = 1
-        res_columns_link = []
-        for link in special_fields:
-            if link in links_dict:
-                res_columns_link.append(link)
-        res_raw = merge_df[res_columns_link + res_columns_normal]
-        # print(">>>>>>>>>>>> res_raw.column >>>>>>>>>>>>")
-        # pprint(res_raw.columns)
+        model_cols = defaultdict(list)
+        for col_ in merge_df_columns:
+            parts = col_.split(".")
+            if len(parts) > 1:
+                model_cols["join_keys"].append(col_)
+            else:
+                model_cols[parts[0]].append(col_)
+        post_models_index = request.POST['model_index'].split(', ')
+        post_models = [models_set2[int(x)] for x in post_models_index]
+        # 根据post_models提取merge_df
+        cols_filtered = get_merge_df_cols(post_models)["id"]
+        res_raw = merge_df.loc[:, cols_filtered].drop_duplicates()
         res_filtered = res_raw
-        # print(">>>>>>>>> request.POST['queryset'] >>>>>")
-        # print(request.POST['queryset'])
         if request.POST['queryset']:  # 有过滤条件
             filter_total = ""
             for i in request.POST['queryset'].split('\n'):
-                filter_line = pd.Series(data=[True] * len(merge_df))
+                filter_line = pd.Series(data=[True] * res_raw.shape[0])
                 for j in i.split(' AND '):
                     not_, m, f, vp, v = j.split('\t')
                     not_ = not_[1:]
                     v = v[:-1]
-                    # print(">>>>>>>>>> not_, m, f, vp, v >>>>>>>>")
-                    # print("%s, %s, %s, %s, %s" % (not_, m, f, vp, v))
-                    filter_condition = condition_filter(res_raw, f, vp, v, not_) if f in special_fields else \
-                        condition_filter(res_raw, m + '_' + f, vp, v, not_)
-                    # print(">>>>>>>>>> filter_condition >>>>>>>>")
-                    # print(filter_condition)
+                    filter_condition = condition_filter(res_raw, f, vp, v, not_) if f in \
+                                            list(FILECOLUMN_FOREIGNKEY_TO_MODEL.keys()) else \
+                                            condition_filter(res_raw, m + '.' + f, vp, v, not_)
                     filter_line = filter_line & filter_condition
                 filter_total = filter_line if filter_total == "" else filter_total | filter_line
             res_filtered = res_raw[filter_total]
         # make res_pro
-        # print(">>>>>>>>>>>>>> res_filtered >>>>>>>>")
-        # pprint(res_filtered)
-        link_n = 0
-        res_pro_df = pd.DataFrame()
-        for link in special_fields:
-            if link in links_dict:
-                res_pro_df.loc[:, "link%s" % link_n] = list(res_filtered[link])
-                link_n = link_n + 1
-        normal_n = 0
-        for col in res_columns_normal:
-            res_pro_df.loc[:, "normal%s" % normal_n] = list(res_filtered[col])
-            normal_n = normal_n + 1
-        res_pro = res_pro_df.to_dict('records')
-        # print('>>>>>>>>>>>>>> res_pro >>>>>>>>')
-        # print(res_pro)
+        res_pro = res_filtered.to_dict('records')
         result = {
-            'draw': 1,
-            'recordsTotal': len(res_raw),
-            'recordsFiltered': len(res_pro),
-            'data': res_pro
-        }
-        # print(">>>>>>>>>>>>>> result >>>>>>>>")
-        # pprint(result)
+                'draw': 1,
+                'recordsTotal': res_raw.shape[0],
+                'recordsFiltered': len(res_pro),
+                'data': res_pro
+            }
         return JsonResponse(result)
     else:
-        # print("request.method == 'get'")
-        return render(request, 'ADVANCE/AdvancedSearch.html')
+        models_query_index = request.GET.get('models_query_index', None)
+        if models_query_index is None:
+            return render(request, 'ADVANCE/AdvanceSearch.html')
+        else:
+            models_query = [models_set2[int(x)] for x in models_query_index.split(', ')]
+            cols_dict = get_merge_df_cols(models_query)
+            return JsonResponse(cols_dict)
 
 
-def Download_excel(request, model):
+def Download_excel(request, name):
     # print(model)
-    if model == 'BIS_SampleInventoryInfo':
-        file_name = "BIS_SampleInventoryInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'BIS_SampleInfo':
-        file_name = "BIS_SampleInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'BIS_ExtractInfo':
-        file_name = "BIS_ExtractInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'BIS_DNAUsageRecordInfo':
-        file_name = "BIS_DNAUsageRecordInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'LIMS_MethyLibraryInfo':
-        file_name = "LIMS_MethyLibraryInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'LIMS_MethyCaptureInfo':
-        file_name = "LIMS_MethyCaptureInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'LIMS_MethyPoolingInfo':
-        file_name = "LIMS_MethyPoolingInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'SEQ_SequencingInfo':
-        file_name = "SEQ_SequencingInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'SEQ_MethyQCInfo':
-        file_name = "SEQ_MethyQCInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'LIMS_MethyCaptureInfoPlus':
-        file_name = "LIMS_MethyCaptureInfoPlus.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'EMR_ClinicalInfo':
-        file_name = "EMR_ClinicalInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'EMR_FollowupInfo':
-        file_name = "EMR_FollowupInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'EMR_LiverPathologicalInfo':
-        file_name = "EMR_LiverPathologicalInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'EMR_LiverTMDInfo':
-        file_name = "EMR_LiverTMDInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
-    elif model == 'EMR_LiverBiochemInfo':
-        file_name = "EMR_LiverBiochemInfo.template.xlsx"
-        file_path = os.path.join(BASE_DIR, "excelData", file_name)
-        response = StreamingHttpResponse(read_file_by_stream(file_path))
-        response['Content-Type'] = 'application/octet-steam'
-        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-        return response
+    file_name = "{}.template.xlsx".format(name)
+    file_path = os.path.join(BASE_DIR, "excelData", file_name)
+    if not os.path.exists(file_path):
+        return
+    file_path = os.path.join(BASE_DIR, "excelData", file_name)
+    response = StreamingHttpResponse(read_file_by_stream(file_path))
+    response['Content-Type'] = 'application/octet-steam'
+    response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
+    return response
 
 
 def plotDataV(request):

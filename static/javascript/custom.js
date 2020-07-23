@@ -108,3 +108,85 @@ function delete_by_id_simple(url_func, id_func){
   return res;
 }
 
+function changeThreeDecimal_f(x) {
+    let f_x = parseFloat(x);
+    if (isNaN(f_x)) {
+        alert('function:changeTwoDecimal->parameter error');
+        return false;
+    }
+    f_x = Math.round(x * 1000) / 1000;
+    let s_x = f_x.toString();
+    let pos_decimal = s_x.indexOf('.');
+    if (pos_decimal < 0) {
+        pos_decimal = s_x.length;
+        s_x += '.';
+    }
+    while (s_x.length <= pos_decimal + 3) {
+        s_x += '0';
+    }
+    return s_x;
+}
+
+function Median(data_) {
+    return Quartile_50(data_);
+}
+
+function Quartile_25(data_) {
+    return Quartile(data_, 0.25);
+}
+
+function Quartile_50(data_) {
+    return Quartile(data_, 0.5);
+}
+
+function Quartile_75(data_) {
+    return Quartile(data_, 0.75);
+}
+
+function Quartile(data_, q) {
+    data_ = Array_Sort_Numbers(data_);
+    let pos = ((data_.length) - 1) * q;
+    let base = Math.floor(pos);
+    let rest = pos - base;
+    if ((data_[base + 1] !== undefined)) {
+        return data_[base] + rest * (data_[base + 1] - data_[base]);
+    } else {
+        return data_[base];
+    }
+}
+
+function Array_Sort_Numbers(data_) {
+    return data_.sort(function (a, b) {
+        return a - b;
+    });
+}
+
+function Array_Sum(data_) {
+    return data_.reduce(function (a, b) {
+        return a + b;
+    }, 0);
+}
+
+function Array_Average(data_) {
+    return Array_Sum(data_) / data_.length;
+}
+
+function Array_Stdev(data_) {
+    let i, j, total = 0, mean = 0, diff_sqred_arr = [];
+    for (i = 0; i < data_.length; i += 1) {
+        total += data_[i];
+    }
+    mean = total / data_.length;
+    for (j = 0; j < data_.length; j += 1) {
+        diff_sqred_arr.push(Math.pow((data_[j] - mean), 2));
+    }
+    return (Math.sqrt(diff_sqred_arr.reduce(function (firstEl, nextEl) {
+        return firstEl + nextEl;
+    }) / data_.length));
+}
+
+function unique(array) {
+    return $.grep(array, function (el, index) {
+        return index === $.inArray(el, array);
+    });
+}

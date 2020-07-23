@@ -34,10 +34,10 @@ class MethyLibraryInfo(models.Model):
         db_column='建库方法', max_length=50, blank=True, null=True)
     kit_batch = models.CharField(
         db_column='试剂批次', max_length=50, blank=True, null=True)
-    mass = models.FloatField(db_column='起始量', blank=True, null=True)
+    mass = models.FloatField(db_column='起始量(ng)', blank=True, null=True)
     pcr_cycles = models.IntegerField(db_column='PCR循环数', blank=True, null=True)
-    LB_con = models.FloatField(db_column='文库浓度', blank=True, null=True)
-    LB_vol = models.FloatField(db_column='文库体积', blank=True, null=True)
+    LB_con = models.FloatField(db_column='文库浓度(ng/ul)', blank=True, null=True)
+    LB_vol = models.FloatField(db_column='文库体积(ul)', blank=True, null=True)
     operator = models.CharField(
         db_column='操作人', max_length=35, blank=True, null=True)
     memo = models.TextField(
@@ -69,12 +69,12 @@ class MethyCaptureInfo(models.Model):
     hybrid_date = models.DateField(db_column='杂交日期', blank=True, null=True)
     probes = models.CharField(
         db_column='杂交探针', max_length=50, blank=True, null=True)
-    hybrid_min = models.FloatField(db_column='杂交时间', blank=True, null=True)
+    hybrid_min = models.FloatField(db_column='杂交时间(min)', blank=True, null=True)
     postpcr_cycles = models.IntegerField(
         db_column='PostPCR循环数', blank=True, null=True)
     postpcr_con = models.FloatField(
-        db_column='PostPCR浓度', blank=True, null=True)
-    elution_vol = models.FloatField(db_column='洗脱体积', blank=True, null=True)
+        db_column='PostPCR浓度(ng/ul)', blank=True, null=True)
+    elution_vol = models.FloatField(db_column='洗脱体积(ul)', blank=True, null=True)
     operator = models.CharField(
         db_column='操作人', max_length=35, blank=True, null=True)
     memo = models.TextField(
@@ -104,7 +104,7 @@ class MethyPoolingInfo(models.Model):
         db_column='甲基化建库信息',
         blank=True,
         null=True)
-    methycaptureInfo = models.ForeignKey(
+    methycaptureinfo = models.ForeignKey(
         "MethyCaptureInfo",
         on_delete=models.CASCADE,
         related_name='MethyPoolingInfo_MethyCaptureInfo',
@@ -121,8 +121,8 @@ class MethyPoolingInfo(models.Model):
         blank=True,
         null=True)
     pooling_ratio = models.FloatField(db_column='pooling比例', blank=True, null=True)
-    mass = models.FloatField(db_column='取样', blank=True, null=True)
-    volume = models.FloatField(db_column='体积', blank=True, null=True)
+    mass = models.FloatField(db_column='取样(ng)', blank=True, null=True)
+    volume = models.FloatField(db_column='体积(ul)', blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)

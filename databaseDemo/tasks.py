@@ -7,9 +7,9 @@ from django.core.mail import send_mail
 from django.db.models import Q
 
 from USER.models import UserInfo, DatabaseRecord
-from util.merge_df import make_new_merge_df, check_new_merge_df_all
+from util.merge_df import make_new_merge_df_all, make_new_merge_df_partly, check_new_merge_df_all
 from .celerys import app
-from .settings import SERVER_HOST
+from .settings import SERVER_HOST, BASE_DIR
 
 
 @app.task
@@ -30,22 +30,32 @@ def send_register_active_email(to_email, username, token):
 
 
 @app.task
-def make_new_merge_df_by_celery(json_files_tmp, time2):
-    make_new_merge_df(json_files_tmp, time2)
+def make_new_merge_df_partly_by_celery(json_files_tmp, time2, index):
+    make_new_merge_df_partly(json_files_tmp, time2, index)
     return True
 
 
 @shared_task
 def keep_merge_df_newest_by_celery():
-    flag_update, json_files, time2, _ = check_new_merge_df_all()
-    if flag_update:
-        make_new_merge_df(json_files, time2)
+    flag_update_list, time2_list, json_files_list = check_new_merge_df_all()
+    check_new_list = []
+    for i in range(len(flag_update_list)):
+        if flag_update_list[i]:
+            make_new_merge_df_partly(json_files_list[i], time2_list[i], i)
+            check_new_list.append(False)
+        else:
+            check_new_list.append(True)
+
+    if False in check_new_list:
+        make_new_merge_df_all(time2_list, json_files_list)
     return True
 
-@app.task
+
+@shared_task
 def backup_db_by_celery():
-    subprocess.run(["bash", "../bkdb.sh"])
+    subprocess.run(["cd", BASE_DIR, "&&", "bash", "bkdb.sh"])
     return True
+
 
 @shared_task
 def add_modelViewRecord_by_celery(model_, username):
@@ -53,7 +63,14 @@ def add_modelViewRecord_by_celery(model_, username):
     last_record = DatabaseRecord.objects.filter(Q(model_changed=model_) & Q(userinfo=user) & Q(operation="访问")
                                                 ).order_by("-create_time")
     now = datetime.datetime.now()
-    if (now - last_record[0].create_time.replace(tzinfo=None)).seconds > 60:
+    create_bool = True
+    try:
+        if (now - last_record[0].create_time.replace(tzinfo=None)).seconds < 60:
+            create_bool = False
+    except IndexError:
+        pass
+
+    if create_bool:
         new_record = {
             'userinfo': user, 'model_changed': model_,
             'operation': "访问",

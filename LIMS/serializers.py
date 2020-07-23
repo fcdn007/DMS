@@ -34,10 +34,10 @@ class MethyPoolingInfoSerializer(DynamicFieldsModelSerializer):
     create_time = serializers.DateTimeField(format=settings.DATETIME_FORMAT, required=False)
     sampler_id = serializers.CharField(source='sampleinventoryinfo.sampler_id', read_only=True)
     singleLB_id = serializers.CharField(source='methylibraryinfo.singleLB_id', read_only=True)
-    poolingLB_id = serializers.CharField(source='methycaptureInfo.poolingLB_id', read_only=True)
+    poolingLB_id = serializers.CharField(source='methycaptureinfo.poolingLB_id', read_only=True)
 
     class Meta:
         model = MethyPoolingInfo
         fields = ('sampler_id', 'singleLB_id', 'poolingLB_id', 'singleLB_Pooling_id', 'pooling_ratio', 'mass', 'volume',
                   'memo', 'id', 'last_modify_time', 'create_time', 'sampleinventoryinfo', 'methylibraryinfo',
-                  'methycaptureInfo')
+                  'methycaptureinfo')

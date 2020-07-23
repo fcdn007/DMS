@@ -49,8 +49,8 @@
 	  let url1 = '/api/LIMS/Methy/MethyLibraryInfo/';
 	  let url2 = '/api/LIMS/Methy/MethyCaptureInfo/';
 	  let id0 = 0;
-      let bulk_update_bool = {% if perms.BIS.bulk_update_MethyPoolingInfo %} true {% else %} false {% endif %};
-      let bulk_delete_bool = {% if perms.BIS.bulk_delete_MethyPoolingInfo %} true {% else %} false {% endif %};
+      let bulk_update_bool = {% if perms.LIMS.bulk_update_MethyPoolingInfo %} true {% else %} false {% endif %};
+      let bulk_delete_bool = {% if perms.LIMS.bulk_delete_MethyPoolingInfo %} true {% else %} false {% endif %};
 
       function update_func(e, id0){
           e.preventDefault();
@@ -76,7 +76,7 @@
             let method = '';
             let url_ajax0 = url0;
             let send_data0 = $("#modelForm").find(":not(#singleLB_id, #poolingLB_id)").serialize() + '&' + $.param({
-				methylibraryinfo: data1.id, methycaptureInfo: data2.id, sampleinventoryinfo: data1.sampleinventoryinfo
+				methylibraryinfo: data1.id, methycaptureinfo: data2.id, sampleinventoryinfo: data1.sampleinventoryinfo
 			});
             if (type === 'new') {
                 // new
@@ -127,18 +127,19 @@
       let input_params = {
           "title1_text": "甲基化检测 pooling映射信息 总条目数： ",
 		  "fields": [
-              // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
-              // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
-              ["singleLB_id", "建库编号", 1, 0, 1, "text"],
-              ["poolingLB_id", "捕获文库名", 1, 1, 1, "text"],
-              ["singleLB_Pooling_id", "测序文库编号", 1, 2, 1, "text"],
-              ["sampler_id", "华大编号", 0],
-              ["pooling_ratio", "pooling比例", 1, 3, 0, "number_0.001", 1],
-              ["mass", "取样(ng)", 1, 4, 0, "number_0.001", 0],
-              ["volume", "体积(ul)", 1, 5, 0, "number_0.001", 0],
-              ["memo", "备注", 1, 6, 0, "text", "无"],
-              ["last_modify_time", "上次修改时间", 0],
-              ["create_time", "创建时间", 0]
+              //                    [   0,     1,               2,               3,             4,       5,       6,        7  ]
+              // input类型是select： [ field, name, 在table中是否可排序/搜索, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
+              // input类型不是select： [ field, name, 在table中是否可排序/搜索, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
+              ["singleLB_id", "建库编号", 0, 1, 0, 1, "text"],
+              ["poolingLB_id", "捕获文库名", 0, 1, 1, 1, "text"],
+              ["singleLB_Pooling_id", "测序文库编号", 1, 1, 2, 1, "text"],
+              ["sampler_id", "华大编号", 0, 0],
+              ["pooling_ratio", "pooling比例", 1, 1, 3, 0, "number_0.001", 1],
+              ["mass", "取样(ng)", 1, 1, 4, 0, "number_0.001", 0],
+              ["volume", "体积(ul)", 1, 1, 5, 0, "number_0.001", 0],
+              ["memo", "备注", 1, 1, 6, 0, "text", "无"],
+              ["last_modify_time", "上次修改时间", 1, 0],
+              ["create_time", "创建时间", 1, 0]
           ],
           "update_func": update_func,
           "delete_func": simple_delete_func,

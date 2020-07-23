@@ -50,6 +50,10 @@
 <h3 class="card-title" id="card-title1"></h3>
 {% endblock %}
 
+{% block plot_card %}
+
+{% endblock %}
+
 {% block modal_html %}
 <!-- NEW and EDIT Modal -->
 <div class="modal fade" id="myModal">
@@ -95,7 +99,7 @@
                         <input type="text" class="form-control" id="uploadUrl" name="uploadUrl"
                                placeholder="请输入数据表名称" required="true">
                     </div>
-                    <div class="form-group" id="upload_file">
+                    <div class="form-group">
                         <label for="uploadFile"> 上传文件</label>
                         <input type="file" class="form-control" id="uploadFile" name="uploadFile"
                                placeholder="请上传文件" required="true">
@@ -103,6 +107,10 @@
                     <button id='uploadSubmit' type="submit" class="btn btn-success btn-block">提交上传</button>
                 </form>
                 <br>
+                <div>
+                    <i class="loading-indicator fas fa-sync fa-spin fa-2x" style="display:none;color: blue;margin-left: 6em"></i>
+<!--                <img src="{% static 'image/ajax-loader.gif' %}" id="loading-indicator" class = "modal-body" style="display:none;left: 12em">-->
+                </div>
                 <dl>
                     <dt class="text-primary front-weight-bold">上传结果信息：</dt>
                     <dd id="uploadInfo" class="text-primary" style="white-space: pre-line"></dd>
@@ -196,6 +204,7 @@
 
         // 生成table的表头和table的columns变量
         let table_columns = [];
+        let table_columnDefs = [];
         let hide_col = [];
         let modal_dict = {};
         let new_modal_fields = [];
@@ -212,39 +221,42 @@
         $.each(input_params.fields, function (i, v) {
             tmp_id.append("<th>" + v[1] + "</th>");
             table_columns.push({ "data": v[0] });
+            if (v[2] === 0) {
+                table_columnDefs.push({ "searchable": false, "orderable": false, "targets": i+1 })
+            }
 
-            if (v[2] === 1){ // 出现在modal
+            if (v[3] === 1){ // 出现在modal
                 let label_str = '<label for="' + v[0] + '"> ' + v[1] + '</label>';
                 edit_modal_fields.push(v[0]);
                 let input_str;
                 // 根据input类型生成input_str
-                if (v[5]==='select') {
+                if (v[6] === 'select') {
                     input_str = '<select type="text" class="form-control" id="' + v[0] + '" name="' + v[0] + '" ';
-                } else if (v[5]==='select_multiple'){
+                } else if (v[6] === 'select_multiple'){
                     input_str = '<select type="text" class="form-control" multiple="multiple" id="' + v[0] + '" name="' + v[0] + '" ';
-                } else if (v[5]==='text'){
+                } else if (v[6] === 'text'){
                     input_str = '<input type="text" class="form-control" id="' + v[0] + '" name="' + v[0] +
                         '" placeholder="请输入' + v[1];
-                } else if (v[5]==='number_1'){
+                } else if (v[6] === 'number_1'){
                     input_str = '<input type="number" step="1" class="form-control" id="' + v[0] + '" name="' + v[0] +
                         '" placeholder="请输入' + v[1];
-                } else if (v[5]==='number_0.001'){
+                } else if (v[6] === 'number_0.001'){
                     input_str = '<input type="number" step="0.001" class="form-control" id="' + v[0] + '" name="' + v[0] +
                         '" placeholder="请输入' + v[1];
-                } else if (v[5]==='number_0.0001'){
+                } else if (v[6] === 'number_0.0001'){
                     input_str = '<input type="number" step="0.0001" class="form-control" id="' + v[0] + '" name="' + v[0] +
                         '" placeholder="请输入' + v[1];
-                } else if (v[5]==='date'){
+                } else if (v[6] === 'date'){
                     input_str = '<input type="date" class="form-control" id="' + v[0] + '" name="' + v[0] +
                         '" placeholder="请输入' + v[1];
                 }
-                modal_dict[v[3]] = '<div class="form-group">';
-                if (v[4] === 1){
+                modal_dict[v[4]] = '<div class="form-group">';
+                if (v[5] === 1){
                     // 如果必填，label前面增加*号
-                    modal_dict[v[3]] += '<span><a class="text-danger front-weight-bold">* </a>' + label_str + '</span>';
-                    if (v[5] === 'select' || v[5] === 'select_multiple') {
+                    modal_dict[v[4]] += '<span><a class="text-danger front-weight-bold">* </a>' + label_str + '</span>';
+                    if (v[6] === 'select' || v[6] === 'select_multiple') {
                         input_str += 'required="true">';
-                        $.each(v[6], function (i2, v2) {
+                        $.each(v[7], function (i2, v2) {
                             if (i2===0){
                                 input_str += '<option value="' + v2[0] + '" selected="selected">' + v2[1] + '</option>';
                             } else {
@@ -257,10 +269,10 @@
                         input_str += '，必填" required="true">';
                     }
                 } else {
-                    modal_dict[v[3]] += label_str;
-                    if (v[5] === 'select') {
+                    modal_dict[v[4]] += label_str;
+                    if (v[6] === 'select') {
                         input_str += '>';
-                        $.each(v[6], function (i2, v2) {
+                        $.each(v[7], function (i2, v2) {
                             if (i2===0){
                                 input_str += '<option value="' + v2[0] + '" selected="selected">' + v2[1] + '</option>';
                             } else {
@@ -269,11 +281,11 @@
                         });
                         input_str += '</select>';
                     } else {
-                        input_str += '，默认：' + v[6] + '" value="' + v[6] + '">';
+                        input_str += '，默认：' + v[7] + '" value="' + v[7] + '">';
                     }
                 }
-                modal_dict[v[3]] += input_str;
-                modal_dict[v[3]] += '</div>';
+                modal_dict[v[4]] += input_str;
+                modal_dict[v[4]] += '</div>';
             }
         });
         tmp_id.append("<th>操作</th>");
@@ -283,7 +295,8 @@
                 '<button type="button" class="btn btn-danger mt-1 ml-1">删除</button>'
         });
         if (table_columns.length > 7) {
-            hide_col = range(6, table_columns.length-1)
+            hide_col = range(6, table_columns.length-1);
+            table_columnDefs.push({ "targets": hide_col, "visible": false })
         }
 
         // 生成modal
@@ -424,7 +437,7 @@
             "serverSide": true, "processing": true,
             "deferRender": true, "dom": 'rBlftip',
             "buttons": buttons_list, "ajax": url0 + "?format=datatables",
-            "columns": table_columns, "columnDefs": [ {"targets": hide_col, "visible": false}]
+            "columns": table_columns, "columnDefs": table_columnDefs
         });
         $('#table tbody').on( 'click', 'tr', function () {
             $(this).toggleClass('selected');

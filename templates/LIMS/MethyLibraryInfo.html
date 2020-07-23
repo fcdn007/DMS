@@ -38,8 +38,8 @@
       let url1 = '/api/BIS/ExtractInfo/';
       let url2 = '/api/BIS/DNAUsageRecordInfo/';
       let id0 = 0;
-      let bulk_update_bool = {% if perms.BIS.bulk_update_MethyLibraryInfo %} true {% else %} false {% endif %};
-      let bulk_delete_bool = {% if perms.BIS.bulk_delete_MethyLibraryInfo %} true {% else %} false {% endif %};
+      let bulk_update_bool = {% if perms.LIMS.bulk_update_MethyLibraryInfo %} true {% else %} false {% endif %};
+      let bulk_delete_bool = {% if perms.LIMS.bulk_delete_MethyLibraryInfo %} true {% else %} false {% endif %};
 
       function update_func(e, id0){
           e.preventDefault();
@@ -264,28 +264,29 @@
       let input_params = {
           "title1_text": "甲基化检测 甲基化建库信息 总条目数： ",
 		  "fields": [
-              // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
-              // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
-              ["singleLB_id", "建库编号", 1, 1, 1, "text"],
-              ["sampler_id", "华大编号", 0],
-              ["dna_id", "核酸提取编号", 1, 0, 1, "text"],
-              ["tube_id", "管上编号", 1, 2, 0, "text", "无"],
-              ["clinical_boolen", "是否临床", 1, 3, 1, "select", [["是", "是"], ["否", "否"]]],
-              ["label", "样本标签", 1, 4, 1, "select", [["P", "P"], ["T", "T"],["Frg_gDNA", "Frg_gDNA"]]],
-              ["singleLB_name", "文库名", 1, 5, 0, "text", "无"],
-              ["barcodes", "index列表", 1, 6, 0, "text", "无"],
-              ["LB_date", "建库日期", 1, 7, 1, "date"],
-              ["LB_method", "建库方法", 1, 8, 0, "text", "无"],
-              ["kit_batch", "试剂批次", 1, 9, 0, "text", "无"],
-              ["dna_con", "核酸样本浓度(ug/ul)", 0],
-              ["mass", "起始量(ng)", 1, 10, 1, "number_0.001"],
-              ["pcr_cycles", "PCR循环数", 1, 11, 0, "number_1", 0],
-              ["LB_con", "文库浓度(ng/ul)", 1, 12, 0, "number_0.001", 0],
-              ["LB_vol", "文库体积(ul)", 1, 13, 0, "number_0.001", 0],
-              ["operator", "操作人", 1, 14, 0, "text", "无"],
-              ["memo", "备注", 1, 15, 0, "text", "无"],
-              ["last_modify_time", "上次修改时间", 0],
-              ["create_time", "创建时间", 0]
+              //                    [   0,     1,               2,               3,             4,       5,       6,        7  ]
+              // input类型是select： [ field, name, 在table中是否可排序/搜索, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
+              // input类型不是select： [ field, name, 在table中是否可排序/搜索, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
+              ["singleLB_id", "建库编号", 1, 1, 1, 1, "text"],
+              ["sampler_id", "华大编号", 0, 0],
+              ["dna_id", "核酸提取编号", 0, 1, 0, 1, "text"],
+              ["tube_id", "管上编号", 1, 1, 2, 0, "text", "无"],
+              ["clinical_boolen", "是否临床", 1, 1, 3, 1, "select", [["是", "是"], ["否", "否"]]],
+              ["label", "样本标签", 1, 1, 4, 1, "select", [["P", "P"], ["T", "T"],["Frg_gDNA", "Frg_gDNA"]]],
+              ["singleLB_name", "文库名", 1, 1, 5, 0, "text", "无"],
+              ["barcodes", "index列表", 1, 1, 6, 0, "text", "无"],
+              ["LB_date", "建库日期", 1, 1, 7, 1, "date"],
+              ["LB_method", "建库方法", 1, 1, 8, 0, "text", "无"],
+              ["kit_batch", "试剂批次", 1, 1, 9, 0, "text", "无"],
+              ["dna_con", "核酸样本浓度(ug/ul)", 0, 0],
+              ["mass", "起始量(ng)", 1, 1, 10, 1, "number_0.001"],
+              ["pcr_cycles", "PCR循环数", 1, 1, 11, 0, "number_1", 0],
+              ["LB_con", "文库浓度(ng/ul)", 1, 1, 12, 0, "number_0.001", 0],
+              ["LB_vol", "文库体积(ul)", 1, 1, 13, 0, "number_0.001", 0],
+              ["operator", "操作人", 1, 1, 14, 0, "text", "无"],
+              ["memo", "备注", 1, 1, 15, 0, "text", "无"],
+              ["last_modify_time", "上次修改时间", 1, 0],
+              ["create_time", "创建时间", 1, 0]
           ],
           "update_func": update_func,
           "delete_func": delete_func,

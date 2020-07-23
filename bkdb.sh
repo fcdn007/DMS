@@ -8,7 +8,7 @@ workdir="/home/wsl/mnt/f/wsl/project/databaseDemo2/mysql_backup"
 mysqldump --flush-logs --single-transaction -udjango -pdjango databaseDemo2 | gzip > $workdir/databaseDemo_$(date +%Y%m%d_%H%M%S).sql.gz
 # 恢复mysql数据
 # gzip -dc $workdir/databaseDemo_*.sql.gz > $workdir/databaseDemo_*.sql
-# mysql -udjango -pdjango databaseDemo < $workdir/databaseDemo_*.sql
+# mysql -udjango -pdjango databaseDemo2 < $workdir/databaseDemo_*.sql
 do_delete(){
 	echo -e "Prepare to delete outdated files in $workdir"
 	find $workdir -name "*.sql.gz" -and -mtime +$number -type f -delete

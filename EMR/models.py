@@ -13,9 +13,9 @@ class ClinicalInfo(models.Model):
         blank=True,
         null=True)
     patientId = models.CharField(
-        db_column='住院号', max_length=35, blank=True, null=True)
+        db_column='住院号', max_length=35)
     hospital = models.CharField(
-        db_column='医院编号', max_length=50, blank=True, null=True)
+        db_column='医院编号', max_length=50)
     department = models.CharField(
         db_column='科室', max_length=50, blank=True, null=True)
     name = models.CharField(
@@ -122,7 +122,7 @@ class LiverPathologicalInfo(models.Model):
     tumor1_diam = models.FloatField(db_column='肿瘤1直径', blank=True, null=True)
     tumor2_diam = models.FloatField(db_column='肿瘤2直径', blank=True, null=True)
     tumor3_diam = models.FloatField(db_column='肿瘤3直径', blank=True, null=True)
-    capsule = models.CharField(db_column='肝包膜侵犯（肝被膜）', max_length=15, blank=True, null=True)
+    capsule = models.CharField(db_column='肝包膜侵犯(肝被膜)', max_length=15, blank=True, null=True)
     lmr = models.CharField(db_column='淋巴结转移', max_length=255, blank=True, null=True)
     lmr_category = models.CharField(db_column='淋巴结转移类型', max_length=15, blank=True, null=True)
     vi_bool = models.CharField(
@@ -167,7 +167,7 @@ class TMDInfo(models.Model):
         blank=True,
         null=True)
     check_date = models.DateField(
-        db_column='检查日期', blank=True, null=True)
+        db_column='检查日期')
     check_stage = models.CharField(
         db_column='检查阶段', max_length=255, blank=True, null=True)
     check_item1 = models.CharField(
@@ -207,8 +207,8 @@ class TMDInfo(models.Model):
         verbose_name = '肿瘤标志物检测结果信息表'
         ordering = ['-id']
         permissions = [
-            ("bulk_delete_LiverTMDInfo", "Can bulk delete 肿瘤标志物检测结果信息表"),
-            ("bulk_update_LiverTMDInfo", "Can bulk update 肿瘤标志物检测结果信息表"),
+            ("bulk_delete_TMDInfo", "Can bulk delete 肿瘤标志物检测结果信息表"),
+            ("bulk_update_TMDInfo", "Can bulk update 肿瘤标志物检测结果信息表"),
         ]
 
 
@@ -228,7 +228,7 @@ class BiochemInfo(models.Model):
         blank=True,
         null=True)
     check_date = models.DateField(
-        db_column='检查日期', blank=True, null=True)
+        db_column='检查日期')
     check_stage = models.CharField(
         db_column='检查阶段', max_length=255, blank=True, null=True)
     check_item1 = models.CharField(

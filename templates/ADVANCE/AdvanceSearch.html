@@ -1,0 +1,1119 @@
+{% extends "../single_page.html" %}
+{% load static %}
+{% load cache %}
+
+{% block specific_page_css %}
+	<link rel="stylesheet" href="{% static 'AdminLTE/plugins/select2/css/select2.min.css' %}">
+	<link rel="stylesheet" href="{% static 'AdminLTE/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
+	<style>
+        button.button_group1+div+div {
+            width: 200px;
+            margin-top: 7px;
+            margin-left: 1em;
+            z-index: 1000;
+        }
+        .select2-results__option[aria-selected=true] {
+            display: none;
+        }
+  </style>
+{% endblock %}
+
+{% block title %}
+<title>高级功能 高级搜索</title>
+{% endblock %}
+
+{% block header_title %}
+<h1>高级搜索</h1>
+{% endblock %}
+
+{% block header_ol %}
+	<li class="breadcrumb-item"><a href="/Home/">Home</a></li>
+	<li class="breadcrumb-item">ADVANCE</li>
+	<li class="breadcrumb-item active">AdvanceSearch</li>
+{% endblock %}
+
+{% cache 600 card-body  %}
+{% block card-body %}
+<div id="card1-body" hidden="hidden">
+    <form id="searchForm1" role="form">
+        <p class="bg-info text-white text-lg">设置查询表</p>
+        <div class="form-group">
+            <div class="form-inline">
+                <label for="EMR_models">病历信息管理</label>
+                <div class="custom-control custom-checkbox ml-4">
+                    <input class="custom-control-input partAll" type="checkbox"  id="set1All">
+                    <label class="custom-control-label"  for="set1All">选取全部</label>
+                </div>
+            </div>
+            <select class="js-example-basic-multiple form-control" name="EMR_models" id="EMR_models" multiple="multiple">
+                <option value="ClinicalInfo">临床信息概述</option>
+                <optgroup label="病理报告信息">
+                    <option value="LiverPathologicalInfo">肝癌</option>
+                </optgroup>
+                <optgroup label="医院检查项目信息">
+                    <option value="TMDInfo">肿瘤标志物检测</option>
+                    <option value="BiochemInfo">生化检测</option>
+                </optgroup>
+                <option value="FollowupInfo">随访信息</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <div class="form-inline">
+                <label for="BIS_models">样本库信息管理</label>
+                <div class="custom-control custom-checkbox ml-4">
+                    <input class="custom-control-input partAll" type="checkbox"  id="set2All">
+                    <label class="custom-control-label"  for="set2All">选取全部</label>
+                </div>
+            </div>
+            <select class="js-example-basic-multiple form-control" name="BIS_models" id="BIS_models" multiple="multiple">
+                <option value="SampleInventoryInfo">样本库存信息</option>
+                <option value="SampleInfo">样本信息</option>
+                <option value="ExtractInfo">核酸提取信息</option>
+                <option value="DNAUsageRecordInfo">核酸使用记录信息</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <div class="form-inline">
+                <label for="LIMS_models">实验项目信息管理</label>
+                <div class="custom-control custom-checkbox ml-4">
+                    <input class="custom-control-input partAll" type="checkbox"  id="set3All">
+                    <label class="custom-control-label"  for="set3All">选取全部</label>
+                </div>
+            </div>
+            <select class="js-example-basic-multiple form-control" name="LIMS_models" id="LIMS_models" multiple="multiple">
+                <optgroup label="甲基化检测">
+                    <option value="MethyLibraryInfo">甲基化建库信息</option>
+                    <option value="MethyCaptureInfo">捕获文库信息</option>
+                    <option value="MethyPoolingInfo">pooling映射信息</option>
+                </optgroup>
+            </select>
+        </div>
+        <div class="form-group">
+            <div class="form-inline">
+                <label for="SEQ_models">样本库信息管理</label>
+                <div class="custom-control custom-checkbox ml-4">
+                    <input class="custom-control-input partAll" type="checkbox"  id="set4All">
+                    <label class="custom-control-label"  for="set4All">选取全部</label>
+                </div>
+            </div>
+            <select class="js-example-basic-multiple form-control" name="SEQ_models" id="SEQ_models" multiple="multiple">
+                <option value="SequencingInfo">测序上机信息</option>
+                <optgroup label="QC信息">
+                    <option value="MethyQCInfo">甲基化检测</option>
+                </optgroup>
+            </select>
+        </div>
+        <div class="custom-control custom-checkbox">
+            <input class="custom-control-input" type="checkbox" id="modelAll">
+            <label for="modelAll" class="custom-control-label">选取所有表</label>
+        </div>
+    </form>
+    <form id="searchForm2" role="form">
+        <p class="bg-info text-white mt-2 text-lg"> 设置过滤条件</p>
+        <div class="form-inline mb-1 search_condition" id="condition1">
+            <span class="text-info h6 mr-3">过滤条件1</span>
+            <div class="form-group mr-2">
+                <select class="form-control SearchNot" id="SearchNot1" name="SearchNot1" required="true">
+                    <option value="0" selected="selected"></option>
+                    <option value="1">非</option>
+                </select>
+            </div>
+            <div class="form-group mr-2">
+                <label class="mr-1" for="SearchModelName1">查询子表及字段</label>
+                <select class="form-control SearchModelName" name="SearchModelName1" id="SearchModelName1"
+                        required="true"></select>
+            </div>
+            <select class="form-control SearchFieldValuePre mr-2" id="SearchFieldValuePre1"
+                            name="SearchFieldValuePre1" required="true">
+                <option value="exact" selected="selected">等于(大小写严格匹配)</option>
+                <option value="iexact">等于(忽略大小写)</option>
+                <option value="contains">包含(大小写严格匹配)</option>
+                <option value="icontains">包含(忽略大小写)</option>
+                <option value="gt">大于</option>
+                <option value="gte">大于等于</option>
+                <option value="lt">小于</option>
+                <option value="lte">小于等于</option>
+            </select>
+            <div class="form-group">
+                <input type="text" class="form-control SearchFieldValue" placeholder="请输入查询字段值"
+                        id="SearchFieldValue1">
+            </div>
+        </div>
+    </form>
+    <div class="form-inline my-2">
+        <button id='textareaAdd' class="btn btn-primary btn-sm mr-3">确认过滤条件</button>
+        <button id='conditionAdd' class="btn btn-info btn-sm mr-3">添加过滤条件</button>
+    </div>
+    <form id="searchForm3" role="form">
+        <p class="bg-info text-white mt-2 text-lg">过滤条件如下:</p>
+        <textarea class="form-control" rows="3" id="SearchText" name="SearchText"></textarea>
+        <div class="form-inline my-2">
+            <button id='textareaSubmit' type="submit" class="btn btn-primary btn-sm mr-3">查询</button>
+            <button id='textareaClear' type="button" class="btn btn-warning btn-sm mr-3">清除过滤条件</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% endcache %}
+
+{% block plot_card %}
+<div class="row">
+    <div class="col-12">
+        <div class="card card-info collapsed-card">
+            <div class="card-header">
+                <h3 class="card-title">可视化</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row" id="resetPlot">
+                    <div id="plot_highcharts" style="width: 550px; height: 600px; margin: 0 auto" class="col-9"></div>
+                    <div id="plot_button" class="form-group col-3">
+                        <label for="plot_highcharts_class"> 请选择画图类型</label>
+                        <select class="form-control" id="plot_highcharts_class">
+                            <option value="None" selected="selected">---</option>
+                            <option value="pie">饼图</option>
+                            <option value="scatter">散点图</option>
+                        </select>
+                        <div id="plot_highcharts_input"></div>
+                        <br>
+                        <button type="button" class="btn btn-primary" id="plotShow">确认</button>
+                        <p id="plotShowError"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card card-info">
+            <div class="card-header">
+                <h3 class="card-title">查询结果</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="resetTable"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modal_html %}
+
+{% endblock %}
+
+{% block modal_js %}
+
+{% endblock %}
+
+<!-- page script -->
+{% block page-script %}
+<script src="{% static 'AdminLTE/plugins/select2/js/select2.min.js' %}"></script>
+
+<script>
+    function get_merge_df_cols(){
+        let models_query_index_tmp = [];
+        let models_set2 = ["SampleInventoryInfo", "SampleInfo", "ExtractInfo", "DNAUsageRecordInfo",
+            "MethyLibraryInfo", "MethyCaptureInfo", "MethyPoolingInfo",
+            "SequencingInfo", "MethyQCInfo",
+            "ClinicalInfo", "FollowupInfo", "LiverPathologicalInfo", "TMDInfo", "BiochemInfo"];
+        // 获取想要查询的表
+        $.each(["#EMR_models", "#BIS_models", "#LIMS_models", "#SEQ_models"], function (i, v) {
+            let models_data = $(v).select2("data");
+            if (models_data.length > 0){
+                $.each(models_data, function (i2, v2) {
+                    models_query_index_tmp.push(models_set2.indexOf(v2.id));
+                });
+            }
+        });
+        let field_dict_tmp = $.ajax({
+            url: "{% url 'ADVANCE:AdvanceSearch' %}", data: {models_query_index: models_query_index_tmp.join(", ")},
+            dataType: 'json', contentType: "application/json",
+            method: "GET", async: false
+        }).responseJSON;
+        return {"models_query_index": models_query_index_tmp, "field_dict": field_dict_tmp}
+    }
+
+    function split_model_field(input_str){
+        let join_field = {
+            "sampler_id": "SampleInventoryInfo", "sample_id": "SampleInfo", "dna_id": "ExtractInfo",
+            "singleLB_id": "MethyLibraryInfo", "poolingLB_id": "MethyCaptureInfo", 'singleLB_Pooling_id': "MethyPoolingInfo",
+            'sequencing_id': "SequencingInfo",
+            'clinical_id': "ClinicalInfo"
+        };
+        let pattern = /^.+__.+$/;
+        let input_model, input_field;
+        if (pattern.test(input_str) === true){
+            let inputs = input_str.split("__");
+            input_model = inputs[0];
+            input_field = inputs[1];
+        } else {
+            input_model = join_field[input_str];
+            input_field = input_str;
+        }
+        return {"model":input_model, "field": input_field}
+    }
+
+	$(document).ready(function () {
+        $("#sidebar_ADVANCE>a").addClass("active");
+        $("#sidebar_ADVANCE").addClass("menu-open");
+        $("#sidebar_ADVANCE>ul>li:eq(0)>a").addClass("active");
+        $(".sidebar").removeAttr("hidden");
+
+        $(".js-example-basic-multiple").select2({
+            placeholder: '请选择需要查询子表',
+            allowClear: true
+        });
+
+        let plotClass = $('#plot_highcharts_class');
+        let plot_highcharts_input = $("#plot_highcharts_input");
+        let plot_highcharts = $('#plot_highcharts');
+        let plotShowError = $("#plotShowError");
+        let models_query_index = [], field_dict = "None", ajax_output;
+        let conditionAdd = 1;
+        let table_element = $("#resetTable");
+
+        // 生成查询条件栏
+        $.each(range(2, 11), function (i, v) {
+            let html_str = '<div class="form-inline mb-1 search_condition" id="condition' + v + '">';
+            html_str += '<span class="text-info h6 mr-3">过滤条件' + v + '</span><div class="form-group mr-2">';
+            html_str += '<select class="form-control SearchNot" id="SearchNot' + v + '" name="SearchNot' + v + '"">';
+            html_str += '<option value="0" selected="selected"></option><option value="1">非</option></select></div>';
+            html_str += '<div class="form-group mr-2"><label class="mr-1" for="SearchModelName' + v + '">查询子表及字段</label>';
+            html_str += '<select class="form-control SearchModelName" name="SearchModelName' + v + '" id="SearchModelName' + v + '"></select>';
+            html_str += '</div><select class="form-control SearchFieldValuePre mr-2" id="SearchFieldValuePre' + v + '" name="SearchFieldValuePre' + v + '" >';
+            html_str += '<option value="exact" selected="selected">等于(大小写严格匹配)</option><option value="iexact">等于(忽略大小写)</option>';
+            html_str += '<option value="contains">包含(大小写严格匹配)</option><option value="icontains">包含(忽略大小写)</option>';
+            html_str += '<option value="gt">大于</option><option value="gte">大于等于</option>';
+            html_str += '<option value="lt">小于</option><option value="lte">小于等于</option></select>';
+            html_str += '<div class="form-group"><input type="text" class="form-control SearchFieldValue" placeholder="请输入查询字段值" ';
+            html_str += 'id="SearchFieldValue' + v + '"></div></div>';
+            $('#searchForm2').append(html_str);
+            $('#condition' + v).hide();
+        });
+        $("#card1-body").removeAttr("hidden");
+
+        $("input.partAll").change(function (e) {
+            e.preventDefault();
+            if ($(this).prop("checked") === true) {
+                $(this).parent().parent().next().select2('destroy').find('option').prop('selected', 'selected').end().select2();
+            } else {
+                $(this).parent().parent().next().select2('destroy').find('option').prop('selected', false).end().select2();
+            }
+        });
+
+        $("#modelAll").change(function (e) {
+            e.preventDefault();
+            if ($(this).prop("checked") === true) {
+                $.each(["#EMR_models", "#BIS_models", "#LIMS_models", "#SEQ_models"], function (i, v) {
+                    $(v).select2('destroy').find('option').prop('selected', 'selected').end().select2();
+                });
+            } else {
+                $.each(["#EMR_models", "#BIS_models", "#LIMS_models", "#SEQ_models"], function (i, v) {
+                    $(v).select2('destroy').find('option').prop('selected', false).end().select2();
+                });
+                $("input.partAll").prop("checked", false);
+            }
+        });
+
+        // 查询子表及字段下拉选框
+        $('.search_condition .SearchModelName').focus(function () {
+            $(this).empty();
+            $(this).parents('.search_condition').find('.SearchFieldValuePre').val('exact');
+            $(this).parents('.search_condition').find('.SearchFieldValue').val("");
+            let tmp_res = get_merge_df_cols();
+            models_query_index = tmp_res.models_query_index;
+            field_dict = tmp_res.field_dict;
+            let str = "";
+            $.each(field_dict['id'], function (i, v) {
+                str += '<option value="' + v +
+                    '">' + field_dict['name'][i] + '</option>';
+            });
+            $(this).append(str);
+        });
+
+        // 查询字段值下拉选框
+        $('.search_condition .SearchFieldValue').focus(function () {
+            // 获取想要查询的字段值
+            $(this).empty();
+            let key = $(this).parents('.search_condition').find('.SearchModelName').val();
+            let dict_model_field = split_model_field(key);
+            let input_model = dict_model_field.model, input_field = dict_model_field.field;
+            let values = $.ajax({
+                url: "{% url 'ADVANCE:unique' %}", data: {model: input_model, filed: input_field},
+                dataType: 'json', contentType: "application/json",
+                method: "GET", async: false
+            }).responseJSON.values;
+            // console.info("values:", values, "; id:", $(this).attr("id"));
+            input_autocomplete(values, '#' + $(this).attr("id"));
+        });
+
+        // 实现"添加过滤条件"按钮的功能
+        $('#conditionAdd').click(function (e) {
+            e.preventDefault();
+            conditionAdd += 1;
+            $('#condition' + conditionAdd).show();
+            if (conditionAdd === 10) {
+                $('#conditionAdd').attr("disabled", true);
+            }
+        });
+
+        // 实现"添加到文本框"按钮的功能
+        $('#textareaAdd').click(function (e) {
+            e.preventDefault();
+            let text = ''; // 储存值
+            for (let i = 1; i <= 10; i++) {
+                let not = $('#SearchNot' + i).val(); //获取查询运算符1
+                let valuePre = $('#SearchFieldValuePre' + i).val(); //获取运算符2
+                let value = $('#SearchFieldValue' + i).val(); //获取查询字段值
+                let key = $('#SearchModelName' + i).val();
+                let dict_model_field = split_model_field(key);
+                let model = dict_model_field.model, name = dict_model_field.field; //获取查询子表及字段
+                if (!model && !name && !value) {
+                    // do nothing
+                } else {
+                    if (!text) {
+                        text = '(' + not + "\t" + model + "\t" + name + "\t" + valuePre + "\t" + value + ')';
+                    } else {
+                        text += ' AND (' + not + "\t" + model + "\t" + name + "\t" + valuePre + "\t" +
+                            value + ')';
+                    }
+                }
+            }
+            $("#SearchText").val(text);  //最后再直接输入到文本框，覆盖原本的值
+            // 复位过滤条件
+            $('.search_condition .SearchNot').val("0");
+            $('.search_condition .SearchModelName').empty();
+            $('.search_condition .SearchFieldValuePre').val('exact');
+            $('.search_condition .SearchFieldValue').val("");
+            // 复位"添加过滤条件"按钮
+            for (; conditionAdd > 1; conditionAdd--) {
+                $('#condition' + conditionAdd).hide();
+            }
+            $('#conditionAdd').attr("disabled", false);
+        });
+
+        // 实现"清除"按钮的功能
+        $('#textareaClear').click(function (e) {
+            e.preventDefault();
+            $("#SearchText").val("");
+        });
+
+        // 实现"查询"按钮的功能
+        $('#textareaSubmit').click(function (e) {
+            e.preventDefault();
+            // let plot_element = $("#resetPlot");
+            table_element.empty(); //再次click后，先将datatable删除
+            plot_highcharts_input.empty(); //先将plot_highcharts_input删除
+            plot_highcharts.empty(); //先将plot_highcharts删除
+            plotShowError.text(""); //先将plotShowError删除
+            plotClass.val("None");
+            // 获取想要查询的表
+            // 根据查询模型生成table列标题，前面列固定为连接字段数组(['华大编号', '生物样本编号', '核酸提取编号', '建库编号',
+            // 'pooling号', '文库编号', '测序编号', '病历编号'])中的元素，后面为各表自定义字段
+            let tableId = []; // 构建request返回数据对应的col数组
+            tableId.push({
+                data: 'index',
+                width: "1%",
+                // 若想前端显示的不一样，则需要"render"函数
+                'render': function (data, type, full, meta) {
+                    return meta.row + 1 + meta.settings._iDisplayStart;
+                }
+            });
+            // 如果field_dict为空，用ajax获取选取子表的字段字典
+            if(models_query_index.length === 0) {
+                let tmp_res = get_merge_df_cols();
+                models_query_index = tmp_res.models_query_index;
+                field_dict =  tmp_res.field_dict;
+            }
+
+            let resetTable_html = '<table id="table_id" class="display"><thead><tr><th>索引</th>'; // 储存生成的html代码
+            $.each(field_dict['name'], function (i, v) {
+                resetTable_html += '<th>' + v + '</th>'; // 记录各表自定义字段名称
+                tableId.push({"data": field_dict['id'][i]});
+            });
+            resetTable_html += '</tr></thead></table>';
+            table_element.append(resetTable_html); //插入html代码
+            let table = $('#table_id').DataTable({
+                "paging": true, "ordering": true,
+                "info": true, "autoWidth": false,
+                "responsive": false, "pagingType": "full_numbers",
+                "language": {
+                    "lengthMenu": "选择每页 _MENU_ 展示 ",
+                    "zeroRecords": "未找到匹配结果--抱歉",
+                    "info": "当前显示第 _PAGE_ 页结果，共 _PAGES_ 页",
+                    "infoEmpty": "没有数据",
+                    "search": "搜索",
+                    "infoFiltered": "(获取 _MAX_ 项结果)",
+                    "paginate": {
+                        "first": "首页", "previous": "上一页",
+                        "next": "下一页", "last": "末页"
+                    },
+                    "select": {
+                        "rows": "%d行已选"
+                    }
+                },
+                "scrollY": "500px", "scrollCollapse": true,
+                "scrollX": true, "fixedColumns": true,
+                "rowReorder": true, "colReorder": true,
+                "searching": true, "select": true,
+                "fixedHeader": true, "lengthChange": true,
+                "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]],
+                "serverSide": true, "processing": true,"dom": 'rBlftip',
+                "buttons": [
+                    {
+                        extend: 'selectNone', text: '取消当前选择',
+                        className: 'btn btn-secondary fas fa-ban my-1',
+                    },
+                    {
+                        extend: 'collection', text: '输出',
+                        className: 'btn btn-primary far fa-save my-1 dropdown-toggle button_group2',
+                        buttons: [
+                            {
+                                extend: 'copy', text: '所选复制到剪切板',
+                                className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-copy my-1'
+                            },
+                            {
+                                extend: 'csv', text: '所选输出到csv',
+                                className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-csv my-1'
+                            },
+                            {
+                                extend: 'csv', text: '全部输出到csv',
+                                className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-excel my-1',
+                                exportOptions: { selected: null }
+                            }
+                        ]
+                    }
+                ],
+                "ajax": {
+                    "url": "{% url 'ADVANCE:AdvanceSearch' %}",
+                    "type": "POST",
+                    "data": function (d) {
+                        return $.extend({}, d, {
+                            "model_index": models_query_index.join(', '),
+                            "queryset": $("#SearchText").val()
+                        });
+                    },
+                    "dataSrc": function (json) {
+                        ajax_output = json.data;
+                        // console.log(ajax_output);//此处json就是返回的数据
+                        return json.data;
+                    }
+                },
+                "deferRender": true, "columns": tableId
+            });
+        });
+
+        // 根据datatables画图
+        function plot_bubble_by_group(tmp_data, tmp_models, x_num, y_num, tmp_xAxis, tmp_yAxis, tmp_plotOptions,
+                                      tmp_tooltip, tmp_title) {
+            let series_array = [];
+            let idx2categories = {
+                'x': {},
+                'y': {}
+            };
+            if (x_num !== 1) {
+                tmp_xAxis['categories'] = tmp_data[0]['categories'];
+                tmp_xAxis['min'] = 0;
+                tmp_xAxis['max'] = tmp_data[0]['categories'].length - 1;
+                $.each(tmp_data[0]['categories'], function (i, v) {
+                    idx2categories['x'][i] = v;
+                });
+            }
+            if (y_num !== 1) {
+                tmp_yAxis['categories'] = tmp_data[1]['categories'];
+                tmp_yAxis['min'] = 0;
+                tmp_yAxis['max'] = tmp_data[1]['categories'].length - 1;
+                $.each(tmp_data[1]['categories'], function (i, v) {
+                    idx2categories['y'][i] = v;
+                });
+            }
+            if (tmp_data[2]['item_type'] === 'str') { // 有分组
+                if (x_num !== 1 && y_num !== 1) {
+                    tmp_tooltip = {
+                        formatter: function () {
+                            return ' group: ' + this.series.name + ' x: ' + idx2categories['x'][parseInt(this.x)] +
+                                ' y: ' + idx2categories['y'][parseInt(this.y)] + ' size: ' + this.point.z;
+                        }
+                    };
+                } else if (x_num !== 1 && y_num === 1) {
+                    tmp_tooltip = {
+                        formatter: function () {
+                            return ' group: ' + this.series.name + ' x: ' + idx2categories['x'][parseInt(this.x)] +
+                                ' y: ' + this.y + ' size: ' + this.point.z;
+                        }
+                    };
+                } else {
+                    tmp_tooltip = {
+                        formatter: function () {
+                            return ' group: ' + this.series.name + ' x: ' + this.x +
+                                ' y: ' + idx2categories['y'][parseInt(this.y)] + ' size: ' + this.point.z;
+                        }
+                    };
+                }
+                tmp_title.text += ' (group by ' + tmp_models[2].val() + ') ';
+                tmp_plotOptions = {
+                    bubble: {
+                        showInLegend: true
+                    }
+                };
+                let tmp_group_dict = {};
+                let name_series = [];
+                let data_series = [];
+                $.each(tmp_data[2]['categories'], function (i, v) {
+                    name_series.push(v);
+                    data_series.push([]);
+                    tmp_group_dict[i] = {};
+                });
+                $.each(tmp_data[2]['data'], function (i, v) {
+                    let tmp_k = tmp_data[0]['data'][i] + '_' + tmp_data[1]['data'][i];
+                    if (tmp_group_dict[v] === undefined) {
+                        tmp_group_dict[v] = {tmp_k: 1};
+                    } else if (tmp_group_dict[v][tmp_k] === undefined) {
+                        tmp_group_dict[v][tmp_k] = 1;
+                    } else {
+                        tmp_group_dict[v][tmp_k] += 1;
+                    }
+                });
+                $.each(tmp_data[2]['categories'], function (i,) {
+                    $.each(tmp_group_dict[i], function (k, v2) {
+                        let v_list = k.split("_");
+                        data_series[i].push([parseFloat(v_list[0]), parseInt(v_list[1]), v2]);
+                    });
+                });
+                $.each(data_series, function (i, v) {
+                    series_array.push({
+                        name: name_series[i],
+                        data: v
+                    });
+                });
+            } else { // 无分组
+                tmp_plotOptions = {
+                    bubble: {
+                        showInLegend: false
+                    }
+                };
+                if (x_num !== 1 && y_num !== 1) {
+                    tmp_tooltip = {
+                        formatter: function () {
+                            return ' x: ' + idx2categories['x'][parseInt(this.x)] +
+                                ' y: ' + idx2categories['y'][parseInt(this.y)] + ' size: ' + this.point.z;
+                        }
+                    };
+                } else if (x_num !== 1 && y_num === 1) {
+                    tmp_tooltip = {
+                        formatter: function () {
+                            return ' x: ' + idx2categories['x'][parseInt(this.x)] +
+                                ' y: ' + this.y + ' size: ' + this.point.z;
+                        }
+                    };
+                } else {
+                    tmp_tooltip = {
+                        formatter: function () {
+                            return ' x: ' + this.x +
+                                ' y: ' + idx2categories['y'][parseInt(this.y)] + ' size: ' + this.point.z;
+                        }
+                    };
+                }
+                let tmp_group_dict = {};
+                $.each(tmp_data[0]['data'], function (i,) {
+                    let tmp_k = tmp_data[0]['data'][i] + '_' + tmp_data[1]['data'][i];
+                    if (tmp_group_dict[tmp_k] === undefined) {
+                        tmp_group_dict[tmp_k] = 1;
+                    } else {
+                        tmp_group_dict[tmp_k] += 1;
+                    }
+                });
+                let data_series = [];
+                $.each(tmp_group_dict, function (k, v) {
+                    let v_list = k.split("_");
+                    data_series.push([parseFloat(v_list[0]), parseInt(v_list[1]), v]);
+                });
+                series_array.push({
+                    name: 'None',
+                    data: data_series
+                });
+            }
+            return series_array;
+        }
+
+        // 根据画图类型选项生成其他画图选项元素
+        plotClass.change(function (e) {
+            // console.log("plotClass change event");
+            // console.info(field_dict.plot);
+            e.preventDefault();
+            plot_highcharts_input.empty(); //先将plot_highcharts_input删除
+            let plot_html;
+            if (plotClass.val() === 'pie') {
+                plot_html = '<label for="plot_highcharts_model"> 请选择用于画图的子表及字段</label>' +
+                    '<select class="form-control plot_highcharts_model" id="plot_highcharts_model">' +
+                    '<option value="None" selected="selected">---</option>';
+                $.each(field_dict.plot, function (i, v) {
+                    if (v === "true") {
+                        plot_html += '<option value="' + field_dict.id[i] + '">' + field_dict.name[i] + '</option>';
+                    }
+                });
+                plot_html += '</select>';
+            } else if (plotClass.val() === 'scatter') {
+                plot_html = '<label for="plot_highcharts_model1"> 请选择用于x轴的数据: 子表及字段</label>' +
+                    '<select class="form-control plot_highcharts_model" id="plot_highcharts_model1">' +
+                    '<option value="None" selected="selected">---</option>';
+                $.each(field_dict.plot, function (i, v) {
+                    if (v === "true") {
+                        plot_html += '<option value="' + field_dict.id[i] + '">' + field_dict.name[i] + '</option>';
+                    }
+                });
+                plot_html += '</select>';
+                plot_html += '<label for="plot_highcharts_model2"> 请选择用于y轴的数据: 子表及字段</label>' +
+                    '<select class="form-control plot_highcharts_model" id="plot_highcharts_model2">' +
+                    '<option value="None" selected="selected">---</option>';
+                $.each(field_dict.plot, function (i, v) {
+                    if (v === "true") {
+                        plot_html += '<option value="' + field_dict.id[i] + '">' + field_dict.name[i] + '</option>';
+                    }
+                });
+                plot_html += '</select>';
+                plot_html += '<label for="plot_highcharts_model3"> 请选择用于分组的数据: 子表及字段</label>' +
+                    '<select class="form-control plot_highcharts_model" id="plot_highcharts_model3">' +
+                    '<option value="None" selected="selected">---</option>';
+                $.each(field_dict.plot, function (i, v) {
+                    if (v === "true") {
+                        plot_html += '<option value="' + field_dict.id[i] + '">' + field_dict.name[i] + '</option>';
+                    }
+                });
+                plot_html += '</select><label class="checkbox-inline"><input type="checkbox" id="scatter_remove_abnormal">剔除异常极值(当x或y轴为数值型变量时可用)</lable>';
+            }
+            plot_highcharts_input.append(plot_html);
+        });
+
+        // 画图确认 按钮功能
+        $('#plotShow').click(function (e) {
+            e.preventDefault();
+            let str_list = [], num_list = [], date_list = [];
+            $.each(field_dict.class, function (i, v) {
+                if (v === "str") {
+                    str_list.push(field_dict.id[i]);
+                } else if(v === "num"){
+                    num_list.push(field_dict.id[i]);
+                } else if(v === "date"){
+                    date_list.push(field_dict.id[i]);
+                }
+            });
+            let field_type = {'str': str_list, "num": num_list, "date": date_list};
+            plotShowError.text("");
+            if (plotClass.val() === 'pie') {
+                let plot_highcharts_model = $('#plot_highcharts_model');
+                let key = plot_highcharts_model.val();
+                if (key === 'None') {
+                    plotShowError.text("请正确选择数据源");
+                    return;
+                }
+                let this_model, this_field; //获取查询子表及字段
+                let dict_model_field = split_model_field(key);
+                this_model = dict_model_field.model;
+                this_field = dict_model_field.field;
+                let tmp_data = {
+                    'sum': 0,
+                    'data': {}
+                };
+                let tmp_data_key = [];
+                $.each(ajax_output, function (i, v) {
+                    tmp_data['sum'] += 1;
+                    let tmp_k2 = v[key];
+                    // let numPattern = /^[-+]?\d+(.\d+)?$/;
+                    // let datePattern = /^\d{4}-\d{2}-\d{2}/;
+                    let nullPattern = /^\s*$/;
+                    // 判断数值类型
+                    if (field_type['str'].indexOf(key) > -1) {
+                        if (nullPattern.test(tmp_k2) || tmp_k2 === undefined || !tmp_k2) {
+                            tmp_k2 = '无'
+                        }
+                    } else if (field_type['date'].indexOf(key) > -1) {
+                        if (nullPattern.test(tmp_k2) || tmp_k2 === undefined || !tmp_k2) {
+                            tmp_k2 = '2000上半年'
+                        } else {
+                            if (parseInt(tmp_k2.substring(5, 7)) < 7) {
+                                tmp_k2 = tmp_k2.substring(0, 4) + '上半年';
+                            } else {
+                                tmp_k2 = tmp_k2.substring(0, 4) + '下半年';
+                            }
+                        }
+                    } else {
+                        if (nullPattern.test(tmp_k2) || tmp_k2 === undefined || !tmp_k2) {
+                            tmp_k2 = 0;
+                        } else {
+                            tmp_k2 = parseInt(changeThreeDecimal_f(tmp_k2 / 10));
+                        }
+                    }
+                    if (tmp_data['data'][tmp_k2] === undefined) {
+                        tmp_data['data'][tmp_k2] = 1;
+                        tmp_data_key.push(tmp_k2);
+                    } else {
+                        tmp_data['data'][tmp_k2] += 1
+                    }
+                });
+                let pie_data_array = [];
+                tmp_data_key = tmp_data_key.sort();
+                $.each(tmp_data_key, function (i, v) {
+                    let tmp_str = v.toString();
+                    if (field_type['num'].indexOf(key) > -1) {
+                        tmp_str = String.format("{0}~{1}", 10 * v, 10 * (v + 1));
+                    }
+                    pie_data_array.push([tmp_str, parseFloat(changeThreeDecimal_f(tmp_data['data'][v] / tmp_data['sum'] * 100))]);
+                });
+                // console.log('pie_data_array: ' + pie_data_array);
+                let chart = {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                };
+                let title = {
+                    text: plot_highcharts_model.find("option:selected").text() + ' 占比图 (总数: ' + tmp_data['sum'] + ')',
+                    style: {
+                        fontWeight: "bold"
+                    }
+                };
+                let tooltip = {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                };
+                let plotOptions = {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: false
+                        },
+                        showInLegend: true
+                    }
+                };
+                let series = [{
+                    type: 'pie',
+                    name: '占比',
+                    data: pie_data_array
+                }];
+                let credits = {
+                    enabled: false,
+                    text: ''
+                };
+                let json = {};
+                json.chart = chart;
+                json.title = title;
+                json.tooltip = tooltip;
+                json.series = series;
+                json.plotOptions = plotOptions;
+                json.credits = credits;
+                plot_highcharts.highcharts(json);
+            } else  if (plotClass.val() === 'scatter') {
+                // 获取数据
+                function collect_data(key_) {
+                    let model_, field_; //获取查询子表及字段
+                    if (key_ === 'None') {
+                        model_ = 'None';
+                        field_ = 'None';
+                    } else {
+                        let dict_model_field = split_model_field(key_);
+                        model_ = dict_model_field.model;
+                        field_ = dict_model_field.field;
+                    }
+                    let res = {
+                        'item_type': '',
+                        'categories': [],
+                        'data': []
+                    };
+                    if (model_ === 'None' || field_ === 'None') {
+                        return res;
+                    }
+                    let item_type;
+                    let nullPattern = /^\s*$/;
+                    // 判断数值类型
+                    if (field_type['str'].indexOf(key_) > -1) {
+                        item_type = 'str';
+                    } else if (field_type['date'].indexOf(key_) > -1) {
+                        item_type = 'date';
+                    } else {
+                        item_type = 'num';
+                    }
+                    // 根据数值类型读取结果
+                    if (item_type === 'num') {
+                        res['item_type'] = 'num';
+                        $.each(ajax_output, function (i, v) {
+                            let v2 = v[key_];
+                            if (nullPattern.test(v2) || v2 === undefined || !v2) {
+                                v2 = 0
+                            }
+                            res['data'].push(v2);
+                        });
+                    } else if (item_type === 'date') {
+                        res['item_type'] = 'date';
+                        let tmp_list = [];
+                        $.each(ajax_output, function (i, v) {
+                            let v2;
+                            if (nullPattern.test(v[key_]) || v[key_] === undefined || !v[key_]) {
+                                v2 = '2000上半年';
+                            } else {
+                                if (parseInt(v[key_].substring(5, 7)) < 7) {
+                                    v2 = v[key_].substring(0, 4) + '上半年';
+                                } else {
+                                    v2 = v[key_].substring(0, 4) + '下半年';
+                                }
+                            }
+                            tmp_list.push(v2);
+                        });
+                        let tmp_list_set = JSON.parse(JSON.stringify(tmp_list));
+                        tmp_list_set = unique(tmp_list_set.sort());
+                        res['categories'] = tmp_list_set;
+                        $.each(tmp_list, function (i, v) {
+                            res['data'].push(tmp_list_set.indexOf(v));
+                        });
+                    } else {
+                        res['item_type'] = 'str';
+                        let tmp_list = [];
+                        $.each(ajax_output, function (i, v) {
+                            let v2 = v[key_];
+                            if (nullPattern.test(v2) || v2 === undefined || !v2) {
+                                v2 = '无'
+                            }
+                            tmp_list.push(v2);
+                        });
+                        //console.log(String.format("before tmp_list: {0}", tmp_list));
+                        let tmp_list_set = JSON.parse(JSON.stringify(tmp_list));
+                        tmp_list_set = unique(tmp_list_set.sort());
+                        res['categories'] = tmp_list_set;
+                        $.each(tmp_list, function (i, v) {
+                            res['data'].push(tmp_list_set.indexOf(v));
+                        });
+                        //console.log(String.format("after tmp_list: {0}", tmp_list));
+                    }
+                    return res;
+                }
+                let this_models = [$('#plot_highcharts_model1'), $('#plot_highcharts_model2'),
+                    $('#plot_highcharts_model3')];
+                if (this_models[0].val === 'None' || this_models[1].val === 'None') {
+                    plotShowError.text("请正确选择x和y轴数据源(包括子表和字段)");
+                    return;
+                }
+                let this_data = [];
+                for (let i = 0; i <= 2; i++) {
+                    this_data.push(collect_data(this_models[i].val()))
+                }
+                // console.log('before this_data:');
+                // console.log(this_data);
+                if ($('#scatter_remove_abnormal').prop('checked') === true) {
+                    function compute_limit(data_) {
+                        let quart_75 = Quartile_75(data_);
+                        let quart_25 = Quartile_25(data_);
+                        return {
+                            "min_v": quart_25 - 1.5 * (quart_75 - quart_25),
+                            "max_v": quart_75 + 1.5 * (quart_75 - quart_25)
+                        }
+                    }
+
+                    let tmp_data = [
+                        {
+                            'item_type': this_data[0]['item_type'],
+                            'categories': this_data[0]['categories'],
+                            'data': []
+                        },
+                        {
+                            'item_type': this_data[1]['item_type'],
+                            'categories': this_data[1]['categories'],
+                            'data': []
+                        },
+                        {
+                            'item_type': this_data[2]['item_type'],
+                            'categories': this_data[2]['categories'],
+                            'data': []
+                        }
+                    ];
+                    let x_bool = Array(this_data[0]['data'].length).fill('true');
+                    let y_bool = Array(this_data[1]['data'].length).fill('true');
+                    if (this_data[0]['item_type'] === 'num') {
+                        // do something for x_bool
+                        let limit = compute_limit(this_data[0]['data']);
+                        // console.info('>>> min_v: ', limit.min_v , '; max_v: ', limit.max_v);
+                        $.each(this_data[0]['data'], function (i, v) {
+                            if (v < limit.min_v || v > limit.max_v) {
+                                x_bool[i] = 'false'
+                            }
+                        })
+                    }
+                    if (this_data[1]['item_type'] === 'num') {
+                        // do something for y_bool
+                        let limit = compute_limit(this_data[1]['data']);
+                        // console.info('>>> y_bool >>> min_v: ', limit.min_v , '; max_v: ', limit.max_v);
+                        $.each(this_data[1]['data'], function (i, v) {
+                            if (v < limit.min_v || v > limit.max_v) {
+                                y_bool[i] = 'false'
+                            }
+                        })
+                    }
+                    // console.info("x_bool: ", x_bool, "; y_bool: ", y_bool);
+                    $.each(x_bool, function (i, v) {
+                        if (v === 'true' && y_bool[i] === 'true') {
+                            tmp_data[0]['data'].push(this_data[0]['data'][i]);
+                            tmp_data[1]['data'].push(this_data[1]['data'][i]);
+                            if (this_data[2]['item_type'] !== '') {
+                                tmp_data[2]['data'].push(this_data[2]['data'][i]);
+                            }
+                        }
+                    });
+                    // console.info("tmp_data: ", tmp_data);
+                    this_data = tmp_data;
+                }
+                // console.log('after this_data:');
+                // console.log(this_data);
+                if (this_data[2]['item_type'] === 'num') { // this_data[2]代表分组，需要把连续数字转换成分组
+                    let tmp_list = [];
+                    $.each(this_data[2]['data'], function (i, v) {
+                        tmp_list.push(parseInt(v / 10));
+                    });
+                    let tmp_list_set = unique(tmp_list).sort();
+                    // console.info("tmp_list_set: ", tmp_list_set);
+                    this_data[2]['categories'] = [];
+                    $.each(tmp_list_set, function (i, v) {
+                        this_data[2]['categories'].push(String.format("{0}~{1}", 10 * v, 10 * (v + 1)));
+                    });
+                    this_data[2]['data'] = [];
+                    $.each(tmp_list, function (i, v) {
+                        this_data[2]['data'].push(tmp_list_set.indexOf(v));
+                    });
+                    this_data[2]['item_type'] = 'str';
+                } else if (this_data[2]['item_type'] === 'date') {
+                    this_data[2]['item_type'] = 'str';
+                }
+                // console.log('after2 this_data:');
+                // console.log(this_data);
+                let chart = {
+                    type: 'bubble',
+                    zoomType: 'xy'
+                };
+                let title = {
+                    text: this_models[0].find("option:selected").text() + ' .VS. ' + this_models[1].find("option:selected").text()
+                };
+                let tooltip = {};
+                let plotOptions = {};
+                let series = [];
+                let credits = {
+                    enabled: false,
+                    text: ''
+                };
+                let xAxis = {
+                    title: {
+                        enabled: true,
+                        text: this_models[0].find("option:selected").text()
+                    },
+                    startOnTick: true,
+                    endOnTick: true,
+                    showLastLabel: true
+                };
+                let yAxis = {
+                    title: {
+                        text: this_models[1].find("option:selected").text()
+                    }
+                };
+                let json = {};
+                if (this_data[0]['item_type'] === 'num' && this_data[1]['item_type'] === 'num') {
+                    // 画正常散点图
+                    chart.type = 'scatter';
+                    plotOptions = {
+                        scatter: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: false
+                            },
+                            showInLegend: false,
+                            marker: {
+                                radius: 5,
+                                states: {
+                                    hover: {
+                                        enabled: true
+                                    }
+                                }
+                            },
+                            states: {
+                                hover: {
+                                    marker: {
+                                        enabled: false
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    if (this_data[2]['item_type'] === 'str') { // 有分组
+                        title.text += ' (grouped by ' + this_models[2].find("option:selected").text() + ') ';
+                        plotOptions.scatter.showInLegend = true;
+                        json.legend = {
+                            layout: 'vertical',
+                            align: 'left',
+                            verticalAlign: 'top',
+                            x: 100,
+                            y: 70,
+                            floating: true,
+                            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
+                            borderWidth: 1
+                        };
+                        let name_series = [];
+                        let data_series = [];
+                        $.each(this_data[2]['categories'], function (i, v) {
+                            name_series.push(v);
+                            data_series.push([]);
+                        });
+                        $.each(this_data[2]['data'], function (i, v) {
+                            data_series[v].push([this_data[0]['data'][i], this_data[1]['data'][i]]);
+                        });
+                        $.each(data_series, function (i, v) {
+                            series.push({
+                                name: name_series[i],
+                                data: v
+                            });
+                        });
+                    } else { // 无分组
+                        let data_series = [];
+                        $.each(this_data[0]['data'], function (i, v) {
+                            // console.log(String.format("无分组 {0} {1}", v, this_data[1]['data'][i]));
+                            data_series.push([v, this_data[1]['data'][i]]);
+                        });
+                        series.push({
+                            name: 'None',
+                            data: data_series
+                        });
+                    }
+                } else if (this_data[0]['item_type'] === 'num' && this_data[1]['item_type'] !== 'num') {
+                    // 画气泡图(x是数值, y是字符串/日期)
+                    series = plot_bubble_by_group(this_data, this_models, 1, 0,
+                        xAxis, yAxis, plotOptions, tooltip, title);
+                } else if (this_data[0]['item_type'] !== 'num' && this_data[1]['item_type'] === 'num') {
+                    // 画气泡图(x是字符串/日期, y是数值)
+                    series = plot_bubble_by_group(this_data, this_models, 0, 1,
+                        xAxis, yAxis, plotOptions, tooltip, title);
+                } else {
+                    // 画气泡图(x是字符串/日期, y是字符串/日期)
+                    series = plot_bubble_by_group(this_data, this_models, 0, 0,
+                        xAxis, yAxis, plotOptions, tooltip, title);
+                }
+                // console.log("series:");
+                // console.log(series);
+                json.chart = chart;
+                json.title = title;
+                json.tooltip = tooltip;
+                json.series = series;
+                json.plotOptions = plotOptions;
+                json.credits = credits;
+                json.xAxis = xAxis;
+                json.yAxis = yAxis;
+                plot_highcharts.highcharts(json);
+            }
+        });
+
+
+    });
+</script>
+{% endblock %}

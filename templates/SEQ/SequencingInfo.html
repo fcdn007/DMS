@@ -5,13 +5,13 @@
 	<link rel="stylesheet" href="{% static 'AdminLTE/plugins/select2/css/select2.min.css' %}">
 	<link rel="stylesheet" href="{% static 'AdminLTE/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
 	<style>
-    button.button_group1+div+div {
-        width: 200px;
-        margin-top: 7px;
-        margin-left: 1em;
-        z-index: 1000;
-    }
-  </style>
+		button.button_group1+div+div {
+			width: 200px;
+			margin-top: 7px;
+			margin-left: 1em;
+			z-index: 1000;
+		}
+	  </style>
 {% endblock %}
 
 {% block title %}
@@ -52,8 +52,8 @@
 	  let url0 = '/api/SEQ/' + model0 + '/';
 	  let url1 = '/api/LIMS/Methy/MethyCaptureInfo/';
 	  let id0 = 0;
-      let bulk_update_bool = {% if perms.BIS.bulk_update_SequencingInfo %} true {% else %} false {% endif %};
-      let bulk_delete_bool = {% if perms.BIS.bulk_delete_SequencingInfo %} true {% else %} false {% endif %};
+      let bulk_update_bool = {% if perms.SEQ.bulk_update_SequencingInfo %} true {% else %} false {% endif %};
+      let bulk_delete_bool = {% if perms.SEQ.bulk_delete_SequencingInfo %} true {% else %} false {% endif %};
 	  let data1 = {};
 	  let poolingLB_id_list = [];
 	  $.each($.ajax({
@@ -143,18 +143,19 @@
       let input_params = {
 		  "title1_text": "分析结果管理 测序上机信息 总条目数：",
 		  "fields": [
-              // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
-              // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
-              ["sequencing_id", "上机文库号", 1, 0, 1, "text"],
-              ["poolingLB_id", "捕获文库名", 1, 1, 1, "select_multiple", []],
-              ["send_date", "送测日期", 1, 2, 0, "date", "2000-01-01"],
-              ["start_time", "上机时间", 1, 3, 0, "date", "2000-01-01"],
-              ["end_time", "下机时间", 1, 4, 0, "date", "2000-01-01"],
-              ["machine_id", "机器号", 1, 5, 0, "text", "无"],
-              ["chip_id", "芯片号", 1, 6, 0, "text", "无"],
-              ["memo", "备注", 1, 7, 0, "text", "无"],
-              ["last_modify_time", "上次修改时间", 0],
-              ["create_time", "创建时间", 0]
+              //                    [   0,     1,               2,               3,             4,       5,       6,        7  ]
+              // input类型是select： [ field, name, 在table中是否可排序/搜索, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
+              // input类型不是select： [ field, name, 在table中是否可排序/搜索, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
+              ["sequencing_id", "上机文库号", 1, 1, 0, 1, "text"],
+              ["poolingLB_id", "捕获文库名", 0, 1, 1, 1, "select_multiple", []],
+              ["send_date", "送测日期", 1, 1, 2, 0, "date", "2000-01-01"],
+              ["start_time", "上机时间", 1, 1, 3, 0, "date", "2000-01-01"],
+              ["end_time", "下机时间", 1, 1, 4, 0, "date", "2000-01-01"],
+              ["machine_id", "机器号", 1, 1, 5, 0, "text", "无"],
+              ["chip_id", "芯片号", 1, 1, 6, 0, "text", "无"],
+              ["memo", "备注", 1, 1, 7, 0, "text", "无"],
+              ["last_modify_time", "上次修改时间", 1, 0],
+              ["create_time", "创建时间", 1, 0]
           ],
           "update_func": update_func,
           "delete_func": simple_delete_func,
