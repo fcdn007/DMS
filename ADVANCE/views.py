@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from USER.models import UserInfo, DatabaseRecord
 from databaseDemo.settings import BASE_DIR, MEDIA_ROOT
-from databaseDemo.tasks import make_new_merge_df_partly_by_celery
+from databaseDemo.tasks import make_new_merge_df_partly_by_celery, add_modelViewRecord_by_celery
 from util.merge_df import models_set2, FILECOLUMN_FOREIGNKEY_TO_MODEL, KEY1_TO_MODEL, apps
 from util.merge_df import save_records, check_new_merge_df_all, get_merge_df_cols, make_new_merge_df_all
 from util.utils import read_file_by_stream, condition_filter
@@ -109,6 +109,7 @@ def uploadV(request):
 @login_required
 @never_cache
 def AdvanceUploadV(request):
+    add_modelViewRecord_by_celery("AdvanceUpload", request.user.username)
     return render(request, 'ADVANCE/AdvanceUpload.html')
 
 
@@ -197,6 +198,7 @@ def AdvanceSearchV(request):
     else:
         models_query_index = request.GET.get('models_query_index', None)
         if models_query_index is None:
+            add_modelViewRecord_by_celery("AdvanceSearch", request.user.username)
             return render(request, 'ADVANCE/AdvanceSearch.html')
         else:
             models_query = [models_set2[int(x)] for x in models_query_index.split(', ')]

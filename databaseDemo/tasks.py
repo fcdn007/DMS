@@ -53,7 +53,7 @@ def keep_merge_df_newest_by_celery():
 
 @shared_task
 def backup_db_by_celery():
-    subprocess.run(["cd", BASE_DIR, "&&", "bash", "bkdb.sh"])
+    subprocess.run(" ".join(["cd", BASE_DIR, "&&", "bash", "bkdb.sh"]), shell=True)
     return True
 
 
