@@ -291,6 +291,11 @@ beat_schedule = {
         "schedule": crontab(minute=0, hour="22"),  # crontab(minute="*/10"),
         "args": (),
     },
+    'clean_media': {
+        "task": "databaseDemo.tasks.clean_media_by_celery",
+        "schedule": crontab(minute=0, hour="22"),  # crontab(minute="*/10"),
+        "args": (),
+    },
 }
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240

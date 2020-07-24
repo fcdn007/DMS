@@ -26,7 +26,7 @@ from EMR.views import ClinicalInfoViewSet, FollowupInfoViewSet, LiverPathologica
 from LIMS.views import MethyLibraryInfoViewSet, MethyCaptureInfoViewSet, MethyPoolingInfoViewSet
 from SEQ.views import SequencingInfoViewSet, MethyQCInfoViewSet
 from USER.views import UserInfoViewSet, DatabaseRecordViewSet
-from .views import HomeV, TestV
+from .views import HomeV, TestV, UrlSearchV
 
 router = DefaultRouter()
 router.register(r'BIS/SampleInventoryInfo', SampleInventoryInfoViewSet)
@@ -60,6 +60,7 @@ urlpatterns = [
     # for rest_framework
     path('api/', include(router.urls)),
     re_path(r'Test/(?P<id>.*)/$', TestV, name='Test'),
+    path('UrlSearch/', UrlSearchV, name='UrlSearch'),
 ]
 
 if settings.DEBUG:

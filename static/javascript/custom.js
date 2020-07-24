@@ -32,12 +32,16 @@ function databaseRecordAjaxPut(model_changed_txt, operation_txt, others_txt) {
     });
 }
 
-function input_autocomplete(values, item_flag) {
+function input_autocomplete(values_input, item_flag) {
+    let values = [];
+    $.each(values_input, function (i, v) {
+        values.push("" + v);
+    });
     console.info("in function input_autocomplete; values:", values, "; item_flag:", item_flag);
     if (values.length === 0) {
         console.log("do if");
         console.log("empty list. do nothing");
-    } else if (values.length > 10) {
+    } else if (values.length > 25) {
         console.log("do else if");
         values.push('...');
         $(item_flag).autocomplete({

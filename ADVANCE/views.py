@@ -161,7 +161,7 @@ def AdvanceSearchV(request):
         merge_df_columns = list(merge_df.columns)
         model_cols = defaultdict(list)
         for col_ in merge_df_columns:
-            parts = col_.split(".")
+            parts = col_.split("__")
             if len(parts) > 1:
                 model_cols["join_keys"].append(col_)
             else:
@@ -182,7 +182,7 @@ def AdvanceSearchV(request):
                     v = v[:-1]
                     filter_condition = condition_filter(res_raw, f, vp, v, not_) if f in \
                                             list(FILECOLUMN_FOREIGNKEY_TO_MODEL.keys()) else \
-                                            condition_filter(res_raw, m + '.' + f, vp, v, not_)
+                                            condition_filter(res_raw, m + '__' + f, vp, v, not_)
                     filter_line = filter_line & filter_condition
                 filter_total = filter_line if filter_total == "" else filter_total | filter_line
             res_filtered = res_raw[filter_total]

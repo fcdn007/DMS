@@ -26,7 +26,6 @@ class SampleInfoSerializer(DynamicFieldsModelSerializer):
                   'send_date', 'memo', 'id', 'last_modify_time', 'create_time', 'sampleinventoryinfo')
 
 
-
 class ExtractInfoSerializer(DynamicFieldsModelSerializer):
     last_modify_time = serializers.DateTimeField(format=settings.DATETIME_FORMAT, required=False)
     create_time = serializers.DateTimeField(format=settings.DATETIME_FORMAT, required=False)
@@ -39,7 +38,7 @@ class ExtractInfoSerializer(DynamicFieldsModelSerializer):
         return round(obj.dna_con * obj.dna_vol, 3)
 
     def get_remainM(self, obj):
-        return round(obj.dna_con*obj.dna_vol-obj.successM-obj.failM-obj.researchM-obj.othersM, 3)
+        return round(obj.dna_con * obj.dna_vol - obj.successM - obj.failM - obj.researchM - obj.othersM, 3)
 
     class Meta:
         model = ExtractInfo

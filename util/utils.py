@@ -1,19 +1,19 @@
 import datetime
+import os
 import re
+import time
 
 import numpy as np
 import pandas as pd
-from django.conf import settings
+from django.http import StreamingHttpResponse
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer_its
+
+from databaseDemo.settings import MEDIA_ROOT, SECRET_KEY
 
 
 def get_queryset_base(model_, query_params_):
     query_params = {}
     tmp_dict = query_params_.dict()
-    # print(">>>>>> model_ >>>>>")
-    # pprint(model_)
-    # print(">>>>>> query_params_ >>>>>")
-    # pprint(query_params_)
     if 'format' in tmp_dict and tmp_dict['format'] == 'datatables':
         return model_.objects.all()
     for key_ in tmp_dict:
@@ -97,8 +97,28 @@ def condition_filter(df, f, vp, v, not_):
 
 def custom_token_generator(num):
     # 加密用户的身份信息，生成激活token
-    serializer = Serializer_its(settings.SECRET_KEY, 3600)
+    serializer = Serializer_its(SECRET_KEY, 3600)
     info = {'confirm': num}
     token = serializer.dumps(info)  # bytes
     token = token.decode('utf8')  # 解码, str
     return token
+
+
+def output_model_all_records(file_name0, data, col_name, drop_cols=None):
+    if drop_cols is None:
+        drop_cols = ["id"]
+    else:
+        drop_cols = ["id"] + drop_cols
+    file_name = "{}.all.csv".format(file_name0)
+    ticks = time.time()
+    file_path = os.path.join(MEDIA_ROOT, "csv", "{}.{}".format(ticks, file_name))
+    res_df = pd.DataFrame(data)
+    col_list = list(res_df.columns)
+    res_df.loc[:, "索引"] = [x + 1 for x in range(res_df.shape[0])]
+    res_df = res_df.loc[:, ["索引"] + [x for x in col_list if x not in drop_cols]]
+    res_df.columns = ["索引"] + col_name
+    res_df.to_csv(file_path, index=False)
+    response = StreamingHttpResponse(read_file_by_stream(file_path))
+    response['Content-Type'] = 'application/octet-steam'
+    response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
+    return response

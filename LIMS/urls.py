@@ -1,10 +1,10 @@
 from django.urls import path
-from . import views
 
+from . import views
 
 app_name = "LIMS"
 urlpatterns = [
-    path('MethyLibraryInfo/', views.MethyLibraryInfoV, name='MethyLibraryInfo'),
-    path('MethyCaptureInfo/', views.MethyCaptureInfoV, name='MethyCaptureInfo'),
-    path('MethyPoolingInfo/', views.MethyPoolingInfoV, name='MethyPoolingInfo')
+    path('Methy/MethyLibraryInfo/', views.MethyLibraryInfoV, name='MethyLibraryInfo'),
+    path('Methy/MethyCaptureInfo/', views.MethyCaptureInfoV, name='MethyCaptureInfo'),
+    path('Methy/MethyPoolingInfo/', views.MethyPoolingInfoV, name='MethyPoolingInfo')
 ]

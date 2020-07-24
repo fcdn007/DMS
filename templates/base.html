@@ -118,17 +118,17 @@
 
     <!-- SEARCH FORM -->
     <!-- 暂时省略
+    -->
     <form class="form-inline ml-3">
       <div class="input-group input-group-sm">
-        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
+        <input class="form-control form-control-navbar" type="search" placeholder="搜索" aria-label="Search" id="urlSearch">
         <div class="input-group-append">
-          <button class="btn btn-navbar" type="submit">
+          <button class="btn btn-navbar" type="submit" id="urlSearchSubmit">
             <i class="fas fa-search"></i>
           </button>
         </div>
       </div>
     </form>
-    -->
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
@@ -205,7 +205,7 @@
                 </a>
                 <ul class="nav nav-treeview  pl-4">
                   <li class="nav-item">
-                    <a href="/EMR/LiverPathologicalInfo/" class="nav-link">
+                    <a href="/EMR/Pathology/LiverPathologicalInfo/" class="nav-link">
                       <i class="far fa-circle nav-icon text-info"></i>
                       <p>肝癌</p>
                     </a>
@@ -226,13 +226,13 @@
                 </a>
                 <ul class="nav nav-treeview  pl-4">
                   <li class="nav-item">
-                    <a href="/EMR/TMDInfo/" class="nav-link">
+                    <a href="/EMR/Test/TMDInfo/" class="nav-link">
                       <i class="far fa-circle nav-icon text-info"></i>
                       <p>肿瘤标志物检测</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="/EMR/BiochemInfo/" class="nav-link">
+                    <a href="/EMR/Test/BiochemInfo/" class="nav-link">
                       <i class="far fa-circle nav-icon text-info"></i>
                       <p>生化检测</p>
                     </a>
@@ -303,19 +303,19 @@
                 </a>
                 <ul class="nav nav-treeview  pl-4">
                   <li class="nav-item">
-                    <a href="/LIMS/MethyLibraryInfo/" class="nav-link">
+                    <a href="/LIMS/Methy/MethyLibraryInfo/" class="nav-link">
                       <i class="far fa-circle nav-icon text-info"></i>
                       <p>甲基化建库信息</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="/LIMS/MethyCaptureInfo/" class="nav-link">
+                    <a href="/LIMS/Methy/MethyCaptureInfo/" class="nav-link">
                       &nbsp;&nbsp;<i class="far fa-circle nav-icon text-info"></i>
                       <p>捕获文库信息</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="/LIMS/MethyPoolingInfo/" class="nav-link">
+                    <a href="/LIMS/Methy/MethyPoolingInfo/" class="nav-link">
                       &nbsp;&nbsp;<i class="far fa-circle nav-icon text-info"></i>
                       <p>pooling映射信息</p>
                     </a>
@@ -349,7 +349,7 @@
                 </a>
                 <ul class="nav nav-treeview  pl-4">
                   <li class="nav-item">
-                    <a href="/SEQ/MethyQCInfo/" class="nav-link">
+                    <a href="/SEQ/QC/MethyQCInfo/" class="nav-link">
                       <i class="far fa-circle nav-icon text-info"></i>
                       <p>甲基化检测</p>
                     </a>
@@ -514,6 +514,23 @@
   </div>
 
   <!-- Modal content -->
+  <!-- urlSearch Modal -->
+  <div class="modal fade" id="urlSearchModal">
+      <div class="modal-dialog">
+          <!-- Modal content-->
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h4 class="modal-title text-info" id="modal_title">搜索结果</h4>
+              </div>
+              <div class="modal-body" id="urlSearchRes">
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-danger" data-dismiss="modal">关闭</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
   {% block modal_html %}
 
   {% endblock %}
@@ -613,27 +630,59 @@ $(document).ready(function () {
     });
 
     Highcharts.setOptions({
-      lang:{
-         contextButtonTitle:"图表导出菜单",
-         decimalPoint:".",
-         downloadJPEG:"下载JPEG图片",
-         downloadPDF:"下载PDF文件",
-         downloadPNG:"下载PNG文件",
-         downloadSVG:"下载SVG文件",
-        viewFullscreen:"全屏查看",
-         drillUpText:"返回 {series.name}",
-         loading:"加载中",
-         months:["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"],
-         noData:"没有数据",
-         numericSymbols: [ "千" , "兆" , "G" , "T" , "P" , "E"],
-         printChart:"打印图表",
-         resetZoom:"恢复缩放",
-         resetZoomTitle:"恢复图表",
-         shortMonths: [ "Jan" , "Feb" , "Mar" , "Apr" , "May" , "Jun" , "Jul" , "Aug" , "Sep" , "Oct" , "Nov" , "Dec"],
-         thousandsSep:",",
-         weekdays: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六","星期天"]
-      }
-  });
+        lang:{
+             contextButtonTitle:"图表导出菜单",
+             decimalPoint:".",
+             downloadJPEG:"下载JPEG图片",
+             downloadPDF:"下载PDF文件",
+             downloadPNG:"下载PNG文件",
+             downloadSVG:"下载SVG文件",
+            viewFullscreen:"全屏查看",
+             drillUpText:"返回 {series.name}",
+             loading:"加载中",
+             months:["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"],
+             noData:"没有数据",
+             numericSymbols: [ "千" , "兆" , "G" , "T" , "P" , "E"],
+             printChart:"打印图表",
+             resetZoom:"恢复缩放",
+             resetZoomTitle:"恢复图表",
+             shortMonths: [ "Jan" , "Feb" , "Mar" , "Apr" , "May" , "Jun" , "Jul" , "Aug" , "Sep" , "Oct" , "Nov" , "Dec"],
+             thousandsSep:",",
+             weekdays: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六","星期天"]
+        }
+    });
+    // urlSearch按钮功能实现
+      $("#urlSearchSubmit").click(function (e) {
+          e.preventDefault();
+          $("#urlSearchRes").empty();
+          let pattern = /^\s*$/;
+          let query_str = $("#urlSearch").val();
+          if (query_str === undefined || pattern.test(query_str) === true) {
+              console.log("Warning! Nothing to search");
+          } else {
+              let res = $.ajax({
+                  url: "{% url 'UrlSearch' %}", data: {query_str: query_str},
+                  dataType: 'json', contentType: "application/json",
+                  method: "GET", async: false
+              }).responseJSON.res;
+              let html_str = '<ul class="list-group mb-2">';
+              if (res.length === 0){
+                  html_str += '<h5>无结果</h5>';
+              } else {
+                  $.each(res, function (i, v) {
+                      let num = i + 1;
+                      $.each(v, function (k, v2) {
+                            html_str += '<li class="list-group-item" style="border:0px"><h5>';
+                            html_str += '<a href="' + v2 + '">' + num + '. ' + k;
+                            html_str += '</a></h5></li>';
+                      });
+                  });
+              }
+              html_str += '</ul>';
+              $("#urlSearchRes").append(html_str);
+              $("#urlSearchModal").modal();
+          }
+      });
 });
 </script>
 <!-- Modal javascript content -->
@@ -643,224 +692,224 @@ $(document).ready(function () {
 <!-- page script -->
 {% block page-script %}
 <script>
-  $(document).ready(function () {
-    $("#sidebar_menu li:eq(0) a").addClass("active");
-    $(".sidebar").removeAttr("hidden");
+    $(document).ready(function () {
+        $("#sidebar_menu li:eq(0) a").addClass("active");
+        $(".sidebar").removeAttr("hidden");
 
-    let url_list = [
-      "/api/EMR/ClinicalInfo/", "/api/EMR/FollowupInfo/",
-      "/api/BIS/SampleInventoryInfo/", "/api/BIS/ExtractInfo/",
-      "/api/LIMS/Methy/MethyLibraryInfo/", "/api/LIMS/Methy/MethyCaptureInfo/",
-      "/api/SEQ/SequencingInfo/", "/api/SEQ/QC/MethyQCInfo/",
-      "/api/USER/UserInfo/"
-    ];
-    let records_sum = [];
+        let url_list = [
+            "/api/EMR/ClinicalInfo/", "/api/EMR/FollowupInfo/",
+            "/api/BIS/SampleInventoryInfo/", "/api/BIS/ExtractInfo/",
+            "/api/LIMS/Methy/MethyLibraryInfo/", "/api/LIMS/Methy/MethyCaptureInfo/",
+            "/api/SEQ/SequencingInfo/", "/api/SEQ/QC/MethyQCInfo/",
+            "/api/USER/UserInfo/"
+        ];
+        let records_sum = [];
 
-    $.each(url_list, function (i, v) {
-      let data = $.ajax({
-        url: v, dataType: 'json', contentType: "application/json",
-        type: "get", async: false, data: {fields: "id"}
-      }).responseJSON;
-      let sum = 0;
-      if (data !== undefined) {
-        sum = data.length;
-      }
-      $('#sum' + i).text(sum);
-      records_sum.push(sum);
-    });
+        $.each(url_list, function (i, v) {
+            let data = $.ajax({
+              url: v, dataType: 'json', contentType: "application/json",
+              type: "get", async: false, data: {fields: "id"}
+            }).responseJSON;
+            let sum = 0;
+            if (data !== undefined) {
+              sum = data.length;
+            }
+            $('#sum' + i).text(sum);
+            records_sum.push(sum);
+        });
 
-    // 条形图： 重要子表总条目数统计
-    $('#recordSum').highcharts({
-        credits: {
-            enabled: false,
-            text: ''
-        },
-        chart: {
-            type: 'bar'
-        },
-        title: {
-            text: null
-        },
-        xAxis: {
-            categories: ['病历信息管理+临床信息', '病历信息管理+随访信息', '样本库信息管理+样本库存信息',
-              '样本库信息管理+核酸提取信息', '实验项目信息管理+甲基化检测-甲基化建库信息',
-              '实验项目信息管理+甲基化检测-捕获建库信息信息', '分析结果信息管理+测序上机信息', '分析结果信息管理+QC信息-甲基化检测',
-              '用户管理信息'],
+        // 条形图： 重要子表总条目数统计
+        $('#recordSum').highcharts({
+            credits: {
+                enabled: false,
+                text: ''
+            },
+            chart: {
+                type: 'bar'
+            },
             title: {
                 text: null
-            }
-        },
-        yAxis: {
-            min: 0,
-            title: {
-                text: '总条目数',
-                align: 'high'
             },
-            labels: {
-                overflow: 'justify'
-            }
-        },
-        tooltip: {
-            formatter: function () {
-				return '<b>' + this.x + '</b> 总条目数:<b>' + this.y + '</b>';
-			}
-        },
-        plotOptions: {
-            bar: {
-                dataLabels: {
-                    enabled: true,
-                    allowOverlap: true // 允许数据标签重叠
+            xAxis: {
+                categories: ['病历信息管理+临床信息', '病历信息管理+随访信息', '样本库信息管理+样本库存信息',
+                  '样本库信息管理+核酸提取信息', '实验项目信息管理+甲基化检测-甲基化建库信息',
+                  '实验项目信息管理+甲基化检测-捕获建库信息信息', '分析结果信息管理+测序上机信息', '分析结果信息管理+QC信息-甲基化检测',
+                  '用户管理信息'],
+                title: {
+                    text: null
                 }
-            }
-        },
-        legend: {
-            enabled: false
-        },
-        series: [{
-            data: records_sum
-        }]
-    });
-
-
-    // 条形图： 用户访问次数统计
-    let behavior_data = $.ajax({
-      url:"/api/USER/DatabaseRecord/", dataType: 'json', contentType: "application/json",
-      type: "get", async: false, data:{ fields:"operation,userinfo,id" }
-    }).responseJSON;
-    let user_data = $.ajax({
-      url:"/api/USER/UserInfo/", dataType: 'json', contentType: "application/json",
-      type: "get", async: false, data:{ fields:"id,nick_name" }
-    }).responseJSON;
-    let visit_dict = {};
-    let add_dict = {};
-    let edit_dict = {};
-    let del_dict = {};
-    let user_dict = {};
-    let valid_userinfo = {};
-    $.each(behavior_data, function (i ,v) {
-      if (valid_userinfo[v.userinfo] === undefined) {
-          valid_userinfo[v.userinfo] = 1;
-      } else {
-          valid_userinfo[v.userinfo] += 1;
-      }
-      if (v.operation === '访问') {
-          if (visit_dict[v.userinfo] === undefined) {
-              visit_dict[v.userinfo] = 1;
-          } else {
-              visit_dict[v.userinfo] += 1;
-          }
-      } else if (v.operation === '单项添加') {
-          if (add_dict[v.userinfo] === undefined) {
-              add_dict[v.userinfo] = 1;
-          } else {
-              add_dict[v.userinfo] += 1;
-          }
-      } else if (v.operation === '单项更新') {
-          if (edit_dict[v.userinfo] === undefined) {
-              edit_dict[v.userinfo] = 1;
-          } else {
-              edit_dict[v.userinfo] += 1;
-          }
-      } else if (v.operation === '单项删除') {
-          if (del_dict[v.userinfo] === undefined) {
-              del_dict[v.userinfo] = 1;
-          } else {
-              del_dict[v.userinfo] += 1;
-          }
-      }
-    });
-    $.each(user_data, function (i ,v) {
-        user_dict[v.id] = v.nick_name
-    });
-
-    let valid_nick_name = [];
-    let valid_visit = [];
-    let valid_add = [];
-    let valid_edit = [];
-    let valid_del = [];
-    $.each(valid_userinfo, function (k ,v) {
-        valid_nick_name.push(user_dict[k]);
-        if (visit_dict[k] === undefined) {
-            valid_visit.push(0);
-        } else {
-            valid_visit.push(visit_dict[k]);
-        }
-        if (add_dict[k] === undefined) {
-            valid_add.push(0);
-        } else {
-            valid_add.push(add_dict[k]);
-        }
-        if (edit_dict[k] === undefined) {
-            valid_edit.push(0);
-        } else {
-            valid_edit.push(edit_dict[k]);
-        }
-        if (del_dict[k] === undefined) {
-            valid_del.push(0);
-        } else {
-            valid_del.push(del_dict[k]);
-        }
-    });
-
-    $('#userSum').highcharts({
-        credits: {
-            enabled: false,
-            text: ''
-        },
-        chart: {
-            type: 'bar'
-        },
-        title: {
-              text: null
-        },
-        xAxis: {
-            categories: valid_nick_name,
-            title: {
-                text: null
-            }
-        },
-        yAxis: {
-            min: 0,
-            title: {
-                text: '总次数',
-                align: 'high'
             },
-            labels: {
-                overflow: 'justify'
+            yAxis: {
+                min: 0,
+                title: {
+                    text: '总条目数',
+                    align: 'high'
+                },
+                labels: {
+                    overflow: 'justify'
+                }
+            },
+            tooltip: {
+                formatter: function () {
+                    return '<b>' + this.x + '</b> 总条目数:<b>' + this.y + '</b>';
+                }
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        enabled: true,
+                        allowOverlap: true // 允许数据标签重叠
+                    }
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            series: [{
+                data: records_sum
+            }]
+        });
+
+
+        // 条形图： 用户访问次数统计
+        let behavior_data = $.ajax({
+            url:"/api/USER/DatabaseRecord/", dataType: 'json', contentType: "application/json",
+            type: "get", async: false, data:{ fields:"operation,userinfo,id" }
+        }).responseJSON;
+        let user_data = $.ajax({
+            url:"/api/USER/UserInfo/", dataType: 'json', contentType: "application/json",
+            type: "get", async: false, data:{ fields:"id,nick_name" }
+        }).responseJSON;
+        let visit_dict = {};
+        let add_dict = {};
+        let edit_dict = {};
+        let del_dict = {};
+        let user_dict = {};
+        let valid_userinfo = {};
+        $.each(behavior_data, function (i ,v) {
+            if (valid_userinfo[v.userinfo] === undefined) {
+                valid_userinfo[v.userinfo] = 1;
+            } else {
+                valid_userinfo[v.userinfo] += 1;
             }
-        },
-        tooltip: {
-            formatter: function () {
-				return '<b>' + this.x + '</b> 总次数:<b>' + this.y + '</b>';
-			}
-        },
-        plotOptions: {
-            bar: {
-                dataLabels: {
-                    enabled: true,
-                    allowOverlap: true // 允许数据标签重叠
+            if (v.operation === '访问') {
+                if (visit_dict[v.userinfo] === undefined) {
+                    visit_dict[v.userinfo] = 1;
+                } else {
+                    visit_dict[v.userinfo] += 1;
+                }
+            } else if (v.operation === '单项添加') {
+                if (add_dict[v.userinfo] === undefined) {
+                    add_dict[v.userinfo] = 1;
+                } else {
+                    add_dict[v.userinfo] += 1;
+                }
+            } else if (v.operation === '单项更新') {
+                if (edit_dict[v.userinfo] === undefined) {
+                    edit_dict[v.userinfo] = 1;
+                } else {
+                    edit_dict[v.userinfo] += 1;
+                }
+            } else if (v.operation === '单项删除') {
+                if (del_dict[v.userinfo] === undefined) {
+                    del_dict[v.userinfo] = 1;
+                } else {
+                    del_dict[v.userinfo] += 1;
                 }
             }
-        },
-        series: [
-                {
-                  name: "访问",
-                  data: valid_visit
-                },{
-                  name: "单项添加",
-                  data: valid_add
-                },{
-                  name: "单项更新",
-                  data: valid_edit
-                },{
-                  name: "单项删除",
-                  data: valid_del
+        });
+        $.each(user_data, function (i ,v) {
+            user_dict[v.id] = v.nick_name
+        });
+
+        let valid_nick_name = [];
+        let valid_visit = [];
+        let valid_add = [];
+        let valid_edit = [];
+        let valid_del = [];
+        $.each(valid_userinfo, function (k ,v) {
+            valid_nick_name.push(user_dict[k]);
+            if (visit_dict[k] === undefined) {
+                valid_visit.push(0);
+            } else {
+                valid_visit.push(visit_dict[k]);
+            }
+            if (add_dict[k] === undefined) {
+                valid_add.push(0);
+            } else {
+                valid_add.push(add_dict[k]);
+            }
+            if (edit_dict[k] === undefined) {
+                valid_edit.push(0);
+            } else {
+                valid_edit.push(edit_dict[k]);
+            }
+            if (del_dict[k] === undefined) {
+                valid_del.push(0);
+            } else {
+                valid_del.push(del_dict[k]);
+            }
+        });
+
+        // 画图，用户行为记录条形图
+        $('#userSum').highcharts({
+            credits: {
+                enabled: false,
+                text: ''
+            },
+            chart: {
+                type: 'bar'
+            },
+            title: {
+                  text: null
+            },
+            xAxis: {
+                categories: valid_nick_name,
+                title: {
+                    text: null
                 }
-        ]
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: '总次数',
+                    align: 'high'
+                },
+                labels: {
+                    overflow: 'justify'
+                }
+            },
+            tooltip: {
+                formatter: function () {
+                    return '<b>' + this.x + '</b> 总次数:<b>' + this.y + '</b>';
+                }
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        enabled: true,
+                        allowOverlap: true // 允许数据标签重叠
+                    }
+                }
+            },
+            series: [
+                    {
+                      name: "访问",
+                      data: valid_visit
+                    },{
+                      name: "单项添加",
+                      data: valid_add
+                    },{
+                      name: "单项更新",
+                      data: valid_edit
+                    },{
+                      name: "单项删除",
+                      data: valid_del
+                    }
+            ]
+        });
+
     });
-
-
-  });
 </script>
 {% endblock %}
 </body>

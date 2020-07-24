@@ -394,9 +394,11 @@
                         exportOptions: { columns: range(table_columns.length-1) }
                     },
                     {
-                        extend: 'csv', text: '全部输出到csv',
-                        className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-excel my-1',
-                        exportOptions: { columns: range(table_columns.length-1), selected: null }
+                        text: '全部输出到csv',attr: { id: 'downloadExcel' },
+                        action: function ( e, dt, node, config ) {
+                            window.location.href = url0.substring(4) + "?all=1";
+                        },
+                        className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-excel my-1'
                     }
                 ]
             },

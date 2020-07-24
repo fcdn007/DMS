@@ -1,4 +1,5 @@
 import datetime
+import os
 import subprocess
 
 from celery import shared_task
@@ -9,7 +10,7 @@ from django.db.models import Q
 from USER.models import UserInfo, DatabaseRecord
 from util.merge_df import make_new_merge_df_all, make_new_merge_df_partly, check_new_merge_df_all
 from .celerys import app
-from .settings import SERVER_HOST, BASE_DIR
+from .settings import SERVER_HOST, BASE_DIR, MEDIA_ROOT
 
 
 @app.task
@@ -79,3 +80,14 @@ def add_modelViewRecord_by_celery(model_, username):
         record_obj = DatabaseRecord(**new_record)
         record_obj.save()
     return True
+
+
+@shared_task
+def clean_media_by_celery():
+    subprocess.run(" ".join(["rm", "{}/*".format(os.path.join(MEDIA_ROOT, "csv"))]), shell=True)
+    now = datetime.datetime.now()
+    files_dir = os.path.join(MEDIA_ROOT, "files")
+    file_gz = os.path.join(files_dir, "backup.{}.tar.gz".format(now.strftime("%Y%m%d")))
+    subprocess.run("tar -czvf {} {}/*.xlsx && rm {}/*.xlsx".format(file_gz, files_dir, files_dir), shell=True)
+    return True
+
