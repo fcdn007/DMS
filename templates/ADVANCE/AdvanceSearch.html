@@ -90,7 +90,7 @@
         </div>
         <div class="form-group">
             <div class="form-inline">
-                <label for="SEQ_models">样本库信息管理</label>
+                <label for="SEQ_models">分析结果管理</label>
                 <div class="custom-control custom-checkbox ml-4">
                     <input class="custom-control-input partAll" type="checkbox"  id="set4All">
                     <label class="custom-control-label"  for="set4All">选取全部</label>
@@ -279,6 +279,7 @@
         let models_query_index = [], field_dict = "None", ajax_output;
         let conditionAdd = 1;
         let table_element = $("#resetTable");
+        let highcharts_export_buttons = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
 
         // 生成查询条件栏
         $.each(range(2, 11), function (i, v) {
@@ -428,11 +429,11 @@
                 }
             });
             // 如果field_dict为空，用ajax获取选取子表的字段字典
-            if(models_query_index.length === 0) {
-                let tmp_res = get_merge_df_cols();
-                models_query_index = tmp_res.models_query_index;
-                field_dict =  tmp_res.field_dict;
-            }
+
+            let tmp_res = get_merge_df_cols();
+            models_query_index = tmp_res.models_query_index;
+            field_dict =  tmp_res.field_dict;
+
 
             let resetTable_html = '<table id="table_id" class="display"><thead><tr><th>索引</th>'; // 储存生成的html代码
             $.each(field_dict['name'], function (i, v) {
@@ -460,13 +461,11 @@
                         "rows": "%d行已选"
                     }
                 },
-                "scrollY": "500px", "scrollCollapse": true,
-                "scrollX": true, "fixedColumns": true,
-                "rowReorder": true, "colReorder": true,
-                "searching": true, "select": true,
+                "scrollY": "300px", "scrollCollapse": true,
+                "scrollX": true, "select": true,
                 "fixedHeader": true, "lengthChange": true,
                 "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]],
-                "serverSide": true, "processing": true,"dom": 'rBltip',
+                "serverSide": false, "processing": true, "dom": 'rBltip',
                 "buttons": [
                     {
                         extend: 'selectNone', text: '取消当前选择',
@@ -723,7 +722,7 @@
                     'sum': 0,
                     'data': {}
                 };
-                let tmp_data_key = [];
+                let tmp_data_key = [], num_bool = 'false', num_min=0, num_max=0;
                 $.each(ajax_output, function (i, v) {
                     tmp_data['sum'] += 1;
                     let tmp_k2 = v[key];
@@ -737,28 +736,47 @@
                         }
                     } else if (field_type['date'].indexOf(key) > -1) {
                         if (nullPattern.test(tmp_k2) || tmp_k2 === undefined || !tmp_k2) {
-                            tmp_k2 = '2000上半年'
+                            tmp_k2 = '200001'
                         } else {
-                            if (parseInt(tmp_k2.substring(5, 7)) < 7) {
-                                tmp_k2 = tmp_k2.substring(0, 4) + '上半年';
-                            } else {
-                                tmp_k2 = tmp_k2.substring(0, 4) + '下半年';
-                            }
+                            tmp_k2 = parseInt(tmp_k2.substring(0, 4) + tmp_k2.substring(5, 7));
                         }
                     } else {
                         if (nullPattern.test(tmp_k2) || tmp_k2 === undefined || !tmp_k2) {
                             tmp_k2 = 0;
                         } else {
-                            tmp_k2 = parseInt(changeThreeDecimal_f(tmp_k2 / 10));
+                            if (tmp_k2 !== 9999 && tmp_k2 > num_max){num_max = tmp_k2}
+                            if (tmp_k2 < num_min){num_min = tmp_k2}
+                            if (num_bool === 'false'){num_bool = 'true'}
                         }
                     }
-                    if (tmp_data['data'][tmp_k2] === undefined) {
-                        tmp_data['data'][tmp_k2] = 1;
-                        tmp_data_key.push(tmp_k2);
-                    } else {
-                        tmp_data['data'][tmp_k2] += 1
+                    if (num_bool === 'false'){
+                        if (tmp_data['data'][tmp_k2] === undefined) {
+                            tmp_data['data'][tmp_k2] = 1;
+                            tmp_data_key.push(tmp_k2);
+                        } else {
+                            tmp_data['data'][tmp_k2] += 1
+                        }
                     }
                 });
+                if (num_bool === 'true'){
+                    let denomin;
+                    if (num_max === num_min){
+                        denomin = 1
+                    } else if (Math.log10(num_max - num_min) >= 0){
+                        denomin = Math.pow(10, Math.floor(Math.log10(num_max - num_min)))
+                    } else if (Math.log10(num_max - num_min) < 0){
+                        denomin = Math.pow(10, Math.cell(Math.log10(num_max - num_min)))
+                    }
+                    $.each(ajax_output, function (i, v) {
+                        let tmp_k2 = parseInt(changeThreeDecimal_f(v[key] / denomin));
+                        if (tmp_data['data'][tmp_k2] === undefined) {
+                            tmp_data['data'][tmp_k2] = 1;
+                            tmp_data_key.push(tmp_k2);
+                        } else {
+                            tmp_data['data'][tmp_k2] += 1
+                        }
+                    });
+                }
                 let pie_data_array = [];
                 tmp_data_key = tmp_data_key.sort();
                 $.each(tmp_data_key, function (i, v) {
@@ -809,6 +827,17 @@
                 json.series = series;
                 json.plotOptions = plotOptions;
                 json.credits = credits;
+                json.exporting= {
+                    buttons: {
+                        contextButton: {
+                          // 自定义导出菜单项目及顺序
+                            menuItems: [
+                                highcharts_export_buttons[4],
+                                highcharts_export_buttons[5]
+                            ]
+                        }
+                    }
+                };
                 plot_highcharts.highcharts(json);
             } else  if (plotClass.val() === 'scatter') {
                 // 获取数据
@@ -846,7 +875,7 @@
                         $.each(ajax_output, function (i, v) {
                             let v2 = v[key_];
                             if (nullPattern.test(v2) || v2 === undefined || !v2) {
-                                v2 = 0
+                                v2 = 9999
                             }
                             res['data'].push(v2);
                         });
@@ -856,19 +885,15 @@
                         $.each(ajax_output, function (i, v) {
                             let v2;
                             if (nullPattern.test(v[key_]) || v[key_] === undefined || !v[key_]) {
-                                v2 = '2000上半年';
+                                v2 = '200001';
                             } else {
-                                if (parseInt(v[key_].substring(5, 7)) < 7) {
-                                    v2 = v[key_].substring(0, 4) + '上半年';
-                                } else {
-                                    v2 = v[key_].substring(0, 4) + '下半年';
-                                }
+                                v2 = parseInt(v[key_].substring(0, 4) + v[key_].substring(5, 7));
                             }
                             tmp_list.push(v2);
                         });
                         let tmp_list_set = JSON.parse(JSON.stringify(tmp_list));
                         tmp_list_set = unique(tmp_list_set.sort());
-                        res['categories'] = tmp_list_set;
+                        res['categories'] = Array_Sort_Numbers(tmp_list_set);
                         $.each(tmp_list, function (i, v) {
                             res['data'].push(tmp_list_set.indexOf(v));
                         });
@@ -906,66 +931,120 @@
                 // console.log('before this_data:');
                 // console.log(this_data);
                 if ($('#scatter_remove_abnormal').prop('checked') === true) {
-                    function compute_limit(data_) {
-                        let quart_75 = Quartile_75(data_);
-                        let quart_25 = Quartile_25(data_);
-                        return {
-                            "min_v": quart_25 - 1.5 * (quart_75 - quart_25),
-                            "max_v": quart_75 + 1.5 * (quart_75 - quart_25)
+                    function compute_push_bool(class_, data_) {
+                        console.info("> class_:",class_);
+                        console.info("> data_:",data_);
+                        let empty_index = -1;
+                        if (class_ === 'num' && data_.indexOf(9999) !== -1) {
+                            empty_index = data_.indexOf(9999);
+                        } else if (class_ === 'str' && data_.indexOf('无') !== -1) {
+                            empty_index = data_.indexOf('无');
+                        } else if (class_ === 'date' && data_.indexOf(200001) !== -1) {
+                            empty_index = data_.indexOf(200001);
                         }
+                        console.info("> empty_index:",empty_index);
+                        return empty_index;
                     }
 
-                    let tmp_data = [
-                        {
-                            'item_type': this_data[0]['item_type'],
-                            'categories': this_data[0]['categories'],
-                            'data': []
-                        },
-                        {
-                            'item_type': this_data[1]['item_type'],
-                            'categories': this_data[1]['categories'],
-                            'data': []
-                        },
-                        {
-                            'item_type': this_data[2]['item_type'],
-                            'categories': this_data[2]['categories'],
-                            'data': []
+                    let x_empty_index = compute_push_bool(this_data[0]['item_type'], this_data[0]['categories']);
+                    let y_empty_index = compute_push_bool(this_data[1]['item_type'], this_data[1]['categories']);
+                    let z_empty_index = compute_push_bool(this_data[2]['item_type'], this_data[2]['categories']);
+                    // console.info("> x_empty_index:",x_empty_index);
+                    // console.info("> y_empty_index:",y_empty_index);
+                    // console.info("> z_empty_index:",z_empty_index);
+                    let update_bool = 'false';
+                    let x_data = [], y_data = [], z_data = [];
+                    if (x_empty_index === -1 && y_empty_index === -1 && z_empty_index === -1) {
+                        if (this_data[0]['item_type'] === 'num' || this_data[1]['item_type'] === 'num' ||
+                            this_data[2]['item_type'] === 'num'){
+                            update_bool = 'true';
+                            // console.info("> update_bool in 943:",update_bool);
+                            $.each(this_data[0]['data'], function (i, v) {
+                                if (v !== 9999 && this_data[1]['data'][i] !== 9999 &&
+                                    this_data[2]['data'][i]  !== 9999) {
+                                    x_data.push(this_data[0]['categories'][v]);
+                                    y_data.push(this_data[1]['categories'][this_data[1]['data'][i]]);
+                                    z_data.push(this_data[2]['categories'][this_data[2]['data'][i]]);
+                                }
+                            });
                         }
-                    ];
-                    let x_bool = Array(this_data[0]['data'].length).fill('true');
-                    let y_bool = Array(this_data[1]['data'].length).fill('true');
-                    if (this_data[0]['item_type'] === 'num') {
-                        // do something for x_bool
-                        let limit = compute_limit(this_data[0]['data']);
-                        // console.info('>>> min_v: ', limit.min_v , '; max_v: ', limit.max_v);
+                    } else {
+                        update_bool = 'true';
+                        // console.info("> update_bool in 955:",update_bool);
+                        function empty_filter(item_type_, data_, index_){
+                            let tmp_bool = 'false';
+                            if (item_type_ !== 'num'){
+                                if (data_ === index_){
+                                    tmp_bool = 'true';
+                                }
+                            } else {
+                                if (data_ === 9999){
+                                    tmp_bool = 'true';
+                                }
+                            }
+                            return tmp_bool;
+                        }
+                        function get_value_pushed(item_type_, categories_, data_){
+                            if (item_type_ !== 'num'){
+                                return categories_[data_];
+                            } else {
+                                return data_;
+                            }
+                        }
                         $.each(this_data[0]['data'], function (i, v) {
-                            if (v < limit.min_v || v > limit.max_v) {
-                                x_bool[i] = 'false'
+                            let x_drop_bool = empty_filter(this_data[0]['item_type'], this_data[0]['data'][i], x_empty_index);
+                            let y_drop_bool = empty_filter(this_data[1]['item_type'], this_data[1]['data'][i], y_empty_index);
+                            let z_drop_bool = empty_filter(this_data[2]['item_type'], this_data[2]['data'][i], z_empty_index);
+                            if (x_drop_bool === 'false' && y_drop_bool === 'false' && z_drop_bool === 'false') {
+                                    console.info("> push in line 986");
+                                    x_data.push(get_value_pushed(this_data[0]['item_type'], this_data[0]['categories'], this_data[0]['data'][i]));
+                                    y_data.push(get_value_pushed(this_data[1]['item_type'], this_data[1]['categories'], this_data[1]['data'][i]));
+                                    z_data.push(get_value_pushed(this_data[2]['item_type'], this_data[2]['categories'], this_data[2]['data'][i]));
                             }
-                        })
+                        });
+
                     }
-                    if (this_data[1]['item_type'] === 'num') {
-                        // do something for y_bool
-                        let limit = compute_limit(this_data[1]['data']);
-                        // console.info('>>> y_bool >>> min_v: ', limit.min_v , '; max_v: ', limit.max_v);
-                        $.each(this_data[1]['data'], function (i, v) {
-                            if (v < limit.min_v || v > limit.max_v) {
-                                y_bool[i] = 'false'
+                    if (update_bool === 'true'){
+                        console.info("> x_data:",x_data);
+                        console.info("> y_data:",y_data);
+                        console.info("> z_data:",z_data);
+                        let x_categories, y_categories, z_categories;
+                        x_categories= unique(x_data.sort());
+                        let tmp_list_x = [];
+                        $.each(x_data, function (i, v) {
+                            tmp_list_x.push(x_categories.indexOf(v));
+                        });
+                        x_data = tmp_list_x;
+                        y_categories= unique(y_data.sort());
+                        let tmp_list_y = [];
+                        $.each(y_data, function (i, v) {
+                            tmp_list_y.push(y_categories.indexOf(v));
+                        });
+                        y_data = tmp_list_y;
+                        z_categories= unique(z_data.sort());
+                        let tmp_list_z = [];
+                        $.each(z_data, function (i, v) {
+                            tmp_list_z.push(z_categories.indexOf(v));
+                        });
+                        z_data = tmp_list_z;
+                        this_data =  [
+                            {
+                                'item_type': this_data[0]['item_type'],
+                                'categories': x_categories,
+                                'data': x_data
+                            },
+                            {
+                                'item_type': this_data[1]['item_type'],
+                                'categories': y_categories,
+                                'data': y_data
+                            },
+                            {
+                                'item_type': this_data[2]['item_type'],
+                                'categories': z_categories,
+                                'data': z_data
                             }
-                        })
+                        ];
                     }
-                    // console.info("x_bool: ", x_bool, "; y_bool: ", y_bool);
-                    $.each(x_bool, function (i, v) {
-                        if (v === 'true' && y_bool[i] === 'true') {
-                            tmp_data[0]['data'].push(this_data[0]['data'][i]);
-                            tmp_data[1]['data'].push(this_data[1]['data'][i]);
-                            if (this_data[2]['item_type'] !== '') {
-                                tmp_data[2]['data'].push(this_data[2]['data'][i]);
-                            }
-                        }
-                    });
-                    // console.info("tmp_data: ", tmp_data);
-                    this_data = tmp_data;
                 }
                 // console.log('after this_data:');
                 // console.log(this_data);
@@ -1109,6 +1188,17 @@
                 json.credits = credits;
                 json.xAxis = xAxis;
                 json.yAxis = yAxis;
+                json.exporting= {
+                    buttons: {
+                        contextButton: {
+                          // 自定义导出菜单项目及顺序
+                            menuItems: [
+                                highcharts_export_buttons[4],
+                                highcharts_export_buttons[5]
+                            ]
+                        }
+                    }
+                };
                 plot_highcharts.highcharts(json);
             }
         });

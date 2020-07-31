@@ -1,7 +1,7 @@
-import re
 import os
 import re
 import subprocess
+import time
 from collections import defaultdict
 
 import numpy as np
@@ -193,6 +193,7 @@ FIELD_CLASS["LiverPathologicalInfo"]["emptyDrop_list"].append("病理报告编�
 FIELD_CLASS["LiverPathologicalInfo"]["repeatDrop_list"] = ["病理报告编号", "病历编号"]
 FIELD_CLASS["TMDInfo"]["repeatDrop_list"] = ["病历编号", "检查日期"]
 FIELD_CLASS["BiochemInfo"]["repeatDrop_list"] = ["病历编号", "检查日期"]
+
 
 def clean_data(data_, warning_msg_dict, error_msg_dict, skip_list, params):
     emptyDrop_list = params["emptyDrop_list"]
@@ -743,6 +744,22 @@ def get_merge_df_cols(model_list):
 
 
 def make_new_merge_df_all(time2_list, json_files_list):
+    # print("run make_new_merge_df_all in function")
+    time_stamp = 0
+    for t in range(4):
+        if time2_list[t] > time_stamp:
+            time_stamp = time2_list[t]
+    running_file = os.path.join(MEDIA_ROOT, "json", '{}.ALL.merge_df.rebuild_running.status'.format(time_stamp))
+    done_file = os.path.join(MEDIA_ROOT, "json", '{}.ALL.merge_df.rebuild_done.status'.format(time_stamp))
+    if os.path.exists(running_file):
+        while True:
+            if os.path.exists(done_file):
+                return True
+            else:
+                time.sleep(5)
+    else:
+        subprocess.run(["touch", running_file])
+        subprocess.run("rm {}/*ALL*json".format(os.path.join(MEDIA_ROOT, "json")), shell=True)
     input_json_files = [json_files_list[0][time2_list[0]], json_files_list[1][time2_list[1]],
                         json_files_list[2][time2_list[2]], json_files_list[3][time2_list[3]]]
     df_list = []
@@ -764,19 +781,30 @@ def make_new_merge_df_all(time2_list, json_files_list):
     for column in columns_raw:
         if column not in join_field_set:
             not_join_field_set.append(column)
-    time_stamp = 0
-    for t in range(4):
-        if time2_list[t] > time_stamp:
-            time_stamp = time2_list[t]
     output_df = merge_df[join_field_set + not_join_field_set].fillna(" ")
     output_df.to_json(os.path.join(MEDIA_ROOT, "json", '{}.ALL.merge_df.json'.format(time_stamp)), date_format='iso')
     for input_json_file in input_json_files:
-        input_json_file = re.sub(r'merge_df', "rebuild_done", input_json_file)
+        input_json_file = re.sub(r'merge_df.json', "rebuild_done.status", input_json_file)
         if os.path.exists(input_json_file):
             subprocess.run(['rm', input_json_file])
+    subprocess.run("rm {}/*.ALL.merge_df.rebuild_done.status".format(os.path.join(MEDIA_ROOT, "json")), shell=True)
+    subprocess.run(["touch", done_file])
+    subprocess.run(["rm", running_file])
+    return True
 
 
 def make_new_merge_df_partly(json_files_tmp, time2, index):
+    running_file = os.path.join(MEDIA_ROOT, "json", '{}.{}.rebuild_running.status'.format(time2, apps[index]))
+    done_file = os.path.join(MEDIA_ROOT, "json", '{}.{}.rebuild_done.status'.format(time2, apps[index]))
+    if os.path.exists(running_file):
+        while True:
+            if os.path.exists(done_file):
+                return True
+            else:
+                time.sleep(5)
+    else:
+        subprocess.run(["touch", running_file])
+        subprocess.run("rm {}/*{}*json".format(os.path.join(MEDIA_ROOT, "json"), apps[index]), shell=True)
     merge_df_tmp = pd.DataFrame()
     len_models = {}
     models_set_index = apps_models_index[index]
@@ -838,12 +866,7 @@ def make_new_merge_df_partly(json_files_tmp, time2, index):
     merge_df_tmp.to_json(json_files_tmp[time2], date_format='iso')
     pd.DataFrame(len_models, index=[0]).to_json(os.path.join(MEDIA_ROOT, "json", '{}.{}.model_len.json'.format(
         time2, apps[index])))
-    if len(json_files_tmp.keys()) > 9:
-        time2_tmp_list = sorted(list(json_files_tmp.keys()), reverse=True)
-        for i in range(9, len(time2_tmp_list)):
-            os.remove(json_files_tmp[time2_tmp_list[i]])
-            os.remove(re.sub(r'\.merge_df\.', '.model_len.', json_files_tmp[time2_tmp_list[i]]))
-    subprocess.run(["touch", os.path.join(MEDIA_ROOT, "json", '{}.{}.rebuild_done.json'.format(time2,
-                                                                                               apps[index]))])
+    subprocess.run(["touch", done_file])
+    subprocess.run(["rm", running_file])
     return True
 

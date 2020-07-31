@@ -327,14 +327,14 @@
         let bulk_buttons = [];
         if (button_bool1===true) {
             bulk_buttons.push({
-                text: '批量添加模板下载', attr: { id: 'downloadExcel' },
+                text: ' 批量添加模板下载', attr: { id: 'downloadExcel' },
                 action: function ( e, dt, node, config ) {
                     window.location.href = input_params["download_excel"];
                 },
                 className: 'btn btn-info fas fa-download my-1'
             });
             bulk_buttons.push({
-                text: '批量添加', attr: { id: 'upload' },
+                text: ' 批量添加', attr: { id: 'upload' },
                 action: function ( e, dt, node, config ) {
                     $('#uploadFile').val("");
                     $('#uploadError').val("");
@@ -347,7 +347,7 @@
         }
         if (button_bool2===true) {
             bulk_buttons.push({
-                text: '批量删除', attr: { id: 'bulkDel' },
+                text: ' 批量删除', attr: { id: 'bulkDel' },
                 action: function ( e, dt, node, config ) {
                     $('#bulkDelModalInfo').text('是否确认批量删除?(' + $('span.select-info>span').text() + ')');
                     $('#bulkDelUrl').val(model0);
@@ -359,7 +359,7 @@
         }
         let buttons_list = [
             {
-                text: '指定显示列', extend: 'colvis',
+                text: ' 指定显示列', extend: 'colvis',
                 className: 'btn btn-primary far fa-eye my-1 dropdown-toggle button_group1',
                 postfixButtons: [
                     {
@@ -376,25 +376,35 @@
                 }
             },
             {
-                extend: 'selectNone', text: '取消当前选择',
+                extend: 'selectNone', text: ' 取消当前选择',
                 className: 'btn btn-secondary fas fa-ban my-1',
             },
             {
-                extend: 'collection', text: '输出',
+                extend: 'collection', text: ' 输出',
                 className: 'btn btn-primary far fa-save my-1 dropdown-toggle button_group2',
                 buttons: [
                     {
-                        extend: 'copy', text: '所选复制到剪切板',
+                        extend: 'copy', text: ' 复制所选到剪切板',
                         className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-copy my-1',
                         exportOptions: { columns: range(table_columns.length-1) }
                     },
                     {
-                        extend: 'csv', text: '所选输出到csv',
+                        extend: 'csv', text: ' 输出所选到csv',
                         className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-csv my-1',
                         exportOptions: { columns: range(table_columns.length-1) }
                     },
                     {
-                        text: '全部输出到csv',attr: { id: 'downloadExcel' },
+                        extend: 'csv', text: ' 输出当前页到csv',
+                        className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-alt my-1',
+                        exportOptions: {
+                            columns: range(table_columns.length-1),
+                            modifier: {
+                                selected: null
+                            }
+                        }
+                    },
+                    {
+                        text: ' 输出所有到csv',attr: { id: 'downloadExcel' },
                         action: function ( e, dt, node, config ) {
                             window.location.href = url0.substring(4) + "?all=1";
                         },
@@ -403,11 +413,11 @@
                 ]
             },
             {
-                text: '添加单行', className: 'btn btn-primary fas fa-edit my-1',
+                text: ' 添加单行', className: 'btn btn-primary fas fa-edit my-1',
                 attr: { id: 'new' }
             },
             {
-                extend: 'collection', text: '批量操作', buttons: bulk_buttons,
+                extend: 'collection', text: ' 批量操作', buttons: bulk_buttons,
                 className: 'btn btn-warning fas fa-wrench my-1 dropdown-toggle button_group3'
             }
         ];
@@ -430,14 +440,12 @@
                     "rows": "%d行已选"
                 }
             },
-            "scrollY": "500px", "scrollCollapse": true,
-            "scrollX": true, "fixedColumns": true,
-            "rowReorder": true, "colReorder": true,
-            "searching": true, "select": true,
+            "scrollY": "300px", "scrollX": true,
+            "rowReorder": true, "select": true,
             "fixedHeader": true, "lengthChange": true,
             "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]],
             "serverSide": true, "processing": true,
-            "deferRender": true, "dom": 'rBlftip',
+            "deferRender": true, "dom": 'rBltip',
             "buttons": buttons_list, "ajax": url0 + "?format=datatables",
             "columns": table_columns, "columnDefs": table_columnDefs
         });

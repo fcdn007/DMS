@@ -304,7 +304,7 @@
                 <ul class="nav nav-treeview  pl-4">
                   <li class="nav-item">
                     <a href="/LIMS/Methy/MethyLibraryInfo/" class="nav-link">
-                      <i class="far fa-circle nav-icon text-info"></i>
+                      &nbsp;&nbsp;<i class="far fa-circle nav-icon text-info"></i>
                       <p>甲基化建库信息</p>
                     </a>
                   </li>
@@ -316,7 +316,7 @@
                   </li>
                   <li class="nav-item">
                     <a href="/LIMS/Methy/MethyPoolingInfo/" class="nav-link">
-                      &nbsp;&nbsp;<i class="far fa-circle nav-icon text-info"></i>
+                      &nbsp;&nbsp;&nbsp;<i class="far fa-circle nav-icon text-info"></i>
                       <p>pooling映射信息</p>
                     </a>
                   </li>
@@ -415,6 +415,7 @@
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
+    <div id="toTop"></div>
   <!-- Content Header (Page header) -->
       <section class="content-header">
         <div class="container-fluid">
@@ -509,6 +510,7 @@
                   </div>
               </div>
             {% endblock %}
+            <a href="#toTop" id="return2top" style="position:fixed;right:2em;bottom:2em"><i class="fas fa-chevron-circle-up"></i> 返回顶部</a>
           </div>
       </section>
   </div>
@@ -637,7 +639,7 @@ $(document).ready(function () {
              downloadPDF:"下载PDF文件",
              downloadPNG:"下载PNG文件",
              downloadSVG:"下载SVG文件",
-            viewFullscreen:"全屏查看",
+             viewFullscreen:"全屏查看",
              drillUpText:"返回 {series.name}",
              loading:"加载中",
              months:["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"],
@@ -704,6 +706,7 @@ $(document).ready(function () {
             "/api/USER/UserInfo/"
         ];
         let records_sum = [];
+        let highcharts_export_buttons = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
 
         $.each(url_list, function (i, v) {
             let data = $.ajax({
@@ -767,7 +770,18 @@ $(document).ready(function () {
             },
             series: [{
                 data: records_sum
-            }]
+            }],
+            exporting: {
+                buttons: {
+                    contextButton: {
+                      // 自定义导出菜单项目及顺序
+                        menuItems: [
+                            highcharts_export_buttons[4],
+                            highcharts_export_buttons[5]
+                        ]
+                    }
+                }
+            }
         });
 
 
@@ -893,20 +907,31 @@ $(document).ready(function () {
                 }
             },
             series: [
-                    {
-                      name: "访问",
-                      data: valid_visit
-                    },{
-                      name: "单项添加",
-                      data: valid_add
-                    },{
-                      name: "单项更新",
-                      data: valid_edit
-                    },{
-                      name: "单项删除",
-                      data: valid_del
+                {
+                  name: "访问",
+                  data: valid_visit
+                },{
+                  name: "单项添加",
+                  data: valid_add
+                },{
+                  name: "单项更新",
+                  data: valid_edit
+                },{
+                  name: "单项删除",
+                  data: valid_del
+                }
+            ],
+            exporting: {
+                buttons: {
+                    contextButton: {
+                      // 自定义导出菜单项目及顺序
+                        menuItems: [
+                            highcharts_export_buttons[4],
+                            highcharts_export_buttons[5]
+                        ]
                     }
-            ]
+                }
+            }
         });
 
     });
