@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 
 from celery import platforms
-from celery.schedules import crontab
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -47,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_datatables',
+    'django_celery_results',
     'django_celery_beat',
     'gunicorn',
     'imagekit',
@@ -267,6 +267,8 @@ result_serializer = "json"
 accept_content = ["json"]
 # 任务序列化数据格式
 task_serializer = "json"
+# 设置每个worker执行了多少个任务就死掉，防止内存泄漏
+worker_max_tasks_per_child = 10
 # 可选参数：给某个任务限流
 # task_annotations = {'tasks.my_task': {'rate_limit': '10/s'}}
 
@@ -280,24 +282,7 @@ task_serializer = "json"
 beat_scheduler = "django_celery_beat.schedulers:DatabaseScheduler"
 
 platforms.C_FORCE_ROOT = True  # 用于开启root也可以启动celery服务，默认是不允许root启动celery的
-beat_schedule = {
-    'check_merge_df_newest': {
-        "task": "databaseDemo.tasks.keep_merge_df_newest_by_celery",
-        "schedule": crontab(minute=0, hour="22"),  # crontab(minute="*/10"),
-        "args": (),
-    },
-    'backup_db': {
-        "task": "databaseDemo.tasks.backup_db_by_celery",
-        "schedule": crontab(minute=0, hour="22"),  # crontab(minute="*/10"),
-        "args": (),
-    },
-    'clean_media': {
-        "task": "databaseDemo.tasks.clean_media_by_celery",
-        "schedule": crontab(minute=0, hour="22"),  # crontab(minute="*/10"),
-        "args": (),
-    },
-}
-
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 # 更多选项见
 # https://docs.celeryproject.org/en/stable/userguide/configuration.html
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240

@@ -25,16 +25,6 @@
 	<li class="breadcrumb-item active">MethyCaptureInfo</li>
 {% endblock %}
 
-{% block card-body %}
-<table id="table" class="table table-bordered table-hover dt-responsive">
-<thead>
-<tr id="table_header">
-
-</tr>
-</thead>
-</table>
-{% endblock %}
-
 {% block page-script %}
 <script>
   $(document).ready(function () {
@@ -107,20 +97,20 @@
       let input_params = {
           "title1_text": "甲基化检测 捕获文库信息 总条目数： ",
 		  "fields": [
-              //                    [   0,     1,               2,               3,             4,       5,       6,        7  ]
-              // input类型是select： [ field, name, 在table中是否可排序/搜索, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
-              // input类型不是select： [ field, name, 在table中是否可排序/搜索, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
-              ["poolingLB_id", "捕获文库名", 1, 1, 0, 1, "text"],
-              ["hybrid_date", "杂交日期", 1, 1, 1, 0, "date", "2000-01-01"],
-              ["probes", "杂交探针", 1, 1, 2, 0, "text", "无"],
-              ["hybrid_min", "杂交时间(min)", 1, 1, 3, 0, "number_0.001", 0],
-              ["postpcr_cycles", "PostPCR循环数", 1, 1, 4, 0, "number_1", 0],
-              ["postpcr_con", "PostPCR浓度(ng/ul)", 1, 1, 5, 0, "number_0.001", 0],
-              ["elution_vol", "洗脱体积(ul)", 1, 1, 6, 0, "number_0.001", 0],
-              ["operator", "操作人", 1, 1, 7, 0, "text", "无"],
-              ["memo", "备注", 1, 1, 8, 0, "text", "无"],
-              ["last_modify_time", "上次修改时间", 1, 0],
-              ["create_time", "创建时间", 1, 0]
+              //                    [   0,     1,      2,               3,        4,       5,       6  ]
+              // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
+              // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
+              ["poolingLB_id", "捕获文库名", 1, 0, 1, "text"],
+              ["hybrid_date", "杂交日期", 1, 1, 0, "date", "2000-01-01"],
+              ["probes", "杂交探针", 1, 2, 0, "text", "无"],
+              ["hybrid_min", "杂交时间(min)", 1, 3, 0, "number_0.001", 0],
+              ["postpcr_cycles", "PostPCR循环数", 1, 4, 0, "number_1", 0],
+              ["postpcr_con", "PostPCR浓度(ng/ul)", 1, 5, 0, "number_0.001", 0],
+              ["elution_vol", "洗脱体积(ul)", 1, 6, 0, "number_0.001", 0],
+              ["operator", "操作人", 1, 7, 0, "text", "无"],
+              ["memo", "备注", 1, 8, 0, "text", "无"],
+              ["last_modify_time", "上次修改时间", 0],
+              ["create_time", "创建时间", 0]
           ],
           "update_func": update_func,
           "delete_func": simple_delete_func,

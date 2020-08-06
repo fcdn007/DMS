@@ -9,7 +9,7 @@
         button.button_group1+div+div {
             width: 200px;
             margin-top: 7px;
-            margin-left: 1em;
+            margin-left: 9em;
             z-index: 1000;
         }
         .select2-results__option[aria-selected=true] {
@@ -36,7 +36,7 @@
 {% block card-body %}
 <div id="card1-body" hidden="hidden">
     <form id="searchForm1" role="form">
-        <p class="bg-info text-white text-lg">设置查询表</p>
+        <p class="bg-info text-white text-lg">&nbsp;设置查询表</p>
         <div class="form-group">
             <div class="form-inline">
                 <label for="EMR_models">病历信息管理</label>
@@ -108,46 +108,49 @@
             <label for="modelAll" class="custom-control-label">选取所有表</label>
         </div>
     </form>
-    <form id="searchForm2" role="form">
-        <p class="bg-info text-white mt-2 text-lg"> 设置过滤条件</p>
-        <div class="form-inline mb-1 search_condition" id="condition1">
-            <span class="text-info h6 mr-3">过滤条件1</span>
-            <div class="form-group mr-2">
-                <select class="form-control SearchNot" id="SearchNot1" name="SearchNot1" required="true">
-                    <option value="0" selected="selected"></option>
-                    <option value="1">非</option>
+    <p class="bg-info text-white mt-2 text-lg">&nbsp;设置过滤条件</p>
+    <div class="row">
+        <form id="searchForm2" role="form" class="row-cols-11">
+            <div class="form-inline mb-1 search_condition" id="condition1">
+                <span class="text-info h6 mr-3">过滤条件1</span>
+                <div class="form-group mr-2">
+                    <select class="form-control SearchNot" id="SearchNot1" name="SearchNot1" required="true">
+                        <option value="0" selected="selected"></option>
+                        <option value="1">非</option>
+                    </select>
+                </div>
+                <div class="form-group mr-2">
+                    <label class="mr-1" for="SearchModelName1">查询子表及字段</label>
+                    <select class="form-control SearchModelName" name="SearchModelName1" id="SearchModelName1"
+                            required="true"></select>
+                </div>
+                <select class="form-control SearchFieldValuePre mr-2" id="SearchFieldValuePre1"
+                                name="SearchFieldValuePre1" required="true">
+                    <option value="exact" selected="selected">等于(大小写严格匹配)</option>
+                    <option value="iexact">等于(忽略大小写)</option>
+                    <option value="contains">包含(大小写严格匹配)</option>
+                    <option value="icontains">包含(忽略大小写)</option>
+                    <option value="gt">大于</option>
+                    <option value="gte">大于等于</option>
+                    <option value="lt">小于</option>
+                    <option value="lte">小于等于</option>
                 </select>
+                <div class="form-group">
+                    <input type="text" class="form-control SearchFieldValue" placeholder="请输入查询字段值"
+                            id="SearchFieldValue1">
+                </div>
             </div>
-            <div class="form-group mr-2">
-                <label class="mr-1" for="SearchModelName1">查询子表及字段</label>
-                <select class="form-control SearchModelName" name="SearchModelName1" id="SearchModelName1"
-                        required="true"></select>
-            </div>
-            <select class="form-control SearchFieldValuePre mr-2" id="SearchFieldValuePre1"
-                            name="SearchFieldValuePre1" required="true">
-                <option value="exact" selected="selected">等于(大小写严格匹配)</option>
-                <option value="iexact">等于(忽略大小写)</option>
-                <option value="contains">包含(大小写严格匹配)</option>
-                <option value="icontains">包含(忽略大小写)</option>
-                <option value="gt">大于</option>
-                <option value="gte">大于等于</option>
-                <option value="lt">小于</option>
-                <option value="lte">小于等于</option>
-            </select>
-            <div class="form-group">
-                <input type="text" class="form-control SearchFieldValue" placeholder="请输入查询字段值"
-                        id="SearchFieldValue1">
-            </div>
+        </form>
+        <div class="row-cols-1 ml-2" style="position: relative;">
+            <a id='conditionAdd' class="bottom" style="position: absolute; bottom: 0">
+                <span style="font-size: 1.5em; color: #007bff;"><i class="fas fa-plus-circle"></i></span></a>
         </div>
-    </form>
-    <div class="form-inline my-2">
-        <button id='textareaAdd' class="btn btn-primary btn-sm mr-3">确认过滤条件</button>
-        <button id='conditionAdd' class="btn btn-info btn-sm mr-3">添加过滤条件</button>
     </div>
     <form id="searchForm3" role="form">
-        <p class="bg-info text-white mt-2 text-lg">过滤条件如下:</p>
+        <p class="bg-info text-white mt-2 text-lg">&nbsp;过滤条件如下:</p>
         <textarea class="form-control" rows="3" id="SearchText" name="SearchText"></textarea>
         <div class="form-inline my-2">
+            <button id='textareaAdd' class="btn btn-primary btn-sm mr-3">确认过滤条件</button>
             <button id='textareaSubmit' type="submit" class="btn btn-primary btn-sm mr-3">查询</button>
             <button id='textareaClear' type="button" class="btn btn-warning btn-sm mr-3">清除过滤条件</button>
         </div>
@@ -433,14 +436,39 @@
             let tmp_res = get_merge_df_cols();
             models_query_index = tmp_res.models_query_index;
             field_dict =  tmp_res.field_dict;
-
-
-            let resetTable_html = '<table id="table_id" class="display"><thead><tr><th>索引</th>'; // 储存生成的html代码
+            let resetTable_html = '<table id="table_id" class="table table-bordered table-hover dt-responsive"><thead>'; // 储存生成的html代码
+            let thead_dict = {'join_field': []}, join_field_pattern = /^.*-.*$/, row1_name = ['join_field'];
             $.each(field_dict['name'], function (i, v) {
-                resetTable_html += '<th>' + v + '</th>'; // 记录各表自定义字段名称
+                if (join_field_pattern.test(v) === true){
+                    let key_list = v.split('-');
+                    if (thead_dict[key_list[0]] === undefined) {
+                        thead_dict[key_list[0]] = [key_list[1]];
+                        row1_name.push(key_list[0]);
+                    } else {
+                        thead_dict[key_list[0]].push([key_list[1]]);
+                    }
+                } else {
+                    thead_dict['join_field'].push(v);
+                }
                 tableId.push({"data": field_dict['id'][i]});
             });
-            resetTable_html += '</tr></thead></table>';
+            let thead_row1_html = '<tr><th rowspan="2">索引</th>', thead_row2_html = '<tr>';
+            $.each(row1_name, function (i, v) {
+                if (v !== 'join_field') {
+                    thead_row1_html += '<th colspan="' + thead_dict[v].length + '">' + v + '</th>';
+                }
+                $.each(thead_dict[v], function (i2, v2) {
+                    if (v === 'join_field') {
+                        thead_row1_html += '<th rowspan="2">' + v2 + '</th>';
+                    } else {
+                        thead_row2_html += '<th>' + v2 + '</th>';
+                    }
+
+                });
+            });
+            thead_row1_html += '</tr>';
+            thead_row2_html += '</tr>';
+            resetTable_html += thead_row1_html + thead_row2_html +'</thead></table>';
             table_element.append(resetTable_html); //插入html代码
             let table = $('#table_id').DataTable({
                 "paging": true, "ordering": true,
@@ -466,31 +494,6 @@
                 "fixedHeader": true, "lengthChange": true,
                 "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]],
                 "serverSide": false, "processing": true, "dom": 'rBltip',
-                "buttons": [
-                    {
-                        extend: 'selectNone', text: '取消当前选择',
-                        className: 'btn btn-secondary fas fa-ban my-1',
-                    },
-                    {
-                        extend: 'collection', text: '输出',
-                        className: 'btn btn-primary far fa-save my-1 dropdown-toggle button_group2',
-                        buttons: [
-                            {
-                                extend: 'copy', text: '所选复制到剪切板',
-                                className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-copy my-1'
-                            },
-                            {
-                                extend: 'csv', text: '所选输出到csv',
-                                className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-csv my-1'
-                            },
-                            {
-                                extend: 'csv', text: '全部输出到csv',
-                                className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-excel my-1',
-                                exportOptions: { selected: null }
-                            }
-                        ]
-                    }
-                ],
                 "ajax": {
                     "url": "{% url 'ADVANCE:AdvanceSearch' %}",
                     "type": "POST",
@@ -506,6 +509,31 @@
                         return json.data;
                     }
                 },
+                "buttons": [
+                    {
+                        extend: 'selectNone', text: '取消当前选择',
+                        className: 'btn btn-secondary fas fa-ban my-1',
+                    },
+                    {
+                        extend: 'collection', text: '输出',
+                        className: 'btn btn-primary far fa-save my-1 dropdown-toggle button_group1',
+                        buttons: [
+                            {
+                                extend: 'copy', text: ' 复制所选到剪切板',
+                                className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-copy my-1'
+                            },
+                            {
+                                extend: 'csv', text: ' 输出所选到csv',
+                                className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-csv my-1'
+                            },
+                            {
+                                extend: 'csv', text: ' 输出所有到csv',
+                                className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-excel my-1',
+                                exportOptions: { selected: null }
+                            }
+                        ]
+                    }
+                ],
                 "deferRender": true, "columns": tableId
             });
         });
@@ -728,7 +756,7 @@
                     let tmp_k2 = v[key];
                     // let numPattern = /^[-+]?\d+(.\d+)?$/;
                     // let datePattern = /^\d{4}-\d{2}-\d{2}/;
-                    let nullPattern = /^\s*$/;
+                    let nullPattern = /^NA$ || ^\s*$/;
                     // 判断数值类型
                     if (field_type['str'].indexOf(key) > -1) {
                         if (nullPattern.test(tmp_k2) || tmp_k2 === undefined || !tmp_k2) {

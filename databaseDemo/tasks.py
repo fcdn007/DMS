@@ -36,7 +36,7 @@ def make_new_merge_df_partly_by_celery(json_files_tmp, time2, index):
     return True
 
 
-@shared_task
+@app.task
 def keep_merge_df_newest_by_celery():
     flag_update_list, time2_list, json_files_list = check_new_merge_df_all()
     check_new_list = []
@@ -52,7 +52,7 @@ def keep_merge_df_newest_by_celery():
     return True
 
 
-@shared_task
+@app.task
 def backup_db_by_celery():
     subprocess.run(" ".join(["cd", BASE_DIR, "&&", "bash", "bkdb.sh"]), shell=True)
     return True
@@ -82,7 +82,7 @@ def add_modelViewRecord_by_celery(model_, username):
     return True
 
 
-@shared_task
+@app.task
 def clean_media_by_celery():
     subprocess.run(" ".join(["rm", "{}/*".format(os.path.join(MEDIA_ROOT, "csv"))]), shell=True)
     now = datetime.datetime.now()

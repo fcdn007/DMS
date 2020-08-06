@@ -715,8 +715,8 @@ def get_merge_df_cols(model_list):
             # "样本提取信息表-其他使用量(ng)"]
             # Todo: 增加key"fieldClass"，表示画图时字段对应的属性[str, num, date]
             # Todo: 增加key"plotBool"，表示是否允许用于画图
-    id_merge_list = join_field_id_list+id_list
-    name_merge_list = join_field_name_list+name_list
+    id_merge_list = join_field_id_list + id_list
+    name_merge_list = join_field_name_list + name_list
     keep_bool_list = [0 for x in range(len(id_merge_list))]
     for model_str in model_list:
         idx1 = models_set2.index(model_str)
@@ -734,6 +734,15 @@ def get_merge_df_cols(model_list):
                 continue
             else:
                 keep_bool_list[idx2] = 1
+        # manytomany field do't show in model_set[idx1]._meta.fields
+        if model_str == "SequencingInfo":
+            field_name = "methycaptureinfo"
+            idx2 = id_merge_list.index(FOREIGNKEY_CONVERSION[field_name][0])
+            if keep_bool_list[idx2] == 1:
+                continue
+            else:
+                keep_bool_list[idx2] = 1
+
     keep_index_list = [x for x in range(len(keep_bool_list)) if keep_bool_list[x] == 1]
     return {
         "id": [id_merge_list[x] for x in keep_index_list],
@@ -764,7 +773,12 @@ def make_new_merge_df_all(time2_list, json_files_list):
                         json_files_list[2][time2_list[2]], json_files_list[3][time2_list[3]]]
     df_list = []
     for i in range(4):
-        df_list.append(pd.read_json(input_json_files[i]))
+        json_df_tmp = pd.read_json(input_json_files[i])
+        if i in [1, 2]:
+            show_cols = [x for x in json_df_tmp.columns]
+            show_cols.remove("sampler_id")
+            json_df_tmp = json_df_tmp[show_cols]
+        df_list.append(json_df_tmp)
     join_cols = [["dna_id", "singleLB_id"], ["singleLB_Pooling_id", "poolingLB_id"], "sampler_id"]
     merge_df = df_list[0]
     for df_index in range(1, 4):
@@ -773,7 +787,7 @@ def make_new_merge_df_all(time2_list, json_files_list):
         else:
             for col_ in df_list[df_index].columns:
                 if col_ not in merge_df.columns:
-                    merge_df[col_] = [" " for row_ in range(merge_df.shape[0])]
+                    merge_df[col_] = ["NA" for row_ in range(merge_df.shape[0])]
 
     columns_raw = list(merge_df.columns)
     join_field_set = list(FILECOLUMN_FOREIGNKEY_TO_MODEL.keys())
@@ -781,7 +795,7 @@ def make_new_merge_df_all(time2_list, json_files_list):
     for column in columns_raw:
         if column not in join_field_set:
             not_join_field_set.append(column)
-    output_df = merge_df[join_field_set + not_join_field_set].fillna(" ")
+    output_df = merge_df[join_field_set + not_join_field_set].fillna("NA")
     output_df.to_json(os.path.join(MEDIA_ROOT, "json", '{}.ALL.merge_df.json'.format(time_stamp)), date_format='iso')
     for input_json_file in input_json_files:
         input_json_file = re.sub(r'merge_df.json', "rebuild_done.status", input_json_file)
@@ -811,6 +825,7 @@ def make_new_merge_df_partly(json_files_tmp, time2, index):
     join_field_set = []
     for idx in models_set_index:
         model_str = models_set2[idx]
+        print(">>> model_str: {}".format(model_str))
         fields = list(FILECOLUMN_TO_FIELD['normal'][model_str].values())
         # Todo: 提取表增加字段
         if model_str in FILECOLUMN_TO_FIELD["normalAdd"]:
@@ -824,6 +839,8 @@ def make_new_merge_df_partly(json_files_tmp, time2, index):
                 join_field = fields[last_idx].split("__")[1]
         elif model_str == "MethyCaptureInfo":  # CaptureInfo需要特殊处理
             join_field = "poolingLB_id"
+        if idx in [4, 8] and 'sampleinventoryinfo__sampler_id' not in fields:
+            fields.append('sampleinventoryinfo__sampler_id')
         res_raw = list(models_set[idx].objects.values_list(*fields))
         fields_rename = []
         for field_ in fields:
@@ -842,7 +859,7 @@ def make_new_merge_df_partly(json_files_tmp, time2, index):
             else:
                 for field_ in fields_rename:
                     if field_ != join_field:
-                        merge_df_tmp[field_] = [" " for row_ in range(merge_df_tmp.shape[0])]
+                        merge_df_tmp[field_] = ["NA" for row_ in range(merge_df_tmp.shape[0])]
 
             if join_field not in join_field_set:
                 join_field_set.append(join_field)
@@ -852,7 +869,9 @@ def make_new_merge_df_partly(json_files_tmp, time2, index):
             for column in columns_raw:
                 if column not in join_field_set:
                     not_join_field_set.append(column)
-            merge_df_tmp = merge_df_tmp[join_field_set + not_join_field_set].fillna(" ")
+            print(">>> join_field_set: {}".format(join_field_set))
+            print(">>> not_join_field_set: {}".format(not_join_field_set))
+            merge_df_tmp = merge_df_tmp[join_field_set + not_join_field_set].fillna("NA")
         len_models[model_str] = models_set[idx].objects.count()
     for ncol in range(merge_df_tmp.shape[1]):
         for nrow in range(merge_df_tmp.shape[0]):
@@ -870,3 +889,61 @@ def make_new_merge_df_partly(json_files_tmp, time2, index):
     subprocess.run(["rm", running_file])
     return True
 
+
+def single_model_search(model_str, queryset=None):
+    model_ = models_set[models_set2.index(model_str)]
+    res_raw_1 = model_.objects
+    res_raw = pd.DataFrame(res_raw_1.all().values())
+    # abstract columns and foreign keys.
+    fields = model_._meta.__dict__['fields']
+    fkeys = [field.verbose_name for field in fields if field.is_relation]
+
+    # 修改列名
+    pre = str(model_).split("\'")[1].split(".")[-1] + "__"
+    pre = pre.lower()
+    list_ = [FOREIGNKEY_CONVERSION[x] + '__' + x for x in
+             list(FILECOLUMN_TO_FIELD['foreign'][model_str].values())]
+    # abstract value of the queried set
+
+    if queryset:
+        for i in queryset.split("\n"):
+            querysetIte = iter(queryset.split(" AND "))
+            while True:
+                try:
+                    currentquery = next(querysetIte)
+                    not_, m, f, vp, v = currentquery.split("\t")
+                    not_ = int(not_[1:])
+                    v = v[:-1]
+
+                    fkey = m + "__" + f + "__" + vp
+                    fkey = fkey.lower()
+                    fparamdict = {fkey: v}
+
+                    gkey = f + "__" + vp
+                    gparamdict = {gkey: v}
+
+                    if not_ == 1:
+                        if m.lower() in fkeys:
+                            res_raw_1 = res_raw_1.exclude(**fparamdict)
+                        else:
+                            res_raw_1 = res_raw_1.exclude(**gparamdict)
+                    elif not_ == 0:
+                        if m.lower() in fkeys:
+                            res_raw_1 = res_raw_1.filter(**fparamdict)
+                        else:
+                            res_raw_1 = res_raw_1.filter(**gparamdict)
+                    else:
+                        raise Exception("ValueError")
+                except StopIteration:
+                    break
+    res_filtered = pd.DataFrame(res_raw_1.all().values())
+    if not res_filtered.shape[0] == 0:
+        fkeydf = pd.DataFrame(res_raw_1.all().values('id', list_[0]))
+        res_filtered = pd.merge(res_filtered, fkeydf)
+        res_filtered.columns = [column if (column.split("_")[0] in fkeys) | (column == "id") | (
+                column in FILECOLUMN_FOREIGNKEY_TO_MODEL.keys()) else
+                                model_str + "__" + column for
+                                column in res_filtered.columns]
+        res_filtered.columns = [column.split("__")[1] if column.split("__")[0] in fkeys else column for column in
+                                res_filtered.columns]
+    return res_filtered, res_raw

@@ -50,6 +50,57 @@
 <h3 class="card-title" id="card-title1"></h3>
 {% endblock %}
 
+{% block card-body %}
+<p class="bg-info text-white mt-2 text-lg">&nbsp;设置过滤条件</p>
+<div class="row" id="card1-body" hidden="hidden">
+    <form id="searchForm" role="form" class="row-cols-11">
+        <div class="form-inline mb-1 search_condition" id="condition1">
+            <span class="text-info h6 mr-3">过滤条件1</span>
+            <div class="form-group mr-2">
+                <select class="form-control SearchNot" id="SearchNot1" name="SearchNot1" required="true">
+                    <option value="0" selected="selected"></option>
+                    <option value="1">非</option>
+                </select>
+            </div>
+            <div class="form-group mr-2">
+                <label class="mr-1" for="SearchFieldName1">查询字段</label>
+                <select class="form-control SearchFieldName" name="SearchFieldName1" id="SearchFieldName1"
+                        required="true"></select>
+            </div>
+            <select class="form-control SearchFieldValuePre mr-2" id="SearchFieldValuePre1"
+                            name="SearchFieldValuePre1" required="true">
+                <option value="exact" selected="selected">等于(大小写严格匹配)</option>
+                <option value="iexact">等于(忽略大小写)</option>
+                <option value="contains">包含(大小写严格匹配)</option>
+                <option value="icontains">包含(忽略大小写)</option>
+                <option value="gt">大于</option>
+                <option value="gte">大于等于</option>
+                <option value="lt">小于</option>
+                <option value="lte">小于等于</option>
+            </select>
+            <div class="form-group">
+                <input type="text" class="form-control SearchFieldValue" placeholder="请输入查询字段值"
+                        id="SearchFieldValue1">
+            </div>
+        </div>
+    </form>
+    <div class="row-cols-1 ml-2" style="position: relative;">
+        <a id='conditionAdd' class="bottom" style="position: absolute; bottom: 0">
+            <span style="font-size: 1.5em; color: #007bff;"><i class="fas fa-plus-circle"></i></span></a>
+    </div>
+</div>
+<form id="searchForm3" role="form">
+    <textarea class="form-control" rows="3" id="SearchText" name="SearchText" hidden></textarea>
+    <div class="form-inline my-2">
+        <button id='textareaSubmit' type="submit" class="btn btn-primary btn-sm mr-3">查询</button>
+        <button id='textareaClear' type="button" class="btn btn-warning btn-sm mr-3">清除过滤条件</button>
+    </div>
+</form>
+<p class="bg-info text-white mt-4 text-lg">&nbsp;结果数据</p>
+<div id="resetTable">
+</div>
+{% endblock %}
+
 {% block plot_card %}
 
 {% endblock %}
@@ -203,14 +254,10 @@
         $("#card-title1").text(input_params["title1_text"] + data0.length);
 
         // 生成table的表头和table的columns变量
-        let table_columns = [];
-        let table_columnDefs = [];
-        let hide_col = [];
-        let modal_dict = {};
-        let new_modal_fields = [];
-        let edit_modal_fields = [];
-        let tmp_id = $("#table_header");
-        tmp_id.append("<th>索引</th>");
+        let table_columns = [], table_columnDefs = [], hide_col = [], modal_dict = {};
+        let new_modal_fields = [], edit_modal_fields = [];
+        let table_header_html = "", conditionAdd = 1;
+        table_header_html += "<th>索引</th>";
         table_columns.push({
             data: 'id', width: "1%",
             // 若想前端显示的不一样，则需要"render"函数
@@ -219,44 +266,40 @@
             }
         });
         $.each(input_params.fields, function (i, v) {
-            tmp_id.append("<th>" + v[1] + "</th>");
+            table_header_html += "<th>" + v[1] + "</th>";
             table_columns.push({ "data": v[0] });
-            if (v[2] === 0) {
-                table_columnDefs.push({ "searchable": false, "orderable": false, "targets": i+1 })
-            }
-
-            if (v[3] === 1){ // 出现在modal
+            if (v[2] === 1){ // 出现在modal
                 let label_str = '<label for="' + v[0] + '"> ' + v[1] + '</label>';
                 edit_modal_fields.push(v[0]);
                 let input_str;
                 // 根据input类型生成input_str
-                if (v[6] === 'select') {
+                if (v[5] === 'select') {
                     input_str = '<select type="text" class="form-control" id="' + v[0] + '" name="' + v[0] + '" ';
-                } else if (v[6] === 'select_multiple'){
+                } else if (v[5] === 'select_multiple'){
                     input_str = '<select type="text" class="form-control" multiple="multiple" id="' + v[0] + '" name="' + v[0] + '" ';
-                } else if (v[6] === 'text'){
+                } else if (v[5] === 'text'){
                     input_str = '<input type="text" class="form-control" id="' + v[0] + '" name="' + v[0] +
                         '" placeholder="请输入' + v[1];
-                } else if (v[6] === 'number_1'){
+                } else if (v[5] === 'number_1'){
                     input_str = '<input type="number" step="1" class="form-control" id="' + v[0] + '" name="' + v[0] +
                         '" placeholder="请输入' + v[1];
-                } else if (v[6] === 'number_0.001'){
+                } else if (v[5] === 'number_0.001'){
                     input_str = '<input type="number" step="0.001" class="form-control" id="' + v[0] + '" name="' + v[0] +
                         '" placeholder="请输入' + v[1];
-                } else if (v[6] === 'number_0.0001'){
+                } else if (v[5] === 'number_0.0001'){
                     input_str = '<input type="number" step="0.0001" class="form-control" id="' + v[0] + '" name="' + v[0] +
                         '" placeholder="请输入' + v[1];
-                } else if (v[6] === 'date'){
+                } else if (v[5] === 'date'){
                     input_str = '<input type="date" class="form-control" id="' + v[0] + '" name="' + v[0] +
                         '" placeholder="请输入' + v[1];
                 }
-                modal_dict[v[4]] = '<div class="form-group">';
-                if (v[5] === 1){
+                modal_dict[v[3]] = '<div class="form-group">';
+                if (v[4] === 1){
                     // 如果必填，label前面增加*号
-                    modal_dict[v[4]] += '<span><a class="text-danger front-weight-bold">* </a>' + label_str + '</span>';
-                    if (v[6] === 'select' || v[6] === 'select_multiple') {
+                    modal_dict[v[3]] += '<span><a class="text-danger front-weight-bold">* </a>' + label_str + '</span>';
+                    if (v[5] === 'select' || v[5] === 'select_multiple') {
                         input_str += 'required="true">';
-                        $.each(v[7], function (i2, v2) {
+                        $.each(v[6], function (i2, v2) {
                             if (i2===0){
                                 input_str += '<option value="' + v2[0] + '" selected="selected">' + v2[1] + '</option>';
                             } else {
@@ -269,10 +312,10 @@
                         input_str += '，必填" required="true">';
                     }
                 } else {
-                    modal_dict[v[4]] += label_str;
-                    if (v[6] === 'select') {
+                    modal_dict[v[3]] += label_str;
+                    if (v[5] === 'select') {
                         input_str += '>';
-                        $.each(v[7], function (i2, v2) {
+                        $.each(v[6], function (i2, v2) {
                             if (i2===0){
                                 input_str += '<option value="' + v2[0] + '" selected="selected">' + v2[1] + '</option>';
                             } else {
@@ -281,14 +324,14 @@
                         });
                         input_str += '</select>';
                     } else {
-                        input_str += '，默认：' + v[7] + '" value="' + v[7] + '">';
+                        input_str += '，默认：' + v[6] + '" value="' + v[6] + '">';
                     }
                 }
-                modal_dict[v[4]] += input_str;
-                modal_dict[v[4]] += '</div>';
+                modal_dict[v[3]] += input_str;
+                modal_dict[v[3]] += '</div>';
             }
         });
-        tmp_id.append("<th>操作</th>");
+        table_header_html += "<th>操作</th>";
         table_columns.push({
             data: null,
             "defaultContent": '<button type="button" class="btn btn-primary mt-1 mr-1">更新</button>' +
@@ -300,7 +343,7 @@
         }
 
         // 生成modal
-        tmp_id = $("#modelForm");
+        let tmp_id = $("#modelForm");
         for (let i=0; i < Object.keys(modal_dict).length; i++){
             tmp_id.append(modal_dict[i]);
         }
@@ -342,7 +385,6 @@
                     $("#uploadModal").modal();
                 },
                 className: 'btn btn-primary fas fa-upload my-1'
-
             });
         }
         if (button_bool2===true) {
@@ -354,126 +396,171 @@
                     $("#bulkDelModal").modal();
                 },
                 className: 'btn btn-danger fas fa-trash-alt my-1'
-
             });
         }
-        let buttons_list = [
-            {
-                text: ' 指定显示列', extend: 'colvis',
-                className: 'btn btn-primary far fa-eye my-1 dropdown-toggle button_group1',
-                postfixButtons: [
-                    {
-                        extend: 'colvisGroup', text: '显示默认', hide: hide_col,
-                        className: 'dt-button buttons-columnVisibility'
-                    },
-                    {
-                        extend: 'colvisGroup', text: '显示全部', show: ':hidden',
-                        className: 'dt-button buttons-columnVisibility'
 
-                    }],
-                columnText: function (dt, idx, title) {
-                    return (idx + 1) + ': ' + title;
-                }
-            },
-            {
-                extend: 'selectNone', text: ' 取消当前选择',
-                className: 'btn btn-secondary fas fa-ban my-1',
-            },
-            {
-                extend: 'collection', text: ' 输出',
-                className: 'btn btn-primary far fa-save my-1 dropdown-toggle button_group2',
-                buttons: [
-                    {
-                        extend: 'copy', text: ' 复制所选到剪切板',
-                        className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-copy my-1',
-                        exportOptions: { columns: range(table_columns.length-1) }
-                    },
-                    {
-                        extend: 'csv', text: ' 输出所选到csv',
-                        className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-csv my-1',
-                        exportOptions: { columns: range(table_columns.length-1) }
-                    },
-                    {
-                        extend: 'csv', text: ' 输出当前页到csv',
-                        className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-alt my-1',
-                        exportOptions: {
-                            columns: range(table_columns.length-1),
-                            modifier: {
-                                selected: null
-                            }
-                        }
-                    },
-                    {
-                        text: ' 输出所有到csv',attr: { id: 'downloadExcel' },
-                        action: function ( e, dt, node, config ) {
-                            window.location.href = url0.substring(4) + "?all=1";
-                        },
-                        className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-excel my-1'
-                    }
-                ]
-            },
-            {
-                text: ' 添加单行', className: 'btn btn-primary fas fa-edit my-1',
-                attr: { id: 'new' }
-            },
-            {
-                extend: 'collection', text: ' 批量操作', buttons: bulk_buttons,
-                className: 'btn btn-warning fas fa-wrench my-1 dropdown-toggle button_group3'
-            }
-        ];
-        let table = $('#table').DataTable({
-            "paging": true, "ordering": true,
-            "info": true, "autoWidth": false,
-            "responsive": false, "pagingType": "full_numbers",
-            "language": {
-                "lengthMenu": "选择每页 _MENU_ 展示 ",
-                "zeroRecords": "未找到匹配结果--抱歉",
-                "info": "当前显示第 _PAGE_ 页结果，共 _PAGES_ 页",
-                "infoEmpty": "没有数据",
-                "search": "搜索",
-                "infoFiltered": "(获取 _MAX_ 项结果)",
-                "paginate": {
-                    "first": "首页", "previous": "上一页",
-                    "next": "下一页", "last": "末页"
+        let table;
+        function create_table(ajax_url, action_afterTableInit){
+            let serverSide_bool, api_pattern = /\/api/, ajax_data, table_div = $('#resetTable');
+            table_div.empty(); //点击查询后，先将datatable删除
+            let table_div_html = '<table id="table" class="table table-bordered table-hover dt-responsive"><thead>';
+            table_div_html += '<tr id="table_header">' + table_header_html;
+            table_div_html += '</tr></thead></table>';
+            table_div.append(table_div_html);
+            let table_element = $('#table');
+            let output_buttons = [
+                {
+                    extend: 'copy', text: ' 复制所选到剪切板',
+                    className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-copy my-1',
+                    exportOptions: { columns: range(table_columns.length-1) }
                 },
-                "select": {
-                    "rows": "%d行已选"
+                {
+                    extend: 'csv', text: ' 输出所选到csv',
+                    className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-csv my-1',
+                    exportOptions: { columns: range(table_columns.length-1) }
                 }
-            },
-            "scrollY": "300px", "scrollX": true,
-            "rowReorder": true, "select": true,
-            "fixedHeader": true, "lengthChange": true,
-            "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]],
-            "serverSide": true, "processing": true,
-            "deferRender": true, "dom": 'rBltip',
-            "buttons": buttons_list, "ajax": url0 + "?format=datatables",
-            "columns": table_columns, "columnDefs": table_columnDefs
-        });
-        $('#table tbody').on( 'click', 'tr', function () {
-            $(this).toggleClass('selected');
-        });
-        if (input_params["action_afterTableInit"] !== undefined){
-            input_params["action_afterTableInit"](table);
-        }
-
-        // 调用modal
-        $('#table tbody').on('click', 'button', function () {
-            let data = table.row($(this).parents('tr')).data();
-            let class_name = $(this).attr('class');
-            id0 = data['id'];
-            console.info("click button, id0:", id0);
-            //alert(id);
-            if (class_name.split(" ")[1] === 'btn-primary') {
-                // EDIT button
-                MyModelInit('更新', data);
-                $("#myModal").modal();
+            ];
+            if (api_pattern.test(ajax_url) === true) {
+                serverSide_bool = true;
+                ajax_data = ajax_url;
+                output_buttons.push({
+                    extend: 'csv', text: ' 输出当前页到csv',
+                    className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-alt my-1',
+                    exportOptions: {
+                        columns: range(table_columns.length-1),
+                        modifier: {
+                            selected: null
+                        }
+                    }
+                });
+                output_buttons.push({
+                    text: ' 输出所有到csv', attr: { id: 'downloadExcel' },
+                    action: function () {
+                        window.location.href = url0.substring(4) + "?all=1";
+                    },
+                    className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-excel my-1'
+                });
             } else {
-                // DELETE button
-                // alert('delete '+id);
-                // $('#modal_title').text('DELETE');
-                $("#confirm").modal();
+                serverSide_bool = false;
+                ajax_data = {
+                    "url": ajax_url,
+                    "type": "POST",
+                    "data": function (d) {
+                        return $.extend({}, d, {
+                            "queryset": $("#SearchText").val()
+                        });
+                    },
+                    "dataSrc": function (json) {
+                        // console.log(ajax_output);//此处json就是返回的数据
+                        return json.data;
+                    }
+                };
+                output_buttons.push({
+                    extend: 'csv', text: ' 输出所有到csv',
+                    className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-excel my-1',
+                    exportOptions: {
+                        columns: range(table_columns.length-1),
+                        modifier: {
+                            selected: null
+                        }
+                    }
+                });
             }
-        });
+            let buttons_list = [
+                {
+                    text: ' 指定显示列', extend: 'colvis',
+                    className: 'btn btn-primary far fa-eye my-1 dropdown-toggle button_group1',
+                    postfixButtons: [
+                        {
+                            extend: 'colvisGroup', text: '显示默认', hide: hide_col,
+                            className: 'dt-button buttons-columnVisibility'
+                        },
+                        {
+                            extend: 'colvisGroup', text: '显示全部', show: ':hidden',
+                            className: 'dt-button buttons-columnVisibility'
+
+                        }],
+                    columnText: function (dt, idx, title) {
+                        return (idx + 1) + ': ' + title;
+                    }
+                },
+                {
+                    extend: 'selectNone', text: ' 取消当前选择',
+                    className: 'btn btn-secondary fas fa-ban my-1',
+                },
+                {
+                    extend: 'collection', text: ' 输出',
+                    className: 'btn btn-primary far fa-save my-1 dropdown-toggle button_group2',
+                    buttons: output_buttons
+                },
+                {
+                    text: ' 添加单行', className: 'btn btn-primary fas fa-edit my-1',
+                    attr: { id: 'new' }
+                },
+                {
+                    extend: 'collection', text: ' 批量操作', buttons: bulk_buttons,
+                    className: 'btn btn-warning fas fa-wrench my-1 dropdown-toggle button_group3'
+                }
+            ];
+            table_tmp = table_element.DataTable({
+                "paging": true, "ordering": true,
+                "info": true, "autoWidth": false,
+                "responsive": false, "pagingType": "full_numbers",
+                "language": {
+                    "lengthMenu": "选择每页 _MENU_ 展示 ",
+                    "zeroRecords": "未找到匹配结果--抱歉",
+                    "info": "当前显示第 _PAGE_ 页结果，共 _PAGES_ 页",
+                    "infoEmpty": "没有数据",
+                    "search": "搜索",
+                    "infoFiltered": "(获取 _MAX_ 项结果)",
+                    "paginate": {
+                        "first": "首页", "previous": "上一页",
+                        "next": "下一页", "last": "末页"
+                    },
+                    "select": {
+                        "rows": "%d行已选"
+                    }
+                },
+                "scrollY": "300px", "scrollX": true,
+                "rowReorder": true, "select": true,
+                "fixedHeader": true, "lengthChange": true,
+                "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]],
+                "serverSide": serverSide_bool, "processing": true,
+                "deferRender": true, "dom": 'rBltip',
+                "buttons": buttons_list, "ajax": ajax_data,
+                "columns": table_columns, "columnDefs": table_columnDefs
+            });
+            if (action_afterTableInit !== undefined){
+                action_afterTableInit(table);
+            }
+            let table_body = $('#table tbody');
+            table_body.on('click', 'tr', function () {
+                $(this).toggleClass('selected');
+            });
+            // 调用modal
+            table_body.on('click', 'button', function () {
+                let data = table.row($(this).parents('tr')).data();
+                let class_name = $(this).attr('class');
+                id0 = data['id'];
+                console.info("click button, id0:", id0);
+                //alert(id);
+                if (class_name.split(" ")[1] === 'btn-primary') {
+                    // EDIT button
+                    MyModelInit('更新', data);
+                    $("#myModal").modal();
+                } else {
+                    // DELETE button
+                    // alert('delete '+id);
+                    // $('#modal_title').text('DELETE');
+                    $("#confirm").modal();
+                }
+            });
+            return table_tmp;
+        }
+        table = create_table(url0 + "?format=datatables", input_params["action_afterTableInit"]);
+
+
+
         $('#modelForm').on('submit', function (e) {
             e.preventDefault();
             console.info("submit, id0:", id0);
@@ -512,6 +599,102 @@
             console.info("values:", values, "; key2:", key2);
             input_autocomplete(values, '#' + key2);
         });
+
+        // 查询
+        // 生成查询条件栏
+        $.each(range(2, 11), function (i, v) {
+            let html_str = '<div class="form-inline mb-1 search_condition" id="condition' + v + '">';
+            html_str += '<span class="text-info h6 mr-3">过滤条件' + v + '</span><div class="form-group mr-2">';
+            html_str += '<select class="form-control SearchNot" id="SearchNot' + v + '" name="SearchNot' + v + '"">';
+            html_str += '<option value="0" selected="selected"></option><option value="1">非</option></select></div>';
+            html_str += '<div class="form-group mr-2"><label class="mr-1" for="SearchFieldName' + v + '">查询子表及字段</label>';
+            html_str += '<select class="form-control SearchFieldName" name="SearchFieldName' + v + '" id="SearchFieldName' + v + '"></select>';
+            html_str += '</div><select class="form-control SearchFieldValuePre mr-2" id="SearchFieldValuePre' + v + '" name="SearchFieldValuePre' + v + '" >';
+            html_str += '<option value="exact" selected="selected">等于(大小写严格匹配)</option><option value="iexact">等于(忽略大小写)</option>';
+            html_str += '<option value="contains">包含(大小写严格匹配)</option><option value="icontains">包含(忽略大小写)</option>';
+            html_str += '<option value="gt">大于</option><option value="gte">大于等于</option>';
+            html_str += '<option value="lt">小于</option><option value="lte">小于等于</option></select>';
+            html_str += '<div class="form-group"><input type="text" class="form-control SearchFieldValue" placeholder="请输入查询字段值" ';
+            html_str += 'id="SearchFieldValue' + v + '"></div></div>';
+            $('#searchForm').append(html_str);
+            $('#condition' + v).hide();
+        });
+        // 查询子表及字段下拉选框
+        $('.search_condition .SearchFieldName').focus(function () {
+            $(this).empty();
+            $(this).parents('.search_condition').find('.SearchFieldValuePre').val('exact');
+            $(this).parents('.search_condition').find('.SearchFieldValue').val("");
+            let str = "";
+            $.each(input_params['fields'], function (i, v) {
+                str += '<option value="' + v[0] +
+                    '">' + v[1] + '</option>';
+            });
+            $(this).append(str);
+        });
+        $("#card1-body").removeAttr("hidden");
+        // 查询字段值下拉选框
+        $('.search_condition .SearchFieldValue').focus(function () {
+            // 获取想要查询的字段值
+            $(this).empty();
+            let input_model = model0;
+            let input_field = $(this).parents('.search_condition').find('.SearchFieldName').val();
+            let values = $.ajax({
+                url: "{% url 'ADVANCE:unique' %}", data: {model: input_model, filed: input_field},
+                dataType: 'json', contentType: "application/json",
+                method: "GET", async: false
+            }).responseJSON.values;
+            // console.info("values:", values, "; id:", $(this).attr("id"));
+            input_autocomplete(values, '#' + $(this).attr("id"));
+        });
+        // 实现"添加过滤条件"按钮的功能
+        $('#conditionAdd').click(function (e) {
+            e.preventDefault();
+            conditionAdd += 1;
+            $('#condition' + conditionAdd).show();
+            if (conditionAdd === 10) {
+                $('#conditionAdd').attr("disabled", true);
+            }
+        });
+        // 实现"清除"按钮的功能
+        $('#textareaClear').click(function (e) {
+            e.preventDefault();
+            $("#SearchText").val("");
+            // 复位过滤条件
+            $('.search_condition .SearchNot').val("0");
+            $('.search_condition .SearchFieldName').empty();
+            $('.search_condition .SearchFieldValuePre').val('exact');
+            $('.search_condition .SearchFieldValue').val("");
+            // 复位"添加过滤条件"按钮
+            for (; conditionAdd > 1; conditionAdd--) {
+                $('#condition' + conditionAdd).hide();
+            }
+            $('#conditionAdd').attr("disabled", false);
+        });
+        // 实现"查询"按钮的功能
+        $('#textareaSubmit').click(function (e) {
+            e.preventDefault();
+            let text = ''; // 储存值
+            for (let i = 1; i <= 10; i++) {
+                let not = $('#SearchNot' + i).val(); //获取查询运算符1
+                let model = model0, name = $('#SearchFieldName' + i).val(); //获取查询子表及字段
+                let valuePre = $('#SearchFieldValuePre' + i).val(); //获取运算符2
+                let value = $('#SearchFieldValue' + i).val(); //获取查询字段值
+                if (name === null || !value) {
+                    // do nothing
+                } else {
+                    if (!text) {
+                        text = '(' + not + "\t" + model + "\t" + name + "\t" + valuePre + "\t" + value + ')';
+                    } else {
+                        text += ' AND (' + not + "\t" + model + "\t" + name + "\t" + valuePre + "\t" +
+                            value + ')';
+                    }
+                }
+            }
+            $("#SearchText").val(text);  //最后再直接输入到文本框，覆盖原本的值
+            table = create_table(url0.substring(4), input_params["action_afterTableInit"]);
+        });
+
+
     }
 
     $(document).ready(function () {

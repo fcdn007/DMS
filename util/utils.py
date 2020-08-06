@@ -5,10 +5,24 @@ import time
 
 import numpy as np
 import pandas as pd
-from django.http import StreamingHttpResponse
+from django.http import JsonResponse, StreamingHttpResponse
+from django.shortcuts import render
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer_its
 
+from BIS.serializers import SampleInventoryInfoSerializer, SampleInfoSerializer, ExtractInfoSerializer, \
+    DNAUsageRecordInfoSerializer
+from EMR.serializers import ClinicalInfoSerializer, FollowupInfoSerializer, LiverPathologicalInfoSerializer, \
+    TMDInfoSerializer, BiochemInfoSerializer
+from LIMS.serializers import MethyLibraryInfoSerializer, MethyCaptureInfoSerializer, MethyPoolingInfoSerializer
+from SEQ.serializers import SequencingInfoSerializer, MethyQCInfoSerializer
 from databaseDemo.settings import MEDIA_ROOT, SECRET_KEY
+from databaseDemo.tasks import add_modelViewRecord_by_celery
+from util.merge_df import FILECOLUMN_FOREIGNKEY_TO_MODEL, models_set, models_set2
+
+serializers_set = [SampleInventoryInfoSerializer, SampleInfoSerializer, ExtractInfoSerializer,
+                  DNAUsageRecordInfoSerializer, MethyLibraryInfoSerializer, MethyCaptureInfoSerializer,
+                  MethyPoolingInfoSerializer, SequencingInfoSerializer, MethyQCInfoSerializer, ClinicalInfoSerializer,
+                  FollowupInfoSerializer, LiverPathologicalInfoSerializer, TMDInfoSerializer, BiochemInfoSerializer]
 
 
 def get_queryset_base(model_, query_params_):
@@ -122,3 +136,63 @@ def output_model_all_records(file_name0, data, col_name, drop_cols=None):
     response['Content-Type'] = 'application/octet-steam'
     response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
     return response
+
+
+def df_queryset_filter(data, queryset, merge_df_bool=False, return_class='dict'):
+    raw_df = pd.DataFrame(data)
+    # print(">>>raw_df :{}".format(raw_df))
+    # print(">>>queryset :{}".format(queryset))
+    res_filtered = raw_df
+    filter_total = []
+    for i in queryset.split('\n'):
+        filter_line = pd.Series(data=[True] * raw_df.shape[0])
+        for j in i.split(' AND '):
+            not_, m, f, vp, v = j.split('\t')[0:5]
+            not_ = int(not_[1:].strip())
+            v = v[:-1].strip()
+            filter_condition = pd.Series()
+            if merge_df_bool:
+                if f in list(FILECOLUMN_FOREIGNKEY_TO_MODEL.keys()):
+                    filter_condition = condition_filter(raw_df, f, vp, v, not_)
+                else:
+                    filter_condition = condition_filter(raw_df, m + '__' + f, vp, v, not_)
+            else:
+                filter_condition = condition_filter(raw_df, f, vp, v, not_)
+            filter_line = filter_line & filter_condition
+        filter_total = filter_line if len(filter_total) == 0 else filter_total | filter_line
+
+    filter_rows = []
+    for row_idx in range(len(filter_total)):
+        if filter_total[row_idx]:
+            filter_rows.append(row_idx)
+    res_filtered = raw_df.loc[filter_rows, :].reset_index(drop=True)
+    if return_class == 'pd.df':
+        return res_filtered
+    else:
+        # make res_pro
+        res_pro = res_filtered.to_dict('records')
+        result = {
+            'draw': 1,
+            'recordsTotal': raw_df.shape[0],
+            'recordsFiltered': len(res_pro),
+            'data': res_pro
+        }
+        return result
+
+
+def singleModelV(request_, idx, template_path, col_name, drop_cols=None):
+    serializer = serializers_set[idx]
+    model_instance = models_set[idx]
+    model_str = models_set2[idx]
+    add_modelViewRecord_by_celery(model_str, request_.user.username)
+    output_all_bool = request_.GET.get('all', 0)
+    queryset = request_.POST.get('queryset', 0)
+    if queryset:
+        serializer = serializer(model_instance.objects.all(), many=True)
+        last_queryset_res = df_queryset_filter(serializer.data, queryset)
+        return JsonResponse(last_queryset_res)
+    elif output_all_bool:
+        res_data = serializer(model_instance.objects.all(), many=True).data
+        return output_model_all_records(model_str, res_data, col_name)
+    else:
+        return render(request_, template_path)

@@ -25,16 +25,6 @@
     <li class="breadcrumb-item active">SampleInfo</li>
 {% endblock %}
 
-{% block card-body %}
-<table id="table" class="table table-bordered table-hover dt-responsive">
-<thead>
-<tr id="table_header">
-
-</tr>
-</thead>
-</table>
-{% endblock %}
-
 {% block page-script %}
 <script>
   $(document).ready(function () {
@@ -117,21 +107,21 @@
       let input_params = {
           "title1_text": "样本信息 总条目数： ",
           "fields": [
-              //                    [   0,     1,               2,               3,             4,       5,       6,        7  ]
-              // input类型是select： [ field, name, 在table中是否可排序/搜索, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
-              // input类型不是select： [ field, name, 在table中是否可排序/搜索, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
-              ["sample_id", "生物样本编号", 1, 1, 1, 1, "text"],
-              ["sampler_id", "华大编号", 0, 1, 0, 1, "text"],
-              ["raw_id", "原始样本编号", 1, 1, 2, 1, "text", "无"],
-              ["fridge", "冰箱位置", 1, 1, 3, 0, "text", "无"],
-              ["plate", "孔板号", 1, 1, 4, 0, "text", "无"],
-              ["well", "孔位", 1, 1, 5, 0, "text", "无"],
-              ["sample_type", "样本类型", 1, 1, 6, 0, "select", [["P", "血浆"], ["L", "癌组织"],["S", "癌旁组织"], ["B", "白细胞"], ["T", "粪便"]]],
-              ["sample_date", "采样日期", 1, 1, 7, 0, "date", "2000-01-01"],
-              ["send_date", "寄送日期", 1, 1, 8, 0, "date", "2000-01-01"],
-              ["memo", "备注", 1, 1, 9, 0, "text", "无"],
-              ["last_modify_time", "上次修改时间", 1, 0],
-              ["create_time", "创建时间", 1, 0]
+              //                    [   0,     1,        2,               3,       4,       5,       6 ]
+              // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
+              // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
+              ["sample_id", "生物样本编号", 1, 1, 1, "text"],
+              ["sampler_id", "华大编号", 1, 0, 1, "text"],
+              ["raw_id", "原始样本编号", 1, 2, 1, "text", "无"],
+              ["fridge", "冰箱位置", 1, 3, 0, "text", "无"],
+              ["plate", "孔板号", 1, 4, 0, "text", "无"],
+              ["well", "孔位", 1, 5, 0, "text", "无"],
+              ["sample_type", "样本类型", 1, 6, 0, "select", [["P", "血浆"], ["L", "癌组织"],["S", "癌旁组织"], ["B", "白细胞"], ["T", "粪便"]]],
+              ["sample_date", "采样日期", 1, 7, 0, "date", "2000-01-01"],
+              ["send_date", "寄送日期", 1, 8, 0, "date", "2000-01-01"],
+              ["memo", "备注", 1, 9, 0, "text", "无"],
+              ["last_modify_time", "上次修改时间", 0],
+              ["create_time", "创建时间", 0]
           ],
           "update_func": update_func,
           "delete_func": simple_delete_func,
