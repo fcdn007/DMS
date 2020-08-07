@@ -897,14 +897,16 @@ def single_model_search(model_str, queryset=None):
     # abstract columns and foreign keys.
     fields = model_._meta.__dict__['fields']
     fkeys = [field.verbose_name for field in fields if field.is_relation]
+    if model_str == 'SequencingInfo':
+        fkeys = ['methycaptureinfo']
 
     # 修改列名
-    pre = str(model_).split("\'")[1].split(".")[-1] + "__"
-    pre = pre.lower()
-    list_ = [FOREIGNKEY_CONVERSION[x] + '__' + x for x in
-             list(FILECOLUMN_TO_FIELD['foreign'][model_str].values())]
+    list_ = []
+    if model_str in FILECOLUMN_TO_FIELD['foreign']:
+        list_ = [FOREIGNKEY_CONVERSION[x] + '__' + x for x in list(FILECOLUMN_TO_FIELD['foreign'][model_str].values())]
+    if model_str in FILECOLUMN_TO_FIELD['foreignAdd']:
+        list_ = list_ + [x[3] + '__' + x[4] for x in list(FILECOLUMN_TO_FIELD['foreignAdd'][model_str].values())]
     # abstract value of the queried set
-
     if queryset:
         for i in queryset.split("\n"):
             querysetIte = iter(queryset.split(" AND "))
@@ -915,10 +917,9 @@ def single_model_search(model_str, queryset=None):
                     not_ = int(not_[1:])
                     v = v[:-1]
 
-                    fkey = m + "__" + f + "__" + vp
-                    fkey = fkey.lower()
+                    fkey = m.lower() + "__" + f + "__" + vp
                     fparamdict = {fkey: v}
-
+                    print(">>> fparamdict: {}".format(fparamdict))
                     gkey = f + "__" + vp
                     gparamdict = {gkey: v}
 
@@ -938,12 +939,9 @@ def single_model_search(model_str, queryset=None):
                     break
     res_filtered = pd.DataFrame(res_raw_1.all().values())
     if not res_filtered.shape[0] == 0:
-        fkeydf = pd.DataFrame(res_raw_1.all().values('id', list_[0]))
+        fkeydf = pd.DataFrame(res_raw_1.all().values('id', *list_))
+        fkeydf.columns = [column.split('__')[1] if '__' in column else column for column in fkeydf.columns]
         res_filtered = pd.merge(res_filtered, fkeydf)
-        res_filtered.columns = [column if (column.split("_")[0] in fkeys) | (column == "id") | (
-                column in FILECOLUMN_FOREIGNKEY_TO_MODEL.keys()) else
-                                model_str + "__" + column for
-                                column in res_filtered.columns]
-        res_filtered.columns = [column.split("__")[1] if column.split("__")[0] in fkeys else column for column in
-                                res_filtered.columns]
+        res_filtered.columns = [column if column in FOREIGNKEY_CONVERSION else model_str + "__" + column
+                                for column in res_filtered.columns]
     return res_filtered, res_raw
