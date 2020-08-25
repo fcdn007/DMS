@@ -2,7 +2,7 @@ import multiprocessing
 import os
 import sys
 
-BASE_DIR = '/home/wsl/mnt/f/wsl/project/databaseDemo2'
+BASE_DIR = '/home/wsl/project/databaseDemo2'
 sys.path.append(BASE_DIR)
 
 LOG_DIR = os.path.join(BASE_DIR, 'log')
@@ -10,8 +10,8 @@ if not os.path.exists(LOG_DIR):
     os.makedirs(LOG_DIR)
 
 # 绑定的ip与端口
-# bind = "unix:/home/wsl/mnt/f/wsl/project/databaseDemo2/databaseDemo.sock"
-bind = ":8001"   #绑定的ip与端口
+# bind = "unix:/home/wsl/project/databaseDemo2/databaseDemo.sock"
+bind = "172.16.184.65:8001"   #绑定的ip与端口
 
 # 以守护进程的形式后台运行
 daemon = True

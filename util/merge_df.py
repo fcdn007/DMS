@@ -40,7 +40,7 @@ FILECOLUMN_TO_FIELD = {
             '华大编号': 'sampler_id'
         },
         'ExtractInfo': {
-            '生物样本编号': 'sample_id'
+            '华大编号': 'sampler_id'
         },
         'DNAUsageRecordInfo': {
             '核酸提取编号': 'dna_id'
@@ -76,9 +76,6 @@ FILECOLUMN_TO_FIELD = {
         }
     },
     'foreignAdd': {
-        'ExtractInfo': {
-            '华大编号': [SampleInfo, 'sample_id', '生物样本编号', 'sampleinventoryinfo', 'sampler_id']
-        },
         'DNAUsageRecordInfo': {
             '华大编号': [ExtractInfo, 'dna_id', '核酸提取编号', 'sampleinventoryinfo', 'sampler_id'],
         },
@@ -175,7 +172,7 @@ for model_ in models_set:
         FILECOLUMN_TO_FIELD["normal"][k][field.db_column] = field.name
         if type(field).__name__ == "TextField" or type(field).__name__ == "CharField":
             FIELD_CLASS[k]["str_list"].append(field.db_column)
-        elif type(field).__name__ == "FloatField" or type(field).__name__ == "PositiveIntegerField":
+        elif type(field).__name__ == "FloatField" or type(field).__name__ == "IntegerField" or type(field).__name__ == "PositiveIntegerField":
             FIELD_CLASS[k]["num_list"].append(field.db_column)
         elif type(field).__name__ == "DateField":
             FIELD_CLASS[k]["date_list"].append(field.db_column)
@@ -200,6 +197,7 @@ def clean_data(data_, warning_msg_dict, error_msg_dict, skip_list, params):
     repeatDrop_list = params["repeatDrop_list"]
     str_list = params["str_list"]
     num_list = params["num_list"]
+    print(">>> num_list: {}".format(num_list))
     date_list = params["date_list"]
     data = data_.copy(deep=True)
     repeatKey_dict = defaultdict(list)
@@ -210,9 +208,9 @@ def clean_data(data_, warning_msg_dict, error_msg_dict, skip_list, params):
             if col not in data:
                 skip_list[row] = 1
                 if col in error_msg_dict['emptyKey']:
-                    error_msg_dict['emptyKey'][col].append(u'第{}行'.format(row + 2))
+                    error_msg_dict['emptyKey'][col].append('第{}行'.format(row + 2))
                 else:
-                    error_msg_dict['emptyKey'][col] = [u'第{}行'.format(row + 2)]
+                    error_msg_dict['emptyKey'][col] = ['第{}行'.format(row + 2)]
                 continue
 
             emptyDrop_list_exists += 1
@@ -220,16 +218,16 @@ def clean_data(data_, warning_msg_dict, error_msg_dict, skip_list, params):
                 if pd.isnull(data[col][row]):
                     skip_list[row] = 1
                     if col in error_msg_dict['emptyKey']:
-                        error_msg_dict['emptyKey'][col].append(u'第{}行'.format(row + 2))
+                        error_msg_dict['emptyKey'][col].append('第{}行'.format(row + 2))
                     else:
-                        error_msg_dict['emptyKey'][col] = [u'第{}行'.format(row + 2)]
+                        error_msg_dict['emptyKey'][col] = ['第{}行'.format(row + 2)]
             except ValueError:
                 if isinstance(data[col][row], list) and len(data[col][row]) == 0:
                     skip_list[row] = 1
                     if col in error_msg_dict['emptyKey']:
-                        error_msg_dict['emptyKey'][col].append(u'第{}行'.format(row + 2))
+                        error_msg_dict['emptyKey'][col].append('第{}行'.format(row + 2))
                     else:
-                        error_msg_dict['emptyKey'][col] = [u'第{}行'.format(row + 2)]
+                        error_msg_dict['emptyKey'][col] = ['第{}行'.format(row + 2)]
         # deal with error_msg_dict['repeatKey']
         if emptyDrop_list_exists == len(emptyDrop_list):
             if len(repeatDrop_list) > 0:
@@ -244,7 +242,7 @@ def clean_data(data_, warning_msg_dict, error_msg_dict, skip_list, params):
             row_list = []
             for row in repeatKey_dict[key]:
                 skip_list[row] = 1
-                row_list.append(u'第{}行'.format(row + 2))
+                row_list.append('第{}行'.format(row + 2))
             error_msg_dict['repeatKey']['/ '.join(repeatDrop_list)].append('({})'.format(', '.join(row_list)))
 
     # deal with warning_msg_dict['empty'] and warning_msg_dict['invalid']
@@ -286,7 +284,7 @@ def clean_data(data_, warning_msg_dict, error_msg_dict, skip_list, params):
                 col_data.append(float(m2.group(1)))
             else:
                 col_data.append(9999)
-                warning_msg_dict['invalid'].append(u'第{}行"{}"列'.format(id2 + 2, id1))
+                warning_msg_dict['invalid'].append('第{}行"{}"列'.format(id2 + 2, id1))
         data[id1] = col_data
 
     # data[id] = [0 if pd.isnull(x) else x for x in data[id]]
@@ -313,7 +311,7 @@ def clean_data(data_, warning_msg_dict, error_msg_dict, skip_list, params):
                     col_data.append("%s-%s-%s" % (m3.group(1), m3.group(2), m3.group(3)))
                 else:
                     col_data.append('2000-01-01')
-                    warning_msg_dict['invalid'].append(u'第{}行"{}"列'.format(id2 + 2, id1))
+                    warning_msg_dict['invalid'].append('第{}行"{}"列'.format(id2 + 2, id1))
         data[id1] = col_data
     return data
 
@@ -341,7 +339,7 @@ def read_file(url, inf, warning_msg_dict, error_msg_dict):
             if len(FIELD_CLASS[url]['repeatDrop_list']) > 0:
                 error_msg_dict['repeatKey']['/ '.join(FIELD_CLASS[url]['repeatDrop_list'])] = []
             if url == "SequencingInfo":
-                data.loc[:, '捕获文库名'] = [[y.strip() for y in x.split(',')] for x in data.loc[:, '捕获文库名']]
+                data.loc[:, '捕获文库名'] = [[y.strip() for y in str(x).split(',')] for x in data.loc[:, '捕获文库名']]
             data = clean_data(data, warning_msg_dict, error_msg_dict, skip_list, FIELD_CLASS[url])
         except KeyError:
             fatal_error = "严重错误！！！输入表格未包含需要的字段，请下载正确的excel模板。"
@@ -373,8 +371,10 @@ def save_records(upload_file):
     error_msg = ""
     error_msg_dict = defaultdict(dict)
     # 读取文件，进行数据清洗
+    url = upload_file.uploadUrl
+    file_path = upload_file.uploadFile.path
     records, skip_list, fatal_error = read_file(
-        upload_file.uploadUrl, upload_file.uploadFile.path, warning_msg_dict, error_msg_dict)
+        url, file_path, warning_msg_dict, error_msg_dict)
 
     if fatal_error:
         return 'NA', 'NA', 'NA', '', '', fatal_error
@@ -389,14 +389,14 @@ def save_records(upload_file):
         many2many_list = []
         created = False
         next_bool = False
-        if upload_file.uploadUrl in FILECOLUMN_TO_FIELD['normal']:
+        if url in FILECOLUMN_TO_FIELD['normal']:
             # 数据预处理
-            if upload_file.uploadUrl in FILECOLUMN_TO_FIELD['foreign']:
-                for db_column in FILECOLUMN_TO_FIELD['foreign'][upload_file.uploadUrl]:
-                    model_key = FILECOLUMN_TO_FIELD['foreign'][upload_file.uploadUrl][db_column]
+            if url in FILECOLUMN_TO_FIELD['foreign']:
+                for db_column in FILECOLUMN_TO_FIELD['foreign'][url]:
+                    model_key = FILECOLUMN_TO_FIELD['foreign'][url][db_column]
                     # 获取foreignKey对应的object
-                    # print('upload_file.uploadUrl: %s; model_key: %s' % (upload_file.uploadUrl, model_key))
-                    if not (upload_file.uploadUrl == 'SequencingInfo' and model_key == 'poolingLB_id'):
+                    # print('url: %s; model_key: %s' % (url, model_key))
+                    if not (url == 'SequencingInfo' and model_key == 'poolingLB_id'):
                         # print('model: {}; key: {}; value: {}'.format(FOREIGNKEY_TO_MODEL[model_key], model_key,
                         # records[col][row]))
                         try:
@@ -405,14 +405,25 @@ def save_records(upload_file):
                             # print(obj_)
                             context[FOREIGNKEY_CONVERSION[model_key]] = obj_
                         except FILECOLUMN_FOREIGNKEY_TO_MODEL[model_key].DoesNotExist:
-                            if db_column in error_msg_dict:
-                                error_msg_dict['noForeignKey'][db_column].append(u'第{}行'.format(row + 2))
+                            if model_key == 'sampler_id' and url in ['ClinicalInfo', 'SampleInfo', "ExtractInfo"]:
+                                context2 = {
+                                    'sampler_id': records[db_column][row],
+                                    'plasma_num': 0, 'cancer_tissue_num': 0,
+                                    'adjacent_mucosa_num': 0, 'WBC_num': 0,
+                                    'stool_num': 0, 'memo': "无"
+                                }
+                                sampleInventoryRecord = SampleInventoryInfo(**context2)
+                                sampleInventoryRecord.save()
+                                context[FOREIGNKEY_CONVERSION[model_key]] = sampleInventoryRecord
                             else:
-                                error_msg_dict['noForeignKey'][db_column] = [u'第{}行'.format(row + 2)]
-                            # print("change skip_list[{}] to 1".format(row))
-                            skip_list[row] = 1
-                            next_bool = True
-                            break
+                                if db_column in error_msg_dict:
+                                    error_msg_dict['noForeignKey'][db_column].append('第{}行'.format(row + 2))
+                                else:
+                                    error_msg_dict['noForeignKey'][db_column] = ['第{}行'.format(row + 2)]
+                                # print("change skip_list[{}] to 1".format(row))
+                                skip_list[row] = 1
+                                next_bool = True
+                                break
                     else:
                         for c in records['捕获文库名'][row]:
                             try:
@@ -420,7 +431,7 @@ def save_records(upload_file):
                                     MethyCaptureInfo.objects.get(poolingLB_id=c))
                             except MethyCaptureInfo.DoesNotExist:
                                 warning_msg_dict['empty'].append(
-                                    u'第{}行"{}"列的"{}"'.format(row + 2, u'捕获文库名', c))
+                                    '第{}行"{}"列的"{}"'.format(row + 2, '捕获文库名', c))
 
             if next_bool:
                 # print("skip row {} from next_bool".format(row))
@@ -542,9 +553,9 @@ def save_records(upload_file):
                                 context[model_key] = obj_
                             except FILECOLUMN_FOREIGNKEY_TO_MODEL[model_key].DoesNotExist:
                                 if db_column in error_msg_dict:
-                                    error_msg_dict['noForeignKey'][db_column].append(u'第{}行'.format(row + 2))
+                                    error_msg_dict['noForeignKey'][db_column].append('第{}行'.format(row + 2))
                                 else:
-                                    error_msg_dict['noForeignKey'][db_column] = [u'第{}行'.format(row + 2)]
+                                    error_msg_dict['noForeignKey'][db_column] = ['第{}行'.format(row + 2)]
                                 skip_list[row] = 1
                                 next_bool = True
                                 break
@@ -569,12 +580,12 @@ def save_records(upload_file):
                         if not (context['poolingLB_id'] in context_pre and context_pre[
                             context['poolingLB_id']] == value_join):
                             _, _ = MethyCaptureInfo.objects.update_or_create(
-                                poolingLB_id=records[u'捕获文库名'][row], defaults={**context})
+                                poolingLB_id=records['捕获文库名'][row], defaults={**context})
                             context_pre[context['poolingLB_id']] = value_join
                     else:
-                        # print(">>>>>>>>>>>>> notice >>>>>>>>>>>", records[u'测序文库名'][row])
+                        # print(">>>>>>>>>>>>> notice >>>>>>>>>>>", records['测序文库名'][row])
                         _, created = MethyPoolingInfo.objects.update_or_create(
-                            singleLB_Pooling_id=records[u'测序文库名'][row], defaults={**context})
+                            singleLB_Pooling_id=records['测序文库名'][row], defaults={**context})
 
                 if next_bool:
                     continue
@@ -586,18 +597,18 @@ def save_records(upload_file):
     valid = total - len([x for x in skip_list if x])
     # 输出 warning_msg, error_msg
     if len(warning_msg_dict['empty']) > 0:
-        warning_msg += u'单元格为空或单元格值不存在：' + ', '.join(warning_msg_dict['empty'])
+        warning_msg += '单元格为空或单元格值不存在：' + ', '.join(warning_msg_dict['empty'])
     if len(warning_msg_dict['invalid']) > 0:
-        warning_msg += u'\n单元格值不符合格式：' + ', '.join(warning_msg_dict['invalid'])
+        warning_msg += '\n单元格值不符合格式：' + ', '.join(warning_msg_dict['invalid'])
     if len(error_msg_dict['repeatKey'].keys()) > 0 and \
             len(error_msg_dict['repeatKey'][list(error_msg_dict['repeatKey'].keys())[0]]) > 0:
-        error_msg += u'存在重复关键字段的行：' + ', '.join(['{}({})'.format(key, ', '.join(
+        error_msg += '存在重复关键字段的行：' + ', '.join(['{}({})'.format(key, ', '.join(
             error_msg_dict['repeatKey'][key])) for key in error_msg_dict['repeatKey']])
     if len(error_msg_dict['emptyKey'].keys()) > 0:
-        error_msg += u'\n关键字段缺失或不正确：' + ', '.join(['{}({})'.format(key, ', '.join(
+        error_msg += '\n关键字段缺失或不正确：' + ', '.join(['{}({})'.format(key, ', '.join(
             error_msg_dict['emptyKey'][key])) for key in error_msg_dict['emptyKey']])
     if len(error_msg_dict['noForeignKey'].keys()) > 0:
-        error_msg += u'\n关联对象不存在：' + ', '.join(['{}({})'.format(key, ', '.join(
+        error_msg += '\n关联对象不存在：' + ', '.join(['{}({})'.format(key, ', '.join(
             error_msg_dict['noForeignKey'][key])) for key in error_msg_dict['noForeignKey']])
     return total, valid, len(add_list), warning_msg, error_msg, fatal_error
 
@@ -641,8 +652,9 @@ def check_new_merge_df_partly(idx):
     for m in m_list:
         len_models[models_set2[m]] = models_set[m].objects.count()
         if len_models[models_set2[m]] > 0:
-            time_list = models_set[m].objects.values_list("last_modify_time").distinct().order_by("-last_modify_time")
-            lastTime_models[models_set2[m]] = int(time_list[0][0].strftime("%Y%m%d%H%M%S%f"))
+            time_list = models_set[m].objects.values_list("last_modify_time").distinct().order_by(
+                "-last_modify_time")[0]
+            lastTime_models[models_set2[m]] = int(time_list[0].strftime("%Y%m%d%H%M%S%f"))
         else:
             lastTime_models[models_set2[m]] = 0
 
@@ -919,7 +931,7 @@ def single_model_search(model_str, queryset=None):
 
                     fkey = m.lower() + "__" + f + "__" + vp
                     fparamdict = {fkey: v}
-                    print(">>> fparamdict: {}".format(fparamdict))
+                    # print(">>> fparamdict: {}".format(fparamdict))
                     gkey = f + "__" + vp
                     gparamdict = {gkey: v}
 

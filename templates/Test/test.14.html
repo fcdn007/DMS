@@ -86,10 +86,10 @@
               success: function () {
                   let v_tmp = $('#clinical_id').val() + ' + ' + $('#followup_date').val();
                   if (type === 'new') {
-                      databaseRecordAjaxPut(model0, "单项添加", "clinical_id + followup_date：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项添加", "clinical_id + followup_date：" + v_tmp);
                       $('#myModalError').text('添加成功！！！clinical_id + followup_date：' + v_tmp);
                   } else {
-                      databaseRecordAjaxPut(model0, "单项更新", "clinical_id + followup_date：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项更新", "clinical_id + followup_date：" + v_tmp);
                       $('#myModalError').text('更新成功！！！clinical_id + followup_date：' + v_tmp);
                   }
 

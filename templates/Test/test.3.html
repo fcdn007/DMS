@@ -83,10 +83,10 @@
               success: function () {
                   let v_tmp = $('#dna_id').val();
                   if (type === 'new') {
-                      databaseRecordAjaxPut(model0, "单项添加", "核酸提取编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项添加", "核酸提取编号：" + v_tmp);
                       $('#myModalError').text('添加成功！！！核酸提取编号：' + v_tmp);
                   } else {
-                      databaseRecordAjaxPut(model0, "单项更新", "核酸提取编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项更新", "核酸提取编号：" + v_tmp);
                       $('#myModalError').text('更新成功！！！核酸提取编号：' + v_tmp);
                   }
 

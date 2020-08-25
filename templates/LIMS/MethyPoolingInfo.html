@@ -94,10 +94,10 @@
                 success: function () {
                     let v_tmp = $('#singleLB_Pooling_id').val();
                     if (type === 'new') {
-                      	databaseRecordAjaxPut(model0, "单项添加", "测序文库编号：" + v_tmp);
+                      	databaseRecordAjaxPut('{{ user.id }}', model0, "单项添加", "测序文库编号：" + v_tmp);
                       	$('#myModalError').text('添加成功！！！捕获文库名：' + v_tmp);
                   	} else {
-                      	databaseRecordAjaxPut(model0, "单项更新", "测序文库编号：" + v_tmp);
+                      	databaseRecordAjaxPut('{{ user.id }}', model0, "单项更新", "测序文库编号：" + v_tmp);
                       	$('#myModalError').text('更新成功！！！测序文库编号：' + v_tmp);
 					}
                     setTimeout(

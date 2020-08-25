@@ -4,7 +4,7 @@ from django.db import models
 # Create your models here.
 class ClinicalInfo(models.Model):
     clinical_id = models.CharField(
-        db_column='病历编号', unique=True, max_length=35, blank=True, null=True)
+        db_column='病历编号', unique=True, max_length=80, blank=True, null=True)
     sampleinventoryinfo = models.ForeignKey(
         "BIS.SampleInventoryInfo",
         on_delete=models.CASCADE,
@@ -25,9 +25,11 @@ class ClinicalInfo(models.Model):
     age = models.IntegerField(db_column='年龄', blank=True, null=True)
     record_date = models.DateField(
         db_column='记录日期', blank=True, null=True)
-    category = models.CharField(db_column='肿瘤类型', max_length=50, blank=True, null=True)
+    category = models.CharField(db_column='癌种', max_length=50, blank=True, null=True)
     stage = models.CharField(db_column='分化程度', max_length=15, blank=True, null=True)
-    tumor1_diam = models.FloatField(db_column='肿瘤1直径', blank=True, null=True)
+    tumor1_diam = models.FloatField(db_column='肿瘤最大径', blank=True, null=True)
+    TNM = models.CharField(db_column='TNM分期', max_length=15, blank=True, null=True)
+    AJCC = models.CharField(db_column='AJCC分期', max_length=15, blank=True, null=True)
     memo = models.TextField(
         db_column='备注', blank=True, null=True)
     create_time = models.DateTimeField(db_column='创建时间', auto_now_add=True)
@@ -62,15 +64,19 @@ class FollowupInfo(models.Model):
         blank=True,
         null=True)
     survival_status = models.CharField(
-        db_column='生存状态', max_length=2, blank=True, null=True, default="存活")
+        db_column='生存状态', max_length=10, blank=True, null=True, default="存活")
     death_date = models.DateField(
         db_column='死亡日期', blank=True, null=True)
     death_bool = models.CharField(
-        db_column='死因是否与肿瘤相关', max_length=1, blank=True, null=True, default="否")
+        db_column='死因是否与肿瘤相关', max_length=10, blank=True, null=True, default="否")
+    death_reason = models.CharField(
+        db_column='死亡原因', max_length=255, blank=True, null=True)
     recur_bool = models.CharField(
-        db_column='是否复发', max_length=1, blank=True, null=True, default="否")
+        db_column='是否复发', max_length=10, blank=True, null=True, default="否")
     recur_date = models.DateField(
         db_column='复发日期', blank=True, null=True)
+    recur_position = models.CharField(
+        db_column='复发转移部位', max_length=255, blank=True, null=True)
     recur_status = models.CharField(
         db_column='复发状态', max_length=255, blank=True, null=True)
     followup_date = models.DateField(
@@ -112,14 +118,15 @@ class LiverPathologicalInfo(models.Model):
         db_column='样本库存信息',
         blank=True,
         null=True)
+    raw_id = models.CharField(db_column='病理编号', max_length=50, blank=True, null=True)
     check_date = models.DateField(
         db_column='检查日期', blank=True, null=True)
     check_stage = models.CharField(
         db_column='检查阶段', max_length=255, blank=True, null=True)
-    category = models.CharField(db_column='肿瘤类型', max_length=50, blank=True, null=True)
+    category = models.CharField(db_column='病理类型', max_length=50, blank=True, null=True)
     stage = models.CharField(db_column='分化程度', max_length=15, blank=True, null=True)
     tumor_count = models.PositiveIntegerField(db_column='肿瘤数目', default=0)
-    tumor1_diam = models.FloatField(db_column='肿瘤1直径', blank=True, null=True)
+    tumor1_diam = models.FloatField(db_column='肿瘤最大径', blank=True, null=True)
     tumor2_diam = models.FloatField(db_column='肿瘤2直径', blank=True, null=True)
     tumor3_diam = models.FloatField(db_column='肿瘤3直径', blank=True, null=True)
     capsule = models.CharField(db_column='肝包膜侵犯(肝被膜)', max_length=15, blank=True, null=True)
@@ -129,7 +136,7 @@ class LiverPathologicalInfo(models.Model):
         db_column='肉眼癌栓(脉管侵犯)', max_length=1, blank=True, null=True, default="否")
     bv_bool = models.CharField(
         db_column='微血管浸润', max_length=1, blank=True, null=True, default="否")
-    mvi_category = models.CharField(db_column='MVI类型', max_length=255, blank=True, null=True)
+    mvi_category = models.CharField(db_column='MVI风险等级', max_length=255, blank=True, null=True)
     section = models.CharField(db_column='切面距癌距离(切除面)', max_length=255, blank=True, null=True)
     G_score = models.CharField(db_column='G评分', max_length=15, blank=True, null=True)
     S_score = models.CharField(db_column='S评分', max_length=15, blank=True, null=True)

@@ -2,7 +2,7 @@
 String.format = function (src) {
     if (arguments.length === 0) return null;
     let args = Array.prototype.slice.call(arguments, 1);
-    return src.replace(/\{(\d+)\}/g, function (m, i) {
+    return src.replace(/{(\d+)}/g, function (m, i) {
         return args[i];
     });
 };
@@ -16,15 +16,15 @@ function range(size, startAt = 0) {
     return [...Array(size).keys()].map(i => i + startAt);
 }
 
-function databaseRecordAjaxPut(model_changed_txt, operation_txt, others_txt) {
+function databaseRecordAjaxPut(user_id, model_changed_txt, operation_txt, others_txt) {
     let url_record = '/api/USER/DatabaseRecord/';
     let data_record = $.param({
-        "userinfo": "{{ user.id }}",
+        "userinfo": user_id,
         "model_changed": model_changed_txt,
         "operation": operation_txt,
         "memo": others_txt
     });
-    //console.info("data_record",data_record);
+    // console.info("data_record",data_record);
     $.ajax({
         url: url_record,
         method: 'POST',

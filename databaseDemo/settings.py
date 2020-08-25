@@ -32,7 +32,7 @@ TEMPLATE_DEBUG = True
 COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 ALLOWED_HOSTS = ['*']
-SERVER_HOST = '127.0.0.1'
+SERVER_HOST = '172.16.165.102'
 
 
 # Application definition
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'imagekit',
     'guardian',
     "compressor",
+    'corsheaders',
     'databaseDemo',
     'EMR',
     'BIS',
@@ -65,11 +66,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsPostCsrfMiddleware',
 ]
 
 ROOT_URLCONF = 'databaseDemo.urls'
@@ -286,3 +289,40 @@ platforms.C_FORCE_ROOT = True  # 用于开启root也可以启动celery服务，�
 # https://docs.celeryproject.org/en/stable/userguide/configuration.html
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+
+# for WOPI Server
+WOPI_FILE_DIR = os.path.join(MEDIA_ROOT, 'xlsx')
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_WHITELIST = (
+#     'http://127.0.0.1:9980',
+#     'http://127.0.0.1:8000',
+#     'http://172.16.165.65:8000'
+# )
+
+CORS_ALLOW_METHODS = (
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+    'VIEW',
+)
+
+CORS_ALLOW_HEADERS = (
+    'XMLHttpRequest',
+    'X_FILENAME',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'Pragma',
+)
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'

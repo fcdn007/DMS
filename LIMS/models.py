@@ -112,7 +112,7 @@ class MethyPoolingInfo(models.Model):
         blank=True,
         null=True)
     singleLB_Pooling_id = models.CharField(
-        db_column='测序文库编号', unique=True, max_length=35, blank=True, null=True)
+        db_column='测序文库编号', unique=True, max_length=80, blank=True, null=True)
     sampleinventoryinfo = models.ForeignKey(
         "BIS.SampleInventoryInfo",
         on_delete=models.CASCADE,

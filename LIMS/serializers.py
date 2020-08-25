@@ -38,6 +38,6 @@ class MethyPoolingInfoSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = MethyPoolingInfo
-        fields = ('sampler_id', 'singleLB_id', 'poolingLB_id', 'singleLB_Pooling_id', 'pooling_ratio', 'mass', 'volume',
+        fields = ('singleLB_id', 'poolingLB_id', 'singleLB_Pooling_id', 'sampler_id', 'pooling_ratio', 'mass', 'volume',
                   'memo', 'id', 'last_modify_time', 'create_time', 'sampleinventoryinfo', 'methylibraryinfo',
                   'methycaptureinfo')

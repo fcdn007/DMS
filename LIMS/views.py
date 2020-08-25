@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import F
 from rest_framework import viewsets
 
 from util.utils import get_queryset_base, singleModelV
@@ -9,9 +10,12 @@ from .serializers import *
 class MethyLibraryInfoViewSet(viewsets.ModelViewSet):
     queryset = MethyLibraryInfo.objects.all()
     serializer_class = MethyLibraryInfoSerializer
+    ordering_fields = '__all__'
 
     def get_queryset(self):
-        return get_queryset_base(MethyLibraryInfo, self.request.query_params)
+        queryset_raw = get_queryset_base(MethyLibraryInfo, self.request.query_params)
+        return queryset_raw.annotate(sampler_id=F('sampleinventoryinfo__sampler_id'), dna_id=F('extractinfo__dna_id'),
+                                     dna_con=F('extractinfo__dna_con'))
 
 
 class MethyCaptureInfoViewSet(viewsets.ModelViewSet):
@@ -22,12 +26,17 @@ class MethyCaptureInfoViewSet(viewsets.ModelViewSet):
         return get_queryset_base(MethyCaptureInfo, self.request.query_params)
 
 
+
 class MethyPoolingInfoViewSet(viewsets.ModelViewSet):
     queryset = MethyPoolingInfo.objects.all()
     serializer_class = MethyPoolingInfoSerializer
+    ordering_fields = '__all__'
 
     def get_queryset(self):
-        return get_queryset_base(MethyPoolingInfo, self.request.query_params)
+        queryset_raw = get_queryset_base(MethyPoolingInfo, self.request.query_params)
+        return queryset_raw.annotate(sampler_id=F('sampleinventoryinfo__sampler_id'),
+                                     singleLB_id=F('methylibraryinfo__singleLB_id'),
+                                     poolingLB_id=F('methycaptureinfo__poolingLB_id'))
 
 
 @login_required

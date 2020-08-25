@@ -61,6 +61,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     re_path(r'Test/(?P<id>.*)/$', TestV, name='Test'),
     path('UrlSearch/', UrlSearchV, name='UrlSearch'),
+    path('WOPI/', include('WOPI.urls', namespace='WOPI')),
 ]
 
 if settings.DEBUG:

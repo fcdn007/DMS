@@ -11,6 +11,11 @@
           font-weight: 900;
       }
 
+      .fa-at:before {
+          content: "\f1fa";
+          font-weight: 900;
+      }
+
       .fa-ban:before {
           content: "\f05e";
           font-weight: 900;
@@ -97,6 +102,7 @@
     </div>
 </form>
 <p class="bg-info text-white mt-4 text-lg">&nbsp;结果数据</p>
+<h6 id="searchStat"></h6>
 <div id="resetTable">
 </div>
 {% endblock %}
@@ -124,6 +130,9 @@
 
                     {% endblock %}
                 </form>
+            </div>
+            <div>
+                <i class="loading-indicator fas fa-sync fa-spin fa-2x" style="display:none;color: blue;margin-left: 6em"></i>
             </div>
             <div class="modal-footer">
                 <p id="myModalError"></p>
@@ -190,6 +199,9 @@
                 <button type="button" data-dismiss="modal" class="btn btn-danger" id="delete">确认删除</button>
                 <button type="button" data-dismiss="modal" class="btn">取消</button>
             </div>
+            <div>
+                <i class="loading-indicator fas fa-sync fa-spin fa-2x" style="display:none;color: blue;margin-left: 6em"></i>
+            </div>
         </div>
     </div>
 </div>
@@ -207,6 +219,9 @@
                 <button type="button" data-dismiss="modal" class="btn btn-danger" id="bulkDelete">确认删除</button>
                 <button type="button" data-dismiss="modal" class="btn">取消</button>
             </div>
+            <div>
+                <i class="loading-indicator fas fa-sync fa-spin fa-2x" style="display:none;color: blue;margin-left: 6em"></i>
+            </div>
             <div class="modal-footer">
                 <p id="bulkDelError"></p>
             </div>
@@ -220,7 +235,7 @@
     function simple_delete_func(model0, url0, id0){
         let res = delete_by_id_simple(url0, id0);
         if (res[0] === "success") {
-            databaseRecordAjaxPut(model0, "单项删除", "id：" + res[1]);
+            databaseRecordAjaxPut('{{ user.id }}', model0, "单项删除", "id：" + res[1]);
             window.location.reload(true);
         } else {
             console.log(res[1]);
@@ -238,7 +253,7 @@
                     delete_id_list.push(res[1]);
                 }
             }
-            databaseRecordAjaxPut(model0, "批量删除", "id_list：[" + delete_id_list + "]");
+            databaseRecordAjaxPut('{{ user.id }}', model0, "批量删除", "id_list：[" + delete_id_list + "]");
             window.location.reload(true);
         } else {
             $('#bulkDelError').text('没有行被选中，请先选中目标行。');
@@ -269,7 +284,7 @@
             table_header_html += "<th>" + v[1] + "</th>";
             table_columns.push({ "data": v[0] });
             if (v[2] === 1){ // 出现在modal
-                let label_str = '<label for="' + v[0] + '"> ' + v[1] + '</label>';
+                let label_str_part1 = '<label class="mr-1 form-label" for="' + v[0] + '"> ' , label_str_part2 =  v[1] + '</label>';
                 edit_modal_fields.push(v[0]);
                 let input_str;
                 // 根据input类型生成input_str
@@ -279,24 +294,24 @@
                     input_str = '<select type="text" class="form-control" multiple="multiple" id="' + v[0] + '" name="' + v[0] + '" ';
                 } else if (v[5] === 'text'){
                     input_str = '<input type="text" class="form-control" id="' + v[0] + '" name="' + v[0] +
-                        '" placeholder="请输入' + v[1];
+                        '" placeholder="' + v[1];
                 } else if (v[5] === 'number_1'){
                     input_str = '<input type="number" step="1" class="form-control" id="' + v[0] + '" name="' + v[0] +
-                        '" placeholder="请输入' + v[1];
+                        '" placeholder="' + v[1];
                 } else if (v[5] === 'number_0.001'){
                     input_str = '<input type="number" step="0.001" class="form-control" id="' + v[0] + '" name="' + v[0] +
-                        '" placeholder="请输入' + v[1];
+                        '" placeholder="' + v[1];
                 } else if (v[5] === 'number_0.0001'){
                     input_str = '<input type="number" step="0.0001" class="form-control" id="' + v[0] + '" name="' + v[0] +
-                        '" placeholder="请输入' + v[1];
+                        '" placeholder="' + v[1];
                 } else if (v[5] === 'date'){
                     input_str = '<input type="date" class="form-control" id="' + v[0] + '" name="' + v[0] +
-                        '" placeholder="请输入' + v[1];
+                        '" placeholder="' + v[1];
                 }
-                modal_dict[v[3]] = '<div class="form-group">';
+                modal_dict[v[3]] = '<div class="form-group my-2 form-inline">';
                 if (v[4] === 1){
                     // 如果必填，label前面增加*号
-                    modal_dict[v[3]] += '<span><a class="text-danger front-weight-bold">* </a>' + label_str + '</span>';
+                    modal_dict[v[3]] += label_str_part1 + '<span><a class="text-danger front-weight-bold">* </a>' + '</span>' + label_str_part2 ;
                     if (v[5] === 'select' || v[5] === 'select_multiple') {
                         input_str += 'required="true">';
                         $.each(v[6], function (i2, v2) {
@@ -312,7 +327,7 @@
                         input_str += '，必填" required="true">';
                     }
                 } else {
-                    modal_dict[v[3]] += label_str;
+                    modal_dict[v[3]] += label_str_part1 + label_str_part2;
                     if (v[5] === 'select') {
                         input_str += '>';
                         $.each(v[6], function (i2, v2) {
@@ -423,6 +438,7 @@
             if (api_pattern.test(ajax_url) === true) {
                 serverSide_bool = true;
                 ajax_data = ajax_url;
+                $('#searchStat').text("");
                 output_buttons.push({
                     extend: 'csv', text: ' 输出当前页到csv',
                     className: 'btn btn-primary dt-button buttons-columnVisibility fas fa-file-alt my-1',
@@ -452,6 +468,7 @@
                     },
                     "dataSrc": function (json) {
                         // console.log(ajax_output);//此处json就是返回的数据
+                        $('#searchStat').text('总记录数量：'+json.recordsTotal+'；过滤后结果的记录数量：'+json.recordsFiltered);
                         return json.data;
                     }
                 };
@@ -485,6 +502,10 @@
                     }
                 },
                 {
+                    extend: 'selectAll', text: ' 选择全部',
+                    className: 'btn btn-primary fas fa-at my-1',
+                },
+                {
                     extend: 'selectNone', text: ' 取消当前选择',
                     className: 'btn btn-secondary fas fa-ban my-1',
                 },
@@ -500,9 +521,37 @@
                 {
                     extend: 'collection', text: ' 批量操作', buttons: bulk_buttons,
                     className: 'btn btn-warning fas fa-wrench my-1 dropdown-toggle button_group3'
+                },
+                {
+                    text: '使用Excel操作', className: 'btn btn-success fas fa-file-excel my-1',
+                    action: function () {
+                        let edit_bool = 0;
+                        if (button_bool2 === true){
+                            edit_bool = 1;
+                        }
+                        let tmp_url = "{% url 'WOPI:xlsx' %}" + "?access_token={{ request.user.id }}_" + button_bool1 ;
+                        document.body.style.cursor = "wait";
+                        if (api_pattern.test(ajax_url) === true) {
+                            tmp_url += "&model=all_" + model0;
+                            let done_flag = $.ajax({
+                                    url: url0.substring(4), data: {all: 1, format: "xlsx"},
+                                    dataType: 'json', contentType: "application/json",
+                                    method: "GET", async: false
+                            }).responseJSON.done;
+                            console.info("done_flag: ",done_flag);
+                            if (done_flag !== 'True') {
+                                console.info("ERROR!!! Output all records to excel failed!")
+                            }
+                        } else {
+                            tmp_url += "&model=queryset_" + model0 + '_{{ request.user.id }}';
+                        }
+                        // console.info("tmp_url: ", tmp_url);
+                        document.body.style.cursor = "default";
+                        window.open(tmp_url,'_blank');
+                    }
                 }
             ];
-            table_tmp = table_element.DataTable({
+            let table_tmp = table_element.DataTable({
                 "paging": true, "ordering": true,
                 "info": true, "autoWidth": false,
                 "responsive": false, "pagingType": "full_numbers",
@@ -558,8 +607,6 @@
             return table_tmp;
         }
         table = create_table(url0 + "?format=datatables", input_params["action_afterTableInit"]);
-
-
 
         $('#modelForm').on('submit', function (e) {
             e.preventDefault();

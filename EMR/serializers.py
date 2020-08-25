@@ -13,8 +13,8 @@ class ClinicalInfoSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = ClinicalInfo
         fields = ('clinical_id', 'sampler_id', 'patientId', 'hospital', 'department', 'name', 'gender', 'age',
-                  'record_date', 'category', 'stage', 'tumor1_diam', 'memo', 'id', 'last_modify_time', 'create_time',
-                  'sampleinventoryinfo')
+                  'record_date', 'category', 'stage', 'tumor1_diam', 'TNM', 'AJCC', 'memo', 'id', 'last_modify_time',
+                  'create_time', 'sampleinventoryinfo')
 
 
 class FollowupInfoSerializer(DynamicFieldsModelSerializer):
@@ -25,9 +25,9 @@ class FollowupInfoSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = FollowupInfo
-        fields = ('clinical_id', 'sampler_id', 'survival_status', 'death_date', 'death_bool', 'recur_bool',
-                  'recur_date', 'recur_status', 'followup_date', 'followup_status', 'memo', 'id', 'last_modify_time',
-                  'create_time', 'sampleinventoryinfo', 'clinicalinfo')
+        fields = ('clinical_id', 'sampler_id', 'survival_status', 'death_date', 'death_bool', 'death_reason',
+                  'recur_bool', 'recur_date', 'recur_position', 'recur_status', 'followup_date', 'followup_status',
+                  'memo', 'id', 'last_modify_time', 'create_time', 'sampleinventoryinfo', 'clinicalinfo')
 
 
 class LiverPathologicalInfoSerializer(DynamicFieldsModelSerializer):
@@ -38,8 +38,8 @@ class LiverPathologicalInfoSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = LiverPathologicalInfo
-        fields = ('pathological_id', 'clinical_id', 'sampler_id', 'check_date', 'check_stage', 'category', 'stage',
-                  'tumor_count', 'tumor1_diam', 'tumor2_diam', 'tumor3_diam', 'capsule', 'lmr', 'lmr_category',
+        fields = ('pathological_id', 'clinical_id', 'sampler_id', 'raw_id', 'check_date', 'check_stage', 'category',
+                  'stage', 'tumor_count', 'tumor1_diam', 'tumor2_diam', 'tumor3_diam', 'capsule', 'lmr', 'lmr_category',
                   'vi_bool', 'bv_bool', 'mvi_category', 'section', 'G_score', 'S_score', 'memo', 'id',
                   'last_modify_time', 'create_time', 'sampleinventoryinfo', 'clinicalinfo')
 

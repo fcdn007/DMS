@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import F
 from rest_framework import viewsets
 
 from util.utils import get_queryset_base, singleModelV
@@ -9,17 +10,23 @@ from .serializers import *
 class SequencingInfoViewSet(viewsets.ModelViewSet):
     queryset = SequencingInfo.objects.all()
     serializer_class = SequencingInfoSerializer
+    ordering_fields = '__all__'
 
     def get_queryset(self):
-        return get_queryset_base(SequencingInfo, self.request.query_params)
+        queryset_raw = get_queryset_base(SequencingInfo, self.request.query_params)
+        return queryset_raw.annotate(poolingLB_id=F('methycaptureinfo__poolingLB_id'))
 
 
 class MethyQCInfoViewSet(viewsets.ModelViewSet):
     queryset = MethyQCInfo.objects.all()
     serializer_class = MethyQCInfoSerializer
+    ordering_fields = '__all__'
 
     def get_queryset(self):
-        return get_queryset_base(MethyQCInfo, self.request.query_params)
+        queryset_raw = get_queryset_base(MethyQCInfo, self.request.query_params)
+        return queryset_raw.annotate(sampler_id=F('sampleinventoryinfo__sampler_id'),
+                                     singleLB_Pooling_id=F('methypoolinginfo__singleLB_Pooling_id'),
+                                     sequencing_id=F('sequencinginfo__sequencing_id'))
 
 
 @login_required
@@ -34,7 +41,7 @@ def SequencingInfoV(request):
 @login_required
 @permission_required('SEQ.view_methyqcinfo')
 def MethyQCInfoV(request):
-    col_name = ["索引", "Sample", "Data_Size(Gb)", "Clean_Rate(%)", "R1_Q20", "R2_Q20", "R1_Q30", "R2_Q30",
+    col_name = ["Sample", "Data_Size(Gb)", "Clean_Rate(%)", "R1_Q20", "R2_Q20", "R1_Q30", "R2_Q30",
                 "GC_Content", "BS_conversion_rate(lambda_DNA)", "BS_conversion_rate(CHH)",
                 "BS_conversion_rate(CHG)", "Uniquely_Paired_Mapping_Rate", "Mismatch_and_InDel_Rate",
                 "Mode_Fragment_Length(bp)", "Genome_Duplication_Rate", "Genome_Depth(X)",

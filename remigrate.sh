@@ -6,6 +6,7 @@ python manage.py makemigrations LIMS && python manage.py migrate  LIMS
 python manage.py makemigrations SEQ && python manage.py migrate  SEQ
 python manage.py makemigrations EMR && python manage.py migrate  EMR
 python manage.py makemigrations ADVANCE && python manage.py migrate  ADVANCE
+python manage.py migrate django_celery_beat django_celery_results
 python manage.py makemigrations && python manage.py migrate
 
 mysql -udjango -pdjango databaseDemo2 < user.sql

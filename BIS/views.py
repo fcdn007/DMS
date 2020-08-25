@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import F
 from rest_framework import viewsets
 
 from util.utils import get_queryset_base, singleModelV
@@ -17,25 +18,34 @@ class SampleInventoryInfoViewSet(viewsets.ModelViewSet):
 class SampleInfoViewSet(viewsets.ModelViewSet):
     queryset = SampleInfo.objects.all()
     serializer_class = SampleInfoSerializer
+    ordering_fields = '__all__'
 
     def get_queryset(self):
-        return get_queryset_base(SampleInfo, self.request.query_params)
+        queryset_raw = get_queryset_base(SampleInfo, self.request.query_params)
+        return queryset_raw.annotate(sampler_id=F('sampleinventoryinfo__sampler_id'))
 
 
 class ExtractInfoViewSet(viewsets.ModelViewSet):
     queryset = ExtractInfo.objects.all()
     serializer_class = ExtractInfoSerializer
+    ordering_fields = '__all__'
 
     def get_queryset(self):
-        return get_queryset_base(ExtractInfo, self.request.query_params)
+        queryset_raw = get_queryset_base(ExtractInfo, self.request.query_params)
+        return queryset_raw.annotate(sampler_id=F('sampleinventoryinfo__sampler_id'),
+                                     totalM=F('dna_con') * F('dna_vol'),
+                                     remainM=F('dna_con') * F('dna_vol') - F('successM') - F('failM') - F('researchM')
+                                             - F('othersM'))
 
 
 class DNAUsageRecordInfoViewSet(viewsets.ModelViewSet):
     queryset = DNAUsageRecordInfo.objects.all()
     serializer_class = DNAUsageRecordInfoSerializer
+    ordering_fields = '__all__'
 
     def get_queryset(self):
-        return get_queryset_base(DNAUsageRecordInfo, self.request.query_params)
+        queryset_raw = get_queryset_base(DNAUsageRecordInfo, self.request.query_params)
+        return queryset_raw.annotate(sampler_id=F('sampleinventoryinfo__sampler_id'), dna_id=F('extractinfo__dna_id'))
 
 
 @login_required
@@ -58,8 +68,8 @@ def SampleInfoV(request):
 @login_required
 @permission_required('BIS.view_extractinfo')
 def ExtractInfoV(request):
-    col_name = ["核酸提取编号", "华大编号", "生物样本编号", "提取日期", "样本类型", "核酸类型", "样本体积(ml)/质量(mg)",
-                "提取方法", "浓度(ng/ul)", "体积(ul)", "冰箱位置", "孔板号", "孔位", "提取总量(ng)", "成功建库使用量(ng)",
+    col_name = ["核酸提取编号", "华大编号", "提取日期", "样本类型", "核酸类型", "样本体积(ml)/质量(mg)", "提取方法",
+                "浓度(ng/ul)", "体积(ul)", "冰箱位置", "孔板号", "孔位", "提取总量(ng)", "成功建库使用量(ng)",
                 "失败建库使用量(ng)", "科研项目使用量(ng)", "其他使用量(ng)", "剩余量(ng)", "备注", "上次修改时间", "创建时间"]
     drop_cols = ['sampleinventoryinfo', 'sampleinfo']
     return singleModelV(request, 2, 'BIS/ExtractInfo.html', col_name, drop_cols=drop_cols)
@@ -69,5 +79,5 @@ def ExtractInfoV(request):
 @permission_required('BIS.view_dnausagerecordinfo')
 def DNAUsageRecordInfoV(request):
     col_name = ["核酸提取编号", "华大编号", "使用日期", "使用量(ng)", "用途", "建库编号(如有)", "备注", "上次修改时间", "创建时间"]
-    drop_cols=['sampleinventoryinfo', 'extractinfo']
+    drop_cols = ['sampleinventoryinfo', 'extractinfo']
     return singleModelV(request, 3, 'BIS/DNAUsageRecordInfo.html', col_name, drop_cols=drop_cols)

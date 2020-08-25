@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<title>Quick Start - Leaflet</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+
+
+	
+</head>
+<body>
+
+
+<div id="doc_outer">
+<div id="mapid" style="width: 600px; height: 400px;"></div></div>
+<script>
+    var map = L.map('mapid', {
+        doc: 'http://127.0.0.1:8000/media/files/%E4%BD%95%E5%B9%BF%E8%89%AF_ClinicalInfo_3b3299e14f.xlsx',
+        server: 'wss://localhost:9980',
+        webserver: 'http://127.0.0.1:9980/',
+        documentContainer: '#doc_outer'
+    });
+
+
+</script>
+
+
+
+</body>
+</html>

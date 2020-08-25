@@ -20,9 +20,9 @@ from databaseDemo.tasks import add_modelViewRecord_by_celery
 from util.merge_df import FILECOLUMN_FOREIGNKEY_TO_MODEL, models_set, models_set2
 
 serializers_set = [SampleInventoryInfoSerializer, SampleInfoSerializer, ExtractInfoSerializer,
-                  DNAUsageRecordInfoSerializer, MethyLibraryInfoSerializer, MethyCaptureInfoSerializer,
-                  MethyPoolingInfoSerializer, SequencingInfoSerializer, MethyQCInfoSerializer, ClinicalInfoSerializer,
-                  FollowupInfoSerializer, LiverPathologicalInfoSerializer, TMDInfoSerializer, BiochemInfoSerializer]
+                   DNAUsageRecordInfoSerializer, MethyLibraryInfoSerializer, MethyCaptureInfoSerializer,
+                   MethyPoolingInfoSerializer, SequencingInfoSerializer, MethyQCInfoSerializer, ClinicalInfoSerializer,
+                   FollowupInfoSerializer, LiverPathologicalInfoSerializer, TMDInfoSerializer, BiochemInfoSerializer]
 
 
 def get_queryset_base(model_, query_params_):
@@ -118,27 +118,70 @@ def custom_token_generator(num):
     return token
 
 
-def output_model_all_records(file_name0, data, col_name, drop_cols=None):
+def output_model_all_records(file_name0, data, col_name, file_ext, drop_cols=None):
     if drop_cols is None:
         drop_cols = ["id"]
     else:
         drop_cols = ["id"] + drop_cols
-    file_name = "{}.all.csv".format(file_name0)
+
     ticks = time.time()
-    file_path = os.path.join(MEDIA_ROOT, "csv", "{}.{}".format(ticks, file_name))
     res_df = pd.DataFrame(data)
     col_list = list(res_df.columns)
     res_df.loc[:, "索引"] = [x + 1 for x in range(res_df.shape[0])]
     res_df = res_df.loc[:, ["索引"] + [x for x in col_list if x not in drop_cols]]
     res_df.columns = ["索引"] + col_name
-    res_df.to_csv(file_path, index=False)
-    response = StreamingHttpResponse(read_file_by_stream(file_path))
-    response['Content-Type'] = 'application/octet-steam'
-    response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
-    return response
+    if file_ext == "csv":
+        file_name = "{}.all.csv".format(file_name0)
+        file_path = os.path.join(MEDIA_ROOT, "csv", "{}.{}".format(ticks, file_name))
+        doing_flag = file_path + '.doing'
+        if os.path.exists(doing_flag):
+            await_flag = True
+            while await_flag:
+                time.sleep(5)
+                await_flag = os.path.exists(doing_flag)
+        else:
+            os.system("touch " + doing_flag)
+            res_df.to_csv(file_path, index=False)
+            os.system("rm " + doing_flag)
+
+        response = StreamingHttpResponse(read_file_by_stream(file_path))
+        response['Content-Type'] = 'application/octet-steam'
+        response['Content-Disposition'] = 'attachment;filename="{0}"'.format(file_name)
+        return response
+    elif file_ext == "xlsx":
+        run_make_bool = False
+        model_objects = models_set[models_set2.index(file_name0)].objects
+        model_len = model_objects.count()
+        model_last_modify_time = int(
+            model_objects.values_list("last_modify_time").distinct().order_by("-last_modify_time")[0][0].strftime(
+                "%Y%m%d%H%M%S%f"))
+        last_info_file = os.path.join(MEDIA_ROOT, "xlsx", "mysql", "all_{}.latest.info.csv".format(file_name0))
+        if not os.path.exists(last_info_file):
+            run_make_bool = True
+        else:
+            last_info_df = pd.read_csv(last_info_file, header=0, encoding='utf-8')
+            if int(last_info_df['len'][0]) != model_len or int(last_info_df['last_modify_time'][0]) != model_last_modify_time:
+                run_make_bool = True
+
+        if run_make_bool:
+            file_name = "all_{}.xlsx".format(file_name0)
+            file_path = os.path.join(MEDIA_ROOT, "xlsx", "mysql", "{}".format(file_name))
+            doing_flag = file_path + '.doing'
+            if os.path.exists(doing_flag):
+                await_flag = True
+                while await_flag:
+                    time.sleep(5)
+                    await_flag = os.path.exists(doing_flag)
+            else:
+                os.system("touch " + doing_flag)
+                res_df.to_excel(file_path, index=False)
+                os.system("rm " + doing_flag)
+            res_df_info = pd.DataFrame(data={'len': [model_len], 'last_modify_time': [model_last_modify_time]})
+            res_df_info.to_csv(last_info_file, index=False)
+        return "True"
 
 
-def df_queryset_filter(data, queryset, merge_df_bool=False, return_class='dict'):
+def df_queryset_filter(data, queryset, model_str=None, merge_df_bool=False, return_class='dict'):
     raw_df = pd.DataFrame(data)
     # print(">>>raw_df :{}".format(raw_df))
     # print(">>>queryset :{}".format(queryset))
@@ -170,6 +213,9 @@ def df_queryset_filter(data, queryset, merge_df_bool=False, return_class='dict')
         return res_filtered
     else:
         # make res_pro
+        if model_str is not None:
+            res_filtered.to_excel(os.path.join(MEDIA_ROOT, "xlsx", "user", "queryset_{}.xlsx".format(model_str)),
+                                  index=False)
         res_pro = res_filtered.to_dict('records')
         result = {
             'draw': 1,
@@ -186,13 +232,19 @@ def singleModelV(request_, idx, template_path, col_name, drop_cols=None):
     model_str = models_set2[idx]
     add_modelViewRecord_by_celery(model_str, request_.user.username)
     output_all_bool = request_.GET.get('all', 0)
+    output_all_format = request_.GET.get('format', 'csv')
     queryset = request_.POST.get('queryset', 0)
     if queryset:
         serializer = serializer(model_instance.objects.all(), many=True)
-        last_queryset_res = df_queryset_filter(serializer.data, queryset)
+        last_queryset_res = df_queryset_filter(serializer.data, queryset, model_str="{}_{}".format(model_str,
+                                                                                                   request_.user.id))
         return JsonResponse(last_queryset_res)
     elif output_all_bool:
         res_data = serializer(model_instance.objects.all(), many=True).data
-        return output_model_all_records(model_str, res_data, col_name)
+        if output_all_format != 'csv':
+            return JsonResponse({"done": output_model_all_records(model_str, res_data, col_name, output_all_format,
+                                                                  drop_cols=drop_cols)})
+        else:
+            return output_model_all_records(model_str, res_data, col_name, "csv", drop_cols=drop_cols)
     else:
         return render(request_, template_path)

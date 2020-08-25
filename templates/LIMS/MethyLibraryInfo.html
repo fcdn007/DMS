@@ -82,11 +82,11 @@
               success: function () {
                   let v_tmp = $('#singleLB_id').val();
                   if (type === 'new') {
-                      databaseRecordAjaxPut(model0, "单项添加", "建库编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项添加", "建库编号：" + v_tmp);
                       $('#myModalError').text('添加成功！！！建库编号：' + v_tmp);
                       data1.successM = parseFloat(data1.successM) + parseFloat($('#mass').val());
                   } else {
-                      databaseRecordAjaxPut(model0, "单项更新", "建库编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项更新", "建库编号：" + v_tmp);
                       $('#myModalError').text('更新成功！！！建库编号：' + v_tmp);
                       data1.successM = parseFloat(data1.successM) + parseFloat($('#mass').val()) -
 							  parseFloat(old_data0.mass);
@@ -101,7 +101,7 @@
                       }),
                       headers: {'X-HTTP-Method-Override': 'PATCH'},
                       success: function () {
-                          databaseRecordAjaxPut("ExtractInfo", "单项更新", "核酸提取编号：" + data1.sample_id);
+                          databaseRecordAjaxPut('{{ user.id }}', "ExtractInfo", "单项更新", "核酸提取编号：" + data1.sample_id);
                       },
                       error: function (jqXHR, textStatus, errorThrown) {
                           console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
@@ -119,7 +119,7 @@
 					  }),
                       headers: {'X-HTTP-Method-Override': 'PATCH'},
                       success: function () {
-                          databaseRecordAjaxPut("DNAUsageRecordInfo", "单项更新", "核酸提取编号：" + data1.sample_id);
+                          databaseRecordAjaxPut('{{ user.id }}', "DNAUsageRecordInfo", "单项更新", "核酸提取编号：" + data1.sample_id);
                       },
                       error: function (jqXHR, textStatus, errorThrown) {
                           console.log(jqXHR + ';' + textStatus + ';' + errorThrown)
@@ -206,17 +206,17 @@
       function delete_func(model0, url0, id0){
           let res = delete_by_id(id0);
         if (res[4] === "success") {
-              databaseRecordAjaxPut("DNAUsageRecordInfo", "单项删除", "id：" + res[5]);
+              databaseRecordAjaxPut('{{ user.id }}', "DNAUsageRecordInfo", "单项删除", "id：" + res[5]);
           } else {
               console.log(res[5]);
           }
       	if (res[2] === "success") {
-              databaseRecordAjaxPut("ExtractInfo", "单项更新", "id：" + res[3]);
+              databaseRecordAjaxPut('{{ user.id }}', "ExtractInfo", "单项更新", "id：" + res[3]);
           } else {
               console.log(res[3]);
           }
           if (res[0] === "success") {
-              databaseRecordAjaxPut(model0, "单项删除", "id：" + res[1]);
+              databaseRecordAjaxPut('{{ user.id }}', model0, "单项删除", "id：" + res[1]);
               window.location.reload(true);
           } else {
               console.log(res[1]);
@@ -242,9 +242,9 @@
                         id_list2.push(res[3]);
                     }
                 }
-                databaseRecordAjaxPut(model0, "批量删除", "id_list：[" + id_list0 + "]");
-                databaseRecordAjaxPut("ExtractInfo", "批量更新", "id_list：[" + id_list1 + "]");
-                databaseRecordAjaxPut("DNAUsageRecordInfo", "批量删除", "id_list：[" + id_list2 + "]");
+                databaseRecordAjaxPut('{{ user.id }}', model0, "批量删除", "id_list：[" + id_list0 + "]");
+                databaseRecordAjaxPut('{{ user.id }}', "ExtractInfo", "批量更新", "id_list：[" + id_list1 + "]");
+                databaseRecordAjaxPut('{{ user.id }}', "DNAUsageRecordInfo", "批量删除", "id_list：[" + id_list2 + "]");
                 window.location.reload(true);
             } else {
                 $('#bulkDelError').text('没有行被选中，请先选中目标行。');

@@ -93,10 +93,10 @@
               success: function () {
                   let v_tmp = $('#clinical_id').val();
                   if (type === 'new') {
-                      databaseRecordAjaxPut(model0, "单项添加", "病历编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项添加", "病历编号：" + v_tmp);
                       $('#myModalError').text('添加成功！！！病历编号：' + v_tmp);
                   } else {
-                      databaseRecordAjaxPut(model0, "单项更新", "病历编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项更新", "病历编号：" + v_tmp);
                       $('#myModalError').text('更新成功！！！病历编号：' + v_tmp);
                   }
 

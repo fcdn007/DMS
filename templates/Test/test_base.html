@@ -161,7 +161,7 @@
     function simple_delete_func(model0, url0, id0){
         let res = delete_by_id_simple(url0, id0);
         if (res[0] === "success") {
-            databaseRecordAjaxPut(model0, "单项删除", "id：" + res[1]);
+            databaseRecordAjaxPut('{{ user.id }}', model0, "单项删除", "id：" + res[1]);
             window.location.reload(true);
         } else {
             console.log(res[1]);
@@ -179,14 +179,14 @@
                 delete_id_list.push(res[1]);
             }
         }
-        databaseRecordAjaxPut(model0, "批量删除", "id_list：[" + delete_id_list + "]");
+        databaseRecordAjaxPut('{{ user.id }}', model0, "批量删除", "id_list：[" + delete_id_list + "]");
         window.location.reload(true);
     } else {
         $('#bulkDelError').text('没有行被选中，请先选中目标行。');
     }
 }
 
-    function single_page_generator(model0, url0, id0, button_bool1, button_bool2, input_params){
+    function single_page_generator('{{ user.id }}', model0, url0, id0, button_bool1, button_bool2, input_params){
         let dataModelForm; //更新弹窗默认值，重置按钮需要
         let data0 = $.ajax({
             url: url0, dataType: 'json', contentType: "application/json",

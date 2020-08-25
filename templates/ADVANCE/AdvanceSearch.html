@@ -436,8 +436,8 @@
             let tmp_res = get_merge_df_cols();
             models_query_index = tmp_res.models_query_index;
             field_dict =  tmp_res.field_dict;
-            let resetTable_html = '<table id="table_id" class="table table-bordered table-hover dt-responsive"><thead>'; // 储存生成的html代码
-            let thead_dict = {'join_field': []}, join_field_pattern = /^.*-.*$/, row1_name = ['join_field'];
+            let resetTable_html = '<h6 id="searchStat"></h6><table id="table_id" class="table table-bordered table-hover dt-responsive"><thead>'; // 储存生成的html代码
+            let thead_dict = {'join_field': []}, join_field_pattern = /^.*-.*$/, row1_name = ['join_field'], searchStatText = '';
             $.each(field_dict['name'], function (i, v) {
                 if (join_field_pattern.test(v) === true){
                     let key_list = v.split('-');
@@ -506,6 +506,7 @@
                     "dataSrc": function (json) {
                         ajax_output = json.data;
                         // console.log(ajax_output);//此处json就是返回的数据
+                        $('#searchStat').text('总记录数量：'+json.recordsTotal+'；过滤后结果的记录数量：'+json.recordsFiltered);
                         return json.data;
                     }
                 },
@@ -536,6 +537,7 @@
                 ],
                 "deferRender": true, "columns": tableId
             });
+            $('#searchStat').text(searchStatText);
         });
 
         // 根据datatables画图
@@ -752,11 +754,14 @@
                 };
                 let tmp_data_key = [], num_bool = 'false', num_min=0, num_max=0;
                 $.each(ajax_output, function (i, v) {
+                    // console.info('i: ' + i);
+                    // console.info('v: ' + v);
                     tmp_data['sum'] += 1;
                     let tmp_k2 = v[key];
+                    // console.info('before tmp_k2: ' + tmp_k2);
                     // let numPattern = /^[-+]?\d+(.\d+)?$/;
                     // let datePattern = /^\d{4}-\d{2}-\d{2}/;
-                    let nullPattern = /^NA$ || ^\s*$/;
+                    let nullPattern = /^NA$|^\s*$/;
                     // 判断数值类型
                     if (field_type['str'].indexOf(key) > -1) {
                         if (nullPattern.test(tmp_k2) || tmp_k2 === undefined || !tmp_k2) {
@@ -777,6 +782,7 @@
                             if (num_bool === 'false'){num_bool = 'true'}
                         }
                     }
+                    // console.info('after tmp_k2: ' + tmp_k2);
                     if (num_bool === 'false'){
                         if (tmp_data['data'][tmp_k2] === undefined) {
                             tmp_data['data'][tmp_k2] = 1;
@@ -807,6 +813,7 @@
                 }
                 let pie_data_array = [];
                 tmp_data_key = tmp_data_key.sort();
+                // console.info('tmp_data_key: ' + tmp_data_key);
                 $.each(tmp_data_key, function (i, v) {
                     let tmp_str = v.toString();
                     if (field_type['num'].indexOf(key) > -1) {
@@ -814,7 +821,7 @@
                     }
                     pie_data_array.push([tmp_str, parseFloat(changeThreeDecimal_f(tmp_data['data'][v] / tmp_data['sum'] * 100))]);
                 });
-                // console.log('pie_data_array: ' + pie_data_array);
+                // console.info('pie_data_array: ' + pie_data_array);
                 let chart = {
                     plotBackgroundColor: null,
                     plotBorderWidth: null,
@@ -888,7 +895,7 @@
                         return res;
                     }
                     let item_type;
-                    let nullPattern = /^\s*$/;
+                    let nullPattern = /^NA$|^\s*$/;
                     // 判断数值类型
                     if (field_type['str'].indexOf(key_) > -1) {
                         item_type = 'str';

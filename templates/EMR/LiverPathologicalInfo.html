@@ -74,10 +74,10 @@
               success: function () {
                   let v_tmp = $('#pathological_id').val();
                   if (type === 'new') {
-                      databaseRecordAjaxPut(model0, "单项添加", "病理报告编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项添加", "病理报告编号：" + v_tmp);
                       $('#myModalError').text('添加成功！！！病理报告编号：' + v_tmp);
                   } else {
-                      databaseRecordAjaxPut(model0, "单项更新", "病理报告编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项更新", "病理报告编号：" + v_tmp);
                       $('#myModalError').text('更新成功！！！病理报告编号：' + v_tmp);
                   }
 
@@ -104,24 +104,25 @@
               ["pathological_id", "病理报告编号", 1, 1, 1, "text"],
 			  ["clinical_id", "病历编号", 1, 0, 1, "text"],
               ["sampler_id", "华大编号", 0],
-              ["check_date", "检查日期", 1, 2, 0, "date", "2000-01-01"],
-              ["check_stage", "检查阶段", 1, 3, 0, "text", "无"],
-              ["category", "肿瘤类型", 1, 4, 0, "text", "无"],
-              ["stage", "分化程度", 1, 5, 0, "text", "无"],
-              ["tumor_count", "肿瘤数目", 1, 6, 0, "number_1", 0],
-              ["tumor1_diam", "肿瘤1直径", 1, 7, 0, "number_0.001", 0],
-			  ["tumor2_diam", "肿瘤2直径", 1, 8, 0, "number_0.001", 0],
-			  ["tumor3_diam", "肿瘤3直径", 1, 9, 0, "number_0.001", 0],
-			  ["capsule", "肝包膜侵犯(肝被膜)", 1, 10, 0, "text", "无"],
-              ["lmr", "淋巴结转移", 1, 11, 0, "text", "无"],
-              ["lmr_category", "淋巴结转移类型", 1, 12, 0, "text", "无"],
-              ["vi_bool", "肉眼癌栓(脉管侵犯)", 1, 13, 0, "select", [["否", "否"], ["是", "是"]]],
-              ["bv_bool", "微血管浸润", 1, 14, 0, "select", [["否", "否"], ["是", "是"]]],
-			  ["mvi_category", "MVI类型", 1, 15, 0, "text", "无"],
-			  ["section", "切面距癌距离(切除面)", 1, 16, 0, "text", "无"],
-              ["G_score", "G评分", 1, 17, 0, "text", "无"],
-              ["S_score", "S评分", 1, 18, 0, "text", "无"],
-              ["memo", "备注", 1, 19, 0, "text", "无"],
+			  ["raw_id", "病理编号", 1, 2, 0, "text", "无"],
+              ["check_date", "检查日期", 1, 3, 0, "date", "2000-01-01"],
+              ["check_stage", "检查阶段", 1, 4, 0, "text", "无"],
+              ["category", "病理类型", 1, 5, 0, "text", "无"],
+              ["stage", "分化程度", 1, 6, 0, "text", "无"],
+              ["tumor_count", "肿瘤数目", 1, 7, 0, "number_1", 0],
+              ["tumor1_diam", "肿瘤最大径", 1, 8, 0, "number_0.001", 0],
+			  ["tumor2_diam", "肿瘤2直径", 1, 9, 0, "number_0.001", 0],
+			  ["tumor3_diam", "肿瘤3直径", 1, 10, 0, "number_0.001", 0],
+			  ["capsule", "肝包膜侵犯(肝被膜)", 1, 11, 0, "text", "无"],
+              ["lmr", "淋巴结转移", 1, 12, 0, "text", "无"],
+              ["lmr_category", "淋巴结转移类型", 1, 13, 0, "text", "无"],
+              ["vi_bool", "肉眼癌栓(脉管侵犯)", 1, 14, 0, "select", [["否", "否"], ["是", "是"]]],
+              ["bv_bool", "微血管浸润", 1, 15, 0, "select", [["否", "否"], ["是", "是"]]],
+			  ["mvi_category", "MVI风险等级", 1, 16, 0, "text", "无"],
+			  ["section", "切面距癌距离(切除面)", 1, 17, 0, "text", "无"],
+              ["G_score", "G评分", 1, 18, 0, "text", "无"],
+              ["S_score", "S评分", 1, 19, 0, "text", "无"],
+              ["memo", "备注", 1, 20, 0, "text", "无"],
               ["last_modify_time", "上次修改时间", 0],
               ["create_time", "创建时间", 0]
           ],

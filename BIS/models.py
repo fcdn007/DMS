@@ -77,13 +77,6 @@ class ExtractInfo(models.Model):
         db_column='样本库存信息',
         blank=True,
         null=True)
-    sampleinfo = models.ForeignKey(
-        "SampleInfo",
-        on_delete=models.CASCADE,
-        related_name='ExtractInfo_SampleInfo',
-        db_column='样本信息',
-        blank=True,
-        null=True)
     extract_date = models.DateField(db_column='提取日期', blank=True, null=True)
     sample_type = models.CharField(db_column='样本类型', max_length=50)
     nucleic_type = models.CharField(db_column='核酸类型', max_length=50)

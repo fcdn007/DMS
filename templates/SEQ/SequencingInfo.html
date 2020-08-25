@@ -109,10 +109,10 @@
                 success: function () {
                     let v_tmp = $('#sequencing_id').val();
                     if (type === 'new') {
-                      	databaseRecordAjaxPut(model0, "单项添加", "上机文库号：" + v_tmp);
+                      	databaseRecordAjaxPut('{{ user.id }}', model0, "单项添加", "上机文库号：" + v_tmp);
                       	$('#myModalError').text('添加成功！！！上机文库号：' + v_tmp);
                   	} else {
-                      	databaseRecordAjaxPut(model0, "单项更新", "上机文库号：" + v_tmp);
+                      	databaseRecordAjaxPut('{{ user.id }}', model0, "单项更新", "上机文库号：" + v_tmp);
                       	$('#myModalError').text('更新成功！！！上机文库号：' + v_tmp);
                   	}
 
@@ -158,7 +158,7 @@
 		  tags: true,
 		  maximumSelectionLength: 50,
 		  allowClear: true,
-		  placeholder: "请输入捕获文库名，必填",
+		  placeholder: "捕获文库名，必填",
 		  multiple: true,
 		  maximumInputLength: 25,//允许长度
 		  //data: initdata

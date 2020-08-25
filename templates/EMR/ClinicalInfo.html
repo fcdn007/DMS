@@ -43,13 +43,38 @@
       function update_func(e, id0){
           e.preventDefault();
           // 递交前检查，一般是检测model的外键是否存在
+		  let sampler_id = $('#sampler_id').val();
           let data1 = $.ajax({
               url: url1, dataType: 'json', contentType: "application/json",
-              type: "get", async: false, data: { sampler_id: $('#sampler_id').val(), fields: "id" }
+              type: "get", async: false, data: { sampler_id: sampler_id, fields: "id" }
           }).responseJSON[0];
           if (data1 === undefined) {
-              $('#myModalError').text('错误！！！华大编号不存在，请填写正确的华大编号。');
-              return
+			  data1 = {
+				  sampler_id: sampler_id, plasma_num: 0, cancer_tissue_num: 0, adjacent_mucosa_num: 0,
+				  WBC_num: 0, stool_num: 0, memo: "无"
+			  };
+			  $.ajax({
+				  url: url1,
+				  method: 'POST',
+				  async: false,
+				  data: $.param(data1),
+				  success: function () {
+					  databaseRecordAjaxPut('{{ user.id }}', 'SampleInventoryInfo', "单项添加", "华大编号: " + sampler_id);
+					  data1 = $.ajax({
+						  url: url1, dataType: 'json', contentType: "application/json",
+						  type: "get", async: false, data: { sampler_id: sampler_id, fields: "id" }
+					  }).responseJSON[0];
+				  },
+				  error: function (jqXHR, textStatus, errorThrown) {
+					  $('#myModalError').text('出现错误！！！请联系管理员');
+					  console.info(">>>>url_ajax0:", url_ajax0);
+					  console.info(">>>>method:", send_data0);
+					  console.info(">>>>send_data0:", send_data0);
+					  console.info(jqXHR,  textStatus, errorThrown);
+				  }
+			  });
+              // $('#myModalError').text('错误！！！华大编号不存在，请填写正确的华大编号。');
+              // return
           }
 
           let type = $('#type').val();
@@ -83,10 +108,10 @@
               success: function () {
                   let v_tmp = $('#clinical_id').val();
                   if (type === 'new') {
-                      databaseRecordAjaxPut(model0, "单项添加", "病历编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项添加", "病历编号：" + v_tmp);
                       $('#myModalError').text('添加成功！！！病历编号：' + v_tmp);
                   } else {
-                      databaseRecordAjaxPut(model0, "单项更新", "病历编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项更新", "病历编号：" + v_tmp);
                       $('#myModalError').text('更新成功！！！病历编号：' + v_tmp);
                   }
 
@@ -112,19 +137,21 @@
               //                    [   0,     1,        2,               3,      4,       5,       6 ]
               // input类型是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, [[value, text]] ]
               // input类型不是select： [ field, name, 是否出现在modal, modal中排序, 是否必填, input类型, value ]
-              ["clinical_id", "病历编号", 1, 4, 1, "text"],
-              ["sampler_id", "华大编号", 1, 3, 1, "text"],
+              ["clinical_id", "病历编号", 1, 3, 1, "text"],
+              ["sampler_id", "华大编号", 1, 4, 1, "text"],
               ["patientId", "住院号", 1, 0, 1, "text"],
               ["hospital", "医院编号", 1, 1, 1, "text"],
-              ["department", "科室", 1, 2, 0, "text", "无"],
-              ["name", "姓名", 1, 5, 0, "text", "无"],
-              ["gender", "性别", 1, 6, 0, "select", [["男", "男"], ["女", "女"]]],
-              ["age", "年龄", 1, 7, 0, "number_1", 0],
-              ["record_date", "记录日期", 1, 8, 0, "date", "2000-01-01"],
-              ["category", "肿瘤类型", 1, 9, 0, "text", "无"],
+              ["department", "科室", 1, 5, 0, "text", "无"],
+              ["name", "姓名", 1, 6, 0, "text", "无"],
+              ["gender", "性别", 1, 7, 0, "select", [["男", "男"], ["女", "女"]]],
+              ["age", "年龄", 1, 8, 0, "number_1", 0],
+              ["record_date", "记录日期", 1, 2, 1, "date"],
+              ["category", "癌种", 1, 9, 0, "text", "无"],
               ["stage", "分化程度", 1, 10, 0, "text", "无"],
-              ["tumor1_diam", "肿瘤1直径", 1, 11, 0, "number_0.001", 0],
-              ["memo", "备注", 1, 12, 0, "text", "无"],
+              ["tumor1_diam", "肿瘤最大径", 1, 11, 0, "number_0.001", 0],
+			  ["TNM", "TNM分期", 1, 12, 0, "text", "无"],
+			  ["AJCC", "AJCC分期", 1, 13, 0, "text", "无"],
+              ["memo", "备注", 1, 14, 0, "text", "无"],
               ["last_modify_time", "上次修改时间", 0],
               ["create_time", "创建时间", 0]
           ],
@@ -135,20 +162,21 @@
       };
       single_page_generator(model0, url0, id0, bulk_update_bool, bulk_delete_bool, input_params);
 
+      function make_clinical_id(){
+		  if ($("#patientId").val()!=="" && $("#hospital").val()!=="" && $("#record_date").val()!==""){
+		  	$("#clinical_id").val($("#hospital").val()+'_'+$("#patientId").val()+'_'+$("#record_date").val());
+		  } else {
+		  	$("#clinical_id").val("");
+		  }
+	  }
       $("#hospital").blur(function () {
-		  if ($("#patientId").val()!=="" && $("#hospital").val()!==""){
-		  	$("#clinical_id").val($("#hospital").val()+'_'+$("#patientId").val());
-		  } else {
-		  	$("#clinical_id").val("");
-		  }
+		  make_clinical_id();
       });
-
       $("#patientId").blur(function () {
-          if ($("#patientId").val()!=="" && $("#hospital").val()!==""){
-		  	$("#clinical_id").val($("#hospital").val()+'_'+$("#patientId").val());
-		  } else {
-		  	$("#clinical_id").val("");
-		  }
+          make_clinical_id();
+      });
+      $("#record_date").blur(function () {
+          make_clinical_id();
       });
   });
 </script>

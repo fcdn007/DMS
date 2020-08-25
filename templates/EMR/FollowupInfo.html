@@ -76,10 +76,10 @@
               success: function () {
                   let v_tmp = $('#clinical_id').val() + ' + ' + $('#followup_date').val();
                   if (type === 'new') {
-                      databaseRecordAjaxPut(model0, "单项添加", "clinical_id + followup_date：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项添加", "clinical_id + followup_date：" + v_tmp);
                       $('#myModalError').text('添加成功！！！clinical_id + followup_date：' + v_tmp);
                   } else {
-                      databaseRecordAjaxPut(model0, "单项更新", "clinical_id + followup_date：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项更新", "clinical_id + followup_date：" + v_tmp);
                       $('#myModalError').text('更新成功！！！clinical_id + followup_date：' + v_tmp);
                   }
 
@@ -110,12 +110,14 @@
               ["survival_status", "生存状态", 1, 1, 1, "select", [["存活", "存活"], ["死亡", "死亡"]]],
               ["death_date", "死亡日期", 1, 2, 0, "date", "2000-01-01"],
               ["death_bool", "死因是否与肿瘤相关", 1, 3, 0, "select", [["否", "否"], ["是", "是"]]],
-              ["recur_bool", "是否复发", 1, 4, 0, "select", [["否", "否"], ["是", "是"]]],
-              ["recur_date", "复发日期", 1, 5, 0, "date", "2000-01-01"],
-              ["recur_status", "复发状态", 1, 6, 0, "text", "无"],
-              ["followup_date", "随访日期", 1, 7, 0, "date", "2000-01-01"],
-              ["followup_status", "随访情况", 1, 8, 1, "text"],
-              ["memo", "备注", 1, 9, 0, "text", "无"],
+              ["death_reason", "死亡原因", 1, 4, 0, "text", "无"],
+			  ["recur_bool", "是否复发", 1, 5, 0, "select", [["否", "否"], ["是", "是"]]],
+              ["recur_date", "复发日期", 1, 6, 0, "date", "2000-01-01"],
+              ["recur_status", "复发状态", 1, 7, 0, "text", "无"],
+			  ["recur_position", "复发转移部位", 1, 8, 0, "text", "无"],
+              ["followup_date", "随访日期", 1, 9, 0, "date", "2000-01-01"],
+              ["followup_status", "随访情况", 1, 10, 1, "text"],
+              ["memo", "备注", 1, 11, 0, "text", "无"],
               ["last_modify_time", "上次修改时间", 0],
               ["create_time", "创建时间", 0]
           ],

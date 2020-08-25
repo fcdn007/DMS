@@ -69,7 +69,7 @@ keys * hgetall cart_2
 ```ugunicorn databaseDemo.wsgi:application -c /home/wsl/mnt/f/wsl/project/databaseDemo/gunicorn.conf.py```
 
 
-
+sudo docker run -i -t -d -p 8008:80 --restart=always onlyoffice/documentserver
 
 
 

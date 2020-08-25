@@ -32,7 +32,6 @@ class ExtractInfoSerializer(DynamicFieldsModelSerializer):
     totalM = serializers.SerializerMethodField()
     remainM = serializers.SerializerMethodField()
     sampler_id = serializers.CharField(source='sampleinventoryinfo.sampler_id', read_only=True)
-    sample_id = serializers.CharField(source='sampleinfo.sample_id', read_only=True)
 
     def get_totalM(self, obj):
         return round(obj.dna_con * obj.dna_vol, 3)
@@ -42,10 +41,10 @@ class ExtractInfoSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = ExtractInfo
-        fields = ('dna_id', 'sampler_id', 'sample_id', 'extract_date', 'sample_type', 'nucleic_type', 'sample_volume',
+        fields = ('dna_id', 'sampler_id', 'extract_date', 'sample_type', 'nucleic_type', 'sample_volume',
                   'extract_method', 'dna_con', 'dna_vol', 'fridge', 'plate', 'well', 'totalM', 'successM', 'failM',
                   'researchM', 'othersM', 'remainM', 'memo', 'id', 'last_modify_time', 'create_time',
-                  'sampleinventoryinfo', 'sampleinfo')
+                  'sampleinventoryinfo')
 
 
 class DNAUsageRecordInfoSerializer(DynamicFieldsModelSerializer):

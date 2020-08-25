@@ -27,7 +27,7 @@ from .forms import FileUploadModelForm
 def uniqueV(request):
     foreign_keys = {
         'SampleInfo': ['sampler_id'],
-        'ExtractInfo': ['sampler_id', 'sample_id'],
+        'ExtractInfo': ['sampler_id'],
         'DNAUsageRecordInfo': ['sampler_id', 'dna_id'],
         'MethyLibraryInfo': ['sampler_id', 'dna_id'],
         'MethyPoolingInfo': ['sampler_id', 'singleLB_id', 'poolingLB_id'],
@@ -40,8 +40,8 @@ def uniqueV(request):
         'LiverBiochemInfo': ['sampler_id', 'clinical_id']
     }
     data = {}
-    key1 = request.GET['model']
-    key2 = request.GET['filed']
+    key1 = request.GET.get('model')
+    key2 = request.GET.get('filed')
     try:
         if key1 in foreign_keys and key2 in foreign_keys[key1]:
             data['values'] = [x[0] for x in FILECOLUMN_FOREIGNKEY_TO_MODEL[key2].objects.values_list(key2).distinct(

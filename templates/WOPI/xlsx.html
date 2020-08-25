@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>在线Excel文档</title>
+    <meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+
+      function post(msg) {
+        window.frames[0].postMessage(JSON.stringify(msg), '*');
+      }
+
+      function insertText(text) {
+        post({'MessageId': 'CallPythonScript',
+              'SendTime': Date.now(),
+              'ScriptFile': 'InsertText.py',
+              'Function': 'InsertText',
+              'Values': { 'text': {'type': 'string', 'value': text}}
+            });
+      }
+
+      function capitalize() {
+        post({'MessageId': 'CallPythonScript',
+              'SendTime': Date.now(),
+              'ScriptFile': 'Capitalise.py',
+              'Function': 'capitalisePython',
+              'Values': null
+            });
+      }
+
+      function save() {
+        post({'MessageId': 'Action_Save',
+              'Values': { 'Notify': true, 'ExtendedData': 'CustomFlag=Custom Value;AnotherFlag=AnotherValue' }
+            });
+      }
+
+      function closeDocument() {
+        post({'MessageId': 'Action_Close',
+              'Values': null
+            });
+      }
+
+      function hide_commands(id) {
+        post({'MessageId': 'Hide_Menu_Item',
+              'Values': { 'id': id, }
+            });
+        post({'MessageId': 'Hide_Button',
+              'Values': { 'id': id, }
+            });
+      }
+
+      function show_commands(id) {
+        post({'MessageId': 'Show_Menu_Item',
+              'Values': { 'id': id, }
+            });
+        post({'MessageId': 'Show_Button',
+              'Values': { 'id': id, }
+            });
+      }
+
+      function disable_default_uiaction(action, disable) {
+        post({'MessageId': 'Disable_Default_UIAction',
+              'Values': { 'action': action, 'disable': disable }
+            });
+      }
+
+      function ShowMenubar(visible) {
+        var messageId = visible ? 'Show_Menubar' : 'Hide_Menubar';
+        window.frames[0].postMessage(JSON.stringify({'MessageId': 'Host_PostmessageReady'}), '*');
+        window.frames[0].postMessage(JSON.stringify({'MessageId': messageId}), '*');
+      }
+
+      // This function is invoked when the iframe posts a message back.
+
+      function receiveMessage(event) {
+        console.log('==== framed.doc.html receiveMessage: ' + event.data);
+        var msg = JSON.parse(event.data);
+        if (!msg) {
+          return;
+        }
+        if (msg.MessageId == 'App_LoadingStatus') {
+          if (msg.Values) {
+            if (msg.Values.Status == 'Document_Loaded') {
+              window.frames[0].postMessage(JSON.stringify({'MessageId': 'Host_PostmessageReady'}), '*');
+            }
+          }
+        } else if (msg.MessageId == 'Doc_ModifiedStatus') {
+          if (msg.Values) {
+            if (msg.Values.Modified == true) {
+              document.getElementById("ModifiedStatus").innerHTML = "Modified";
+            }
+            else {
+              document.getElementById("ModifiedStatus").innerHTML = "Saved";
+            }
+          }
+        } else if (msg.MessageId == 'Action_Save_Resp') {
+          if (msg.Values) {
+            if (msg.Values.success == true) {
+              document.getElementById("ModifiedStatus").innerHTML = "Saved";
+            } else {
+              document.getElementById("ModifiedStatus").innerHTML = "Error during save";
+            }
+          }
+        }
+      }
+
+      // 'main' code of this <script> block, run when page is being
+      // rendered. Install the message listener.
+      window.addEventListener("message", receiveMessage, false);
+
+    </script>
+</head>
+<body>
+<iframe id="iframe1" style="width: 98vw;height: 96vh" src="http://127.0.0.1:9980/loleaflet/dist/loleaflet.html?WOPISrc={{ host_web }}/WOPI/files/{{ model }}.xlsx&access_token={{ access_token }}&NotWOPIButIframe=true"></iframe>
+<!-- jQuery -->
+<script src="{% static 'AdminLTE/plugins/jquery/jquery.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        let maxTime = 300; // seconds
+        let time = maxTime;
+        $('body').on('keydown mousemove mousedown', function (e) {
+            time = maxTime; // reset
+        });
+        let intervalId = setInterval(function () {
+            time--;
+            if (time <= 0) {
+                ShowInvalidLoginMessage();
+                clearInterval(intervalId);
+            }
+        }, 1000)
+
+        function ShowInvalidLoginMessage() {
+            alert("您已经长时间没操作了，即将退出");
+            //TODO 做需要做的操作
+            //exp:关闭页面
+            save();
+            closeDocument();
+            window.close();
+        }
+    });
+</script>
+</body>
+</html>

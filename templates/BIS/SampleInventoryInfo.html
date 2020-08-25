@@ -73,10 +73,10 @@
               success: function () {
                   let v_tmp = $('#sampler_id').val();
                   if (type === 'new') {
-                      databaseRecordAjaxPut(model0, "单项添加", "华大编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项添加", "华大编号：" + v_tmp);
                       $('#myModalError').text('添加成功！！！华大编号：' + v_tmp);
                   } else {
-                      databaseRecordAjaxPut(model0, "单项更新", "华大编号：" + v_tmp);
+                      databaseRecordAjaxPut('{{ user.id }}', model0, "单项更新", "华大编号：" + v_tmp);
                       $('#myModalError').text('更新成功！！！华大编号：' + v_tmp);
                   }
 
